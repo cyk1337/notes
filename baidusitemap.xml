@@ -61,15 +61,19 @@
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
-    <loc>https://cyk1337.github.io/notes/notes/2019/03/26/RL/David%20Silver/RL-notes-5-Model-Free-control/</loc>
-    <lastmod>2022-05-16</lastmod>
-  </url>
-  <url>
     <loc>https://cyk1337.github.io/notes/notes/2019/02/23/RL/David%20Silver/RL-notes-3-Planning-by-Dynamic-Programming-RL/</loc>
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
+    <loc>https://cyk1337.github.io/notes/notes/2019/03/26/RL/David%20Silver/RL-notes-5-Model-Free-control/</loc>
+    <lastmod>2022-05-16</lastmod>
+  </url>
+  <url>
     <loc>https://cyk1337.github.io/notes/notes/2019/03/03/Programming/Tricks-of-Python/</loc>
+    <lastmod>2022-05-16</lastmod>
+  </url>
+  <url>
+    <loc>https://cyk1337.github.io/notes/notes/2019/07/04/RL/DRL/DQN-A-Summary/</loc>
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
@@ -81,23 +85,11 @@
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
-    <loc>https://cyk1337.github.io/notes/notes/2019/07/04/RL/DRL/DQN-A-Summary/</loc>
-    <lastmod>2022-05-16</lastmod>
-  </url>
-  <url>
-    <loc>https://cyk1337.github.io/notes/notes/2019/09/06/Programming/PyTorch-notes/</loc>
-    <lastmod>2022-05-16</lastmod>
-  </url>
-  <url>
     <loc>https://cyk1337.github.io/notes/notes/2019/09/10/Programming/Implementation-Magic-Misc-in-ML/</loc>
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
-    <loc>https://cyk1337.github.io/notes/notes/2020/04/03/Programming/Sparse-matrix-in-data-processing/</loc>
-    <lastmod>2022-05-16</lastmod>
-  </url>
-  <url>
-    <loc>https://cyk1337.github.io/notes/notes/2019/02/14/Programming/Tricks-of-Git/</loc>
+    <loc>https://cyk1337.github.io/notes/notes/2019/09/06/Programming/PyTorch-notes/</loc>
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
@@ -106,6 +98,14 @@
   </url>
   <url>
     <loc>https://cyk1337.github.io/notes/notes/2019/02/28/Programming/TensorFlow-v1/</loc>
+    <lastmod>2022-05-16</lastmod>
+  </url>
+  <url>
+    <loc>https://cyk1337.github.io/notes/notes/2020/04/03/Programming/Sparse-matrix-in-data-processing/</loc>
+    <lastmod>2022-05-16</lastmod>
+  </url>
+  <url>
+    <loc>https://cyk1337.github.io/notes/notes/2019/02/14/Programming/Tricks-of-Git/</loc>
     <lastmod>2022-05-16</lastmod>
   </url>
   <url>
