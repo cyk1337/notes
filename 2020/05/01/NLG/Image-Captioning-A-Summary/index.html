@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A summary of image-to-text translation.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Image Captioning: A Summary!">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2020/05/01/NLG/Image-Captioning-A-Summary/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="A summary of image-to-text translation.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-show-n-tell-cvpr2015.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-show-attend-and-tell.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-show-attend-tell-attention-vis.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Semantic-Attn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SCA-CNN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/adaptive-attn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Spatial-attn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Adaptive-Attn-Model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-SCN-model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-SCN-RNN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Up-Down-attn-region.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Up-Down-Decoder.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-StyleNet.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Img-Cpt-SemStyle.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Style-factual-LSTM.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Factual-LSTM-Model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Show-Adapt-Tell-Model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-Poetry-generation.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-SCST.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-RL-Embed-Reward.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ImgCpt-RL-Value-Network.png">
+<meta property="article:published_time" content="2020-05-01T12:48:00.000Z">
+<meta property="article:modified_time" content="2020-07-01T12:48:00.000Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="Vision &amp; Language">
+<meta property="article:tag" content="Image Captioning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/ImgCpt-show-n-tell-cvpr2015.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2020/05/01/NLG/Image-Captioning-A-Summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Image Captioning: A Summary! | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2020/05/01/NLG/Image-Captioning-A-Summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Image Captioning: A Summary!
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-01 20:48:00" itemprop="dateCreated datePublished" datetime="2020-05-01T20:48:00+08:00">2020-05-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Vision-Language/" itemprop="url" rel="index"><span itemprop="name">Vision & Language</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Vision-Language/Image-Captioning/" itemprop="url" rel="index"><span itemprop="name">Image Captioning</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2020/05/01/NLG/Image-Captioning-A-Summary/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/05/01/NLG/Image-Captioning-A-Summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A summary of image-to-text translation.<br><span id="more"></span></p>
+<h1 id="Neural-Image-Captioning-CVPR-2015"><a href="#Neural-Image-Captioning-CVPR-2015" class="headerlink" title="Neural Image Captioning (CVPR 2015)"></a>Neural Image Captioning (CVPR 2015)</h1><p>As the first end-to-end neural model for image captioning tasks, Neural Image Captioning (NIC)<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Vinyals, O., Toshev, A., Bengio, S., & Erhan, D. (2015). [Show and tell: A neural image caption generator](https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Vinyals_Show_and_Tell_2015_CVPR_paper.pdf). 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 3156-3164.
+">[1]</span></a></sup> combines the pretrained convolutional neural networks (CNNs) for image classification with recurrent networks (RNNs) for sequence modeling.<br><img data-src="/notes/images/ImgCpt-show-n-tell-cvpr2015.png" width="40%"/></p>
+<center> Image source: <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Vinyals, O., Toshev, A., Bengio, S., & Erhan, D. (2015). [Show and tell: A neural image caption generator](https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Vinyals_Show_and_Tell_2015_CVPR_paper.pdf). 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 3156-3164.
+">[1]</span></a></sup> </center>
+
+
+
+<p>Let $I$ denote the input image, <script type="math/tex">\mathbf{W}_e \in \mathbb{R}^{\vert V \vert \times D}</script> be the $D$-dimensional word embedding matrices of vocabulary $V$, <script type="math/tex">\mathbf{s}_t</script> be the one-hot vector of $t$-th word. </p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_{-1} &{}= \textrm{CNN}(I) & \\
+x_t &{}= \mathbf{W}_e \mathbf{s}_t, & t \in \{ 0 \cdots N-1\} \\
+p_{t+1} &{}= \textrm{LSTM}(x_t), & t \in \{0 \cdots N-1 \} \\
+\mathcal{L} &{}= -\sum_{t=1}^N \log p_t (\mathbf{s}_t) & \textrm{NLL loss}
+\end{align}</script><p><strong>Inference</strong>:  sampling or beam search.</p>
+<h1 id="Show-Attend-and-Tell-ICML-2015"><a href="#Show-Attend-and-Tell-ICML-2015" class="headerlink" title="Show, Attend and Tell (ICML 2015)"></a>Show, Attend and Tell (ICML 2015)</h1><p>The model receives a single raw image and generates a caption <script type="math/tex">\mathbf{y}</script> encoded as a sequence of $1$-of-$V$ encoded words.</p>
+<script type="math/tex; mode=display">y = \{ \mathbf{y}_1, \cdots, \mathbf{y}_C \}, \mathbf{y}_i \in \mathbb{R}^V</script><p>where $V$ is the vocabulary size and $C$ is the caption length.</p>
+<h2 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h2><ul>
+<li>Encoder: employ CNNs (Oxford VGGnet) from lower convolutional layers (4-th convolutional layer before max-pooling. 14 x 14 x 512) to extract $L$ (14 x 14 =196) vectors for each image. $D$-dimensional (512) features corresponds to different part of the images.<script type="math/tex; mode=display">a = \{ \mathbf{a}_1, \cdots, \mathbf{a}_L \}, \mathbf{a}_i \in \mathbb{R}^D</script></li>
+</ul>
+<p><img data-src="/notes/images/ImgCpt-show-attend-and-tell.png" width="60%"/></p>
+<h2 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h2><ul>
+<li>Decoder: LSTM<script type="math/tex; mode=display">
+\left[\begin{array}{c} \mathbf{i}_t\\ \mathbf{o}_t    \\ \mathbf{f}_t    \\ \mathbf{g}_t \end{array}\right]  = \left[\begin{array}{c} \sigma    \\ \sigma    \\ \sigma    \\ \tanh \end{array}\right]  T_{D+m+n, n} \left(\begin{array}{c} \mathbf{E} \mathbf{y}_{t-1}    \\ \mathbf{h}{t-1} \\ \hat{\mathbf{z}_t } \end{array}\right)</script><script type="math/tex; mode=display">\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \mathbf{g}_{t}</script><script type="math/tex; mode=display">\mathbf{h}_t = \mathbf{o}_t \odot \tanh(\mathbf{c}_t)</script>where <script type="math/tex">T_{s,t}: \mathbb{R}^s \rightarrow \mathbb{R}^t</script> denotes affine transformation, <script type="math/tex">\mathbf{i}_t</script>, <script type="math/tex">\mathbf{f}_t</script>, <script type="math/tex">\mathbf{c}_t</script>, <script type="math/tex">\mathbf{o}_t</script>, <script type="math/tex">\mathbf{h}_t</script> are the input, forget, memory, output and hidden state of the LSTM, respectively. </li>
+</ul>
+<p>The context vector<script type="math/tex">\hat{\mathbf{z}_t} \in \mathbb{R}^{D}</script> is calculated as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+e_{ti} &{}= \color{green}{f_\textrm{att}}(\mathbf{a}_i, \mathbf{h}_{t-1}) \\
+\alpha_{ti} &{}= \frac{\exp(e_{ti})}{\sum_{k=1}^L \exp(e_{tk})} \\
+\hat{\mathbf{z}_t} &{}= \phi(\{ \mathbf{a}_i \} \{ \alpha_i\})
+\end{align}</script><p>where <script type="math/tex">\alpha_i</script> represents the position weight, indicating as either the probability that location $i$ is the right place to focus on, or as relative importance to give to location $i$ in blending the <script type="math/tex">\alpha_i</script>‘s together. “Where” the network looks next, <em>i.e.</em>, <script type="math/tex">\alpha_{ti}</script>, depends on the sequence of words that has already been generated, <em>i.e.</em>, <script type="math/tex">\mathbf{h}_{t-1}</script>.</p>
+<p>The initial memory state <script type="math/tex">\mathbf{c}_0</script> and hidden state <script type="math/tex">\mathbf{h}_0</script> of the LSTM are linear projected outputs of an average of annotation vectors <script type="math/tex">\mathbf{a}_i, i=\{1, \cdots, L\}</script>:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{c}_0 &{}= f_c (\frac{1}{L} \sum_{L}^1\mathbf{a}_i) \\
+\mathbf{h}_0 &{}= f_c (\frac{1}{L} \sum_{L}^1\mathbf{a}_i) \\
+\end{align}</script><p><img data-src="/notes/images/ImgCpt-show-attend-tell-attention-vis.png" alt="upload successful"></p>
+<center> Image source: <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Xu, K., Ba, J., Kiros, R., Cho, K., Courville, A.C., Salakhutdinov, R., Zemel, R.S., & Bengio, Y. (2015). [Show, Attend, and Tell: Neural Image Caption Generation with Visual Attention](https://arxiv.org/pdf/1502.03044.pdf). ICML.
+">[2]</span></a></sup> </center>
+
+<ul>
+<li>Output: use a deep output layer with LSTM state, context vector and the previous word:<script type="math/tex; mode=display">p(\mathbf{y}_t \vert \mathbf{a}, \mathbf{y}_1^{t-1}) \propto \exp(\mathbf{L}_O (\mathbf{E}\mathbf{y}_{t-1} + \mathbf{L}_h \mathbf{h}_t + \mathbf{L}_z \hat{\mathbf{z}_t}))</script>where <script type="math/tex">\mathbf{L}_O \in \mathbb{R}^{V \times m}, \mathbf{L}_h \in \mathbb{R}^{m \times n}, \mathbf{L}_z \in \mathbb{R}^{m \times D}</script> and $\mathbb{E}$ are learnable parameters initialized randomly.</li>
+</ul>
+<h2 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h2><p>f<sub>att</sub> has two alternatives: </p>
+<ul>
+<li>stochastic (hard) attention</li>
+<li>deterministic (soft) attention.</li>
+</ul>
+<h3 id="Stochastic-Hard-Attention"><a href="#Stochastic-Hard-Attention" class="headerlink" title="Stochastic Hard Attention"></a>Stochastic Hard Attention</h3><p>Let the location variable <script type="math/tex">s_t \in \mathbb{R}^L</script> denote where the model to focus on when generating the $t$-th word. <script type="math/tex">s_{t,i}</script> is an indicator one-hot variable where the $i$-th location to focus is set to 1. They assign a multinouli distribution parameterized by <script type="math/tex">\alpha_i</script>. This method requires sampling the attention location <script type="math/tex">s_t</script> at each time $t$.</p>
+<p>It is computed as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+p(s_{t,i} = 1 \vert s_{j<t}, \mathbf{a}) &{}= \alpha_{t,i} \\
+\hat{\mathbf{z}_t} &{}= \sum_i s_{t,i} \mathbf{a}_i \\
+\end{align}</script><p>The objective function $L$ is defined as a variational lower bound on the marginal log-likelihood <script type="math/tex">\log p(\mathbf{y} \vert \mathbf{a})</script> of obsreving sequence of words $\mathbf{y}$ given image features $\mathbf{a}$. Let $W$ denote the parameters of the model.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+L_s &{}= \sum_s p(s \vert \mathbf{a}) \log p(\mathbf{y} \vert s, \mathbf{a}) \\
+&{}\leq \sum_s p(s \vert \mathbf{a}) p(\mathbf{y} \vert s, \mathbf{a})\\
+&{}= \log  p(\mathbf{y} \vert \mathbf{a})
+\end{align}</script><p>By assuming <script type="math/tex">\tilde{s} \sim \textrm{Multinoulli}_L (\{ \alpha_i \})</script>, the location <script type="math/tex">s_t</script> is calculated by sampling with Monte Carlo method.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{\partial L_s}{\partial W} &=\sum_s p(s \vert \mathbf{a}) \bigg[ \frac{\partial \log p(\mathbf{y} \vert s, \mathbf{a})}{\partial W} + \log p(\mathbf{y} \vert s, \mathbf{a}) \frac{\log p(s \vert \mathbf{a})}{\partial W} \bigg] \\
+&{} \approx \frac{1}{N} \sum_{n=1}^N \bigg[ \frac{\partial \log p(\mathbf{y} \vert \tilde{s}^n, \mathbf{a})}{\partial W} + \log p(\mathbf{y} \vert \tilde{s}^n, \mathbf{a}) \frac{\log p(\tilde{s}^n \vert \mathbf{a})}{\partial W} \bigg]
+\end{align}</script><p>A moveing average baseline is used to reduce the variance in the Monte Carlo estimator:</p>
+<script type="math/tex; mode=display">
+b_k = 0.9 \times b_{k-1} + 0.1 \times \log p(\mathbf{y} \vert \tilde{s}_k, \mathbf{a})</script><p>Finally, the entropy term is added:</p>
+<script type="math/tex; mode=display">
+\frac{\partial L_s}{\partial W} \approx \frac{1}{N} \sum_{n=1}^N \bigg[ \frac{\partial \log p(\mathbf{y} \vert \tilde{s}^n, \mathbf{a})}{\partial W} + \color{green}{\lambda_t} (\log p(\mathbf{y} \vert \tilde{s}^n, \mathbf{a})  - b )\frac{\log p(\tilde{s}^n \vert \mathbf{a})}{\partial W} + \color{green}{\lambda_e} \frac{\partial H [\tilde{s}^n]}{\partial W} \bigg]</script><p>where <script type="math/tex">\lambda_r</script> and <script type="math/tex">\lambda_e</script> are discounting factors. </p>
+<div class="note info">
+            <p>This equation is equivalent to the REINFORCE learning, where the reward for selecting the attention is a real value proportional to the log-likelihood of the target sentence under the sampled attention rollouts.</p>
+          </div>
+<h3 id="Deterministic-Soft-Attention"><a href="#Deterministic-Soft-Attention" class="headerlink" title="Deterministic Soft Attention"></a>Deterministic Soft Attention</h3><p>Soft attention take the expectation of the context vector $\hat{\mathbf{z}}_t$ directly:</p>
+<script type="math/tex; mode=display">\mathbb{E}_{p(s_t \vert a)} [\hat{\mathbf{z}}_t] = \sum_{i=1}^L \alpha_{t,i} \mathbf{a}_i</script><div class="note success">
+            <p>Deterministic soft attention can be treated as an approximation to the marginal likelihood over the attention locations.</p>
+          </div>
+<p>The expectation <script type="math/tex">\mathbb{E}_{p(s_t \vert a)}</script> can be treated as the first order Taylor approximation using a single forward prop. </p>
+<p>Let <script type="math/tex">\mathbf{n}_t = \mathbf{L}_O (\mathbf{E}\mathbf{y}_{t-1} + \mathbf{L}_h \mathbf{h}_t + \mathbf{L}_z \hat{\mathbf{z}_t})</script>, <script type="math/tex">\mathbf{n}_{t,i}</script> denote <script type="math/tex">\mathbf{n}_t</script> computed by setting the context vector $\hat{\mathbf{z}}$ value to <script type="math/tex">\mathbf{a}_i</script>. The normalized weighted geometric mean for the softmax $k$-th word prediction:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\textrm{out}[p(y_t=k \vert \mathbf{a})] &{}= \frac{\prod_{i} \exp(n_{t,k,i})^{p(s_{t,i}=1 \vert a)}}{\sum_j \prod_{i} \exp(n_{t,k,i})^{p(s_{t,i}=1 \vert a)}}\\
+&{}= \frac{\exp(\mathbb{\mathbf{E}_{p(s_t \vert a)}[n_{t,k}]})}{\sum_j \exp(\mathbb{\mathbf{E}_{p(s_t \vert a)}[n_{t,k}]})}
+\end{align}</script><p>It show that the expectation of context vector <script type="math/tex">\mathbb{E} [\mathbf{n}_t] = \mathbf{L}_O (\mathbf{E}\mathbf{y}_{t-1} + \mathbf{L}_h \mathbb{E} [\mathbf{h}_t] + \mathbf{L}_z \mathbb{E} [\hat{\mathbf{z}_t}] )</script>.</p>
+<h3 id="Doubly-Stochastic-Attention"><a href="#Doubly-Stochastic-Attention" class="headerlink" title="Doubly Stochastic Attention"></a>Doubly Stochastic Attention</h3><ul>
+<li>Encourage <script type="math/tex">\sum_{i} \alpha_{ti} \approx 1</script></li>
+<li>Adopt a gating scalar $\beta$ from previsou hidden state <script type="math/tex">\mathbf{h}_{t-1}</script> at each time step $t$<script type="math/tex; mode=display">
+\begin{align}
+\phi(\{ \mathbf{a}_i \}, \{ \alpha_i \}) &{}= \beta \sum_i^L \alpha_i \mathbf{a}_i \\
+\beta_t &{}= \sigma(f_\beta(\mathbf{h}_{t-1}))
+\end{align}</script></li>
+<li>The model is trained end-to-end by minimizing the penalized negative log-likelihood:<script type="math/tex; mode=display">
+L_d = -\log(P(\mathbf{y} \vert \mathbf{x})) + \lambda \sum_i^L (1 - \sum_{t}^C \alpha_{ti})^2</script></li>
+</ul>
+<h2 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h2><ul>
+<li>Trained both attention variants using SGD with an adaptive learning rate. They found that RMSProp worked best on Flickr8k, whereas Adam performed better on Flickr30k/MS COCO dataset.</li>
+<li>Early stopping on BLEU score, dropout.</li>
+<li>MS COCO: &lt; 3 days training on an NVIDIA Titan Black GPU.</li>
+<li>Vocabulary size V=10k.</li>
+<li>Problems: no public splits on Flickr30k and COCO datasets.</li>
+<li>Single model w/o an ensemble.</li>
+</ul>
+<h1 id="Semantic-Attention-CVPR-2016"><a href="#Semantic-Attention-CVPR-2016" class="headerlink" title="Semantic Attention (CVPR 2016)"></a>Semantic Attention (CVPR 2016)</h1><p>Image captioning methods can be generally divided into two approaches: top-down and bottom-up.</p>
+<ul>
+<li>The top-down method starts from the image features and converts it into words end-to-end using RNNs. But it is hard to attend to fine details when describing the image.</li>
+<li>The bottom-up method is free to operate on any image resolution but lacks end-to-end formulation.</li>
+</ul>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p>Semantic Attention<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="You, Q., Jin, H., Wang, Z., Fang, C., & Luo, J. (2016). [Image Captioning with Semantic Attention](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7780872). 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 4651-4659.
+">[4]</span></a></sup> extracts top-down and bottom-up features from an input image. Firstly, the global visual feature $\mathbf{v}$ is extracted from a classification CNN and a list of visual attributes or concepts <script type="math/tex">\{ A_i \}</script> that are detected using attribute detectors.</p>
+<p>$\mathbf{v}$ is only used to initilize the input node <script type="math/tex">\mathbf{x}_0</script>.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{x}_0 &{}= \phi_0 (\mathbf{v}) = \mathbf{W}^{x,v} \mathbf{v}\\
+\mathbf{h}_t &{}= \textrm{RNN} (\mathbf{h}_{t-1}, \mathbf{x}_t) \\
+Y_t &\sim \mathbf{p}_t = \varphi (\mathbf{h}_t, \{ A_t \}) \\
+\mathbf{x}_i &{}= \phi (Y_{t-1}, \{ A_i \}), t>0
+\end{align}</script><p><img data-src="/notes/images/ImgCpt-Semantic-Attn.png" width="50%"/></p>
+<h2 id="Input-attention-phi"><a href="#Input-attention-phi" class="headerlink" title="Input attention $\phi$"></a>Input attention $\phi$</h2><p>Both <script type="math/tex">Y_{t-1}</script> and <script type="math/tex">A_i</script> correspond to an one-hot entry in dictionay $\mathcal{Y}$, denoting as <script type="math/tex">\mathbf{y}_{t-1}</script> and <script type="math/tex">\mathbf{y}^i</script>, respectively. Let <script type="math/tex">\mathbf{E} \in \mathbf{R}^{d \times \vert \mathcal{Y} \vert}</script> with $d &lt;&lt; \vert \mathcal{Y} \vert$, the relevance score assigned to each detected attribute <script type="math/tex">A_i</script> based on its relevance between the previous predicted word <script type="math/tex">Y_{t-1}</script>:</p>
+<script type="math/tex; mode=display">\alpha_t^i \propto \exp (\mathbf{y}_{t-1}^\top\mathbf{E}^\top \mathbf{U}\mathbf{E}\mathbf{y}^i)</script><p>where trainable parameters $\mathbf{U} \in \mathbb{R}^{d \times d}$</p>
+<p>The attention score $\alpha$ measures the attention on different attributes. The weighted sum are added to the input space together with previous word:</p>
+<script type="math/tex; mode=display">
+\mathbf{x}_t = \mathbf{W}^{x, Y} \bigg(\mathbf{E} \mathbf{y}_{t-1} + \textrm{diag} (\mathbf{w}^{x,A}) \sum_{i} \alpha_t^i \mathbf{E} \mathbf{y}^i \bigg)</script><p>where <script type="math/tex">\mathbf{W}^{x, Y} \in \mathbf{R}^{m \times d}</script> is the project matrix, $\mathbf{w}^{x,A} \in \mathbb{R}^d$ models the relative importance of visual attributes in each dimension of the word space.</p>
+<h2 id="Output-attention-varphi"><a href="#Output-attention-varphi" class="headerlink" title="Output attention $\varphi$"></a>Output attention $\varphi$</h2><p>Similarly, the score <script type="math/tex">\beta_t^i</script> for each attribute <script type="math/tex">A_i</script> is measured w.r.t <script type="math/tex">\mathbf{h}_t</script>:</p>
+<script type="math/tex; mode=display">\beta_t^i \propto \exp(\mathbf{h}_t^\top \mathbf{V} \sigma(\mathbf{E}\mathbf{y}^i))</script><p>The sigmiod activation function $\sigma$ is applied as the output to hidden state in RNN to ensure the same nonlinear transform on compared feature vectors.</p>
+<p>The distribution is generated by a linaer transform followed by a softmax normalization:</p>
+<script type="math/tex; mode=display">
+\mathbf{p}_t \propto \exp(\mathbf{E}^\top \mathbf{W}^{Y,h} (\mathbf{h}_t + \textrm{diag}(\mathbf{w}^{Y,A}) \sum_i \beta_t^i \sigma (\mathbf{E}\mathbf{y}^i)))</script><p>where $\mathbf{W}^{Y,h} \in \mathbf{R}^{d \times n}$ is the projection matrix and $\mathbf{w}^{Y,A} \in \mathbf{R}^n$ models the relative importance of visual attributes in each dimension of the RNN state space.</p>
+<h2 id="Model-training"><a href="#Model-training" class="headerlink" title="Model training"></a>Model training</h2><p>The loss function is defined as the NLL loss combined with regularization terms on attention scores <script type="math/tex">\{ \alpha_t^i \}</script> and <script type="math/tex">\{ \beta_t^i \}</script>:</p>
+<script type="math/tex; mode=display">
+\min -\sum_t \log p(Y_t) + g(\mathbf{\alpha}) + g(\mathbf{\beta})</script><p>where <script type="math/tex">\mathbf{\alpha}</script> and <script type="math/tex">\mathbf{\beta}</script> are attention score matrices with $(t,i)$-th entries of <script type="math/tex">\alpha_t^i</script> and <script type="math/tex">\beta_t^i</script>. The regularization function $g$ is used to enfoce the completeness of attention paid to every attribute in <script type="math/tex">\{ A_i \}</script> as well as the sparsity of attention at any particular time step.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+g(\mathbf{\alpha}) &{}= \Vert \mathbf{\alpha} \Vert_{1,p} + \Vert \mathbf{\alpha}^\top \Vert_{q,1}\\
+&{}= \big[ \sum_i [ \sum_t \alpha_t^i]^p \big]^{1/p} + \big[ \sum_t [ \sum_i \alpha_t^i]^q \big]^{1/q} 
+\end{align}</script><p>where the first term with $p&gt;1$ penalizes excessive attention paid to any single attribute <script type="math/tex">A_i</script> accumulated over the entire sentence, and the second term $0&lt;q&lt;1$ penalizes diverted attention to multiple attributes at any particular time.</p>
+<h1 id="SCA-CNN-CVPR-2017"><a href="#SCA-CNN-CVPR-2017" class="headerlink" title="SCA-CNN (CVPR 2017)"></a>SCA-CNN (CVPR 2017)</h1><p><strong>Motivation</strong>: </p>
+<ol>
+<li>low-layer filters detect low-level visual cues like edges and corners, while higher-level ones extract abstract semantic patterns like objects.</li>
+<li>CNN extractors output a hierarchy of visual abstractions, which is spatial, channel-wise, and multi-layer. Previous work only takes into account the spatial characteristics, regardless of the channel-wise and multi-layer information.</li>
+<li>SCA-CNN takes full advantage of such three characteristics of CNN features.</li>
+</ol>
+<h2 id="Spatial-and-Channel-wise-Attention-CNN"><a href="#Spatial-and-Channel-wise-Attention-CNN" class="headerlink" title="Spatial and Channel-wise Attention CNN"></a>Spatial and Channel-wise Attention CNN</h2><p>Spatial and Channel-wise Attention-based Convolutional Neural Network (SCA-CNN)<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, L., Zhang, H., Xiao, J., Nie, L., Shao, J., Liu, W., & Chua, T. (2017). [SCA-CNN: Spatial and Channel-Wise Attention in Convolutional Networks for Image Captioning](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8100150). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 6298-6306.
+">[5]</span></a></sup> applies channel-wise attention and spatial attention at multiple layers.</p>
+<p>At $l$-th layer, the spatial and channel-wise attention weights $\gamma^l$ are function of LSTM memory <script type="math/tex">\mathbf{h}_{t-1} \in \mathbb{R}^d</script> and input CNN features $\mathbf{V}^l$, where $d$ is the dimension of hidden state. SCA-CNN modulates <script type="math/tex">\mathbf{V}^l</script> using the spatial and channel attention weights $\gamma^l$ as follows:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{V} &{}= \textrm{CNN} (\mathbf{X}^{l-1}) \\
+\gamma^l &{}= \Phi(\mathbf{h}_{t-1}, \mathbf{V}^l)\\
+\mathbf{X}_l &{}= f(\mathbf{V}^l, \gamma^l)
+\end{align}</script><p>where <script type="math/tex">\mathbf{X}^l</script> is the modulated feature, $\pmb{\Phi}(\cdot)$ is the spatial and channel-wise attention function, $f(\cdot)$ is a linear weighting function that modulates CNN features and attention weights.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{h}_t &{}= \textrm{LSTM}(\mathbf{h}_{t-1}, \mathbf{X}^L, y_{t-1})\\
+y_t &\sim p_t = \textrm{softmax}(\mathbf{h}_t, y_{t-1})
+\end{align}</script><p>The spatial attention weights $\alpha^l$ and channel-wise attention weights $\beta^l$ are learned separately:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\alpha^l &{}= \mathbf{\Phi}_s (\mathbf{h}_{t-1}, \mathbf{V}^l) \\
+\beta^l &{}= \mathbf{\Phi}_c (\mathbf{h}_{t-1}, \mathbf{V}^l)
+\end{align}</script><p>where <script type="math/tex">\mathbf{\Phi}_s</script> and <script type="math/tex">\mathbf{\Phi}_c</script> represent spatial and channel-wise model respectively, having the cost of <script type="math/tex">\mathcal{O}(W^lH^lk)</script> for spatial attention and $\mathcal{O}(C^lk)$ for channel-wise attention. $W$,$H$,$C$, $k$ represent the width, height, channel and mapping dimension.<br><img data-src="/notes/images/SCA-CNN.png" width="80%"/></p>
+<h2 id="Spatial-Attention"><a href="#Spatial-Attention" class="headerlink" title="Spatial Attention"></a>Spatial Attention</h2><p>CNN features <script type="math/tex">\mathbf{V}=[\mathbf{v}_1, \mathbf{v}_3, \cdots ,\mathbf{v}_m]</script> is flattened features along width and height, where <script type="math/tex">\mathbf{v}_i \in \mathbb{R}^C</script>, and $m=W \cdot H$. <script type="math/tex">\mathbf{v}_i</script> is considered as the visual feature of the $i$-th location. Given the previous hidden state <script type="math/tex">\mathbf{h}_{t-1}</script>, a single-layer fully-connected layer followed by a softmax is applied to generate attention distributions $\alpha$ over the image regions.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{a} &{}= \tanh \big( (\mathbf{W}_s \mathbf{V} + b_s) \oplus \mathbf{W}_{hs}\mathbf{h}_{t-1}  \big) \\
+\alpha &{}= \textrm{softmax}(\mathbf{W}_i \mathbf{a} + b_i)
+\end{align}</script><p>where <script type="math/tex">\mathbf{W}_s \in \mathbb{R}^{k \times C}</script>, <script type="math/tex">\mathbf{W}_hs \in \mathbb{R}^{k \times d}</script>, <script type="math/tex">\mathbf{W}_i \in \mathbb{R}^{k}</script> are trainable matrices to obtain the same dimension $k$, $\oplus$ is the addition between a matrice and a vector, model biases <script type="math/tex">b_s \in \mathbb{R}^k, b_i \in \mathbb{R}</script>.</p>
+<h2 id="Channel-wise-Attention"><a href="#Channel-wise-Attention" class="headerlink" title="Channel-wise Attention"></a>Channel-wise Attention</h2><p>Each CNN filter is a pattern detector on images, and each channel of a feature map in CNN is a response activation of the corresponding convolutional filter. Applying channel-wise attention mechanisms can be treated as selecting semantic attributes.</p>
+<p>Firstly, CNN features $\mathbf{V}$ is reshaped to $\mathbf{U} = [\mathbf{u}_1, \mathbf{u}_2,\cdots, \mathbf{u}_C]$, where <script type="math/tex">\mathbf{u}_i \in \mathbb{R}^{W \times H}</script> represents the $i$-th channel of the feature map $\mathbf{V}$, $C$ is the channel number. The mean-pooling for each channel is applied to obtain the channel feature $\mathbf{v}$:</p>
+<script type="math/tex; mode=display">
+\mathbf{v} = [v_1, v_2, \cdots, v_C ], \quad \mathbf{v} \in \mathbb{R}^C</script><p>where scalar <script type="math/tex">v_i</script> is the mean of vector <script type="math/tex">\mathbf{u}_i</script>, which represents the $i$-th channel features. </p>
+<p>The channel-wise attention model $\Phi_c$ can be defined as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{b} &{}= \tanh \big( (\mathbf{W}_c \otimes \mathbf{v} + b_c) \oplus \mathbf{W}_{hc} \mathbf{h}_{t-1} \big) \\
+\beta &{}= \textrm{softmax} (\mathbf{W}^\prime_i \mathbf{b} + b^\prime_i)
+\end{align}</script><p>where <script type="math/tex">\mathbf{W}_c \in \mathbb{R}^k, \mathbf{W}_{hc} \in \mathbb{R}^{k \times d}, \mathbf{W}^\prime_i \in \mathbb{R}^k</script> are trainable parameters, $\otimes$ represents the outer product of vectors, biases <script type="math/tex">b_c \in \mathbb{R}^k, b^\prime_i \in \mathbb{R}</script>.</p>
+<h3 id="Channel-Spatial"><a href="#Channel-Spatial" class="headerlink" title="Channel-Spatial"></a>Channel-Spatial</h3><p>Apply channel-wise attention followed by feature map $\mathbf{X}$.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\beta &{} = \Phi_c (\mathbf{h}_{t-1}, \mathbf{V}) \\
+\alpha &{}= \Phi_s (\mathbf{h}_{t-1}, f_c (\mathbf{V}, \beta)) \\
+\mathbf{X} &{}= f(\mathbf{V}, \alpha, \beta)
+\end{align}</script><p>where <script type="math/tex">f_c(\cdot)</script> is a channel-wise multiplication for feature map channels and corresponding channel weights.</p>
+<h1 id="Adaptive-Attention-CVPR-2017"><a href="#Adaptive-Attention-CVPR-2017" class="headerlink" title="Adaptive Attention (CVPR 2017)"></a>Adaptive Attention (CVPR 2017)</h1><p><strong>Motivation</strong>:</p>
+<ol>
+<li>Most attention-based methods force visual attention to be active for each generated word. However, not all words have corresponding visual signals. </li>
+<li>Decoders require little to predict words like “the”/“of”. Besides, other words that may be predicted reliably just from the language model, <em>e.g.,</em>, “sign” after “behind a red stop” or “phone” following “talk on a cell”.</li>
+</ol>
+<p><img data-src="/notes/images/adaptive-attn.png" width="80%"/></p>
+<p>Adaptive attention with a “visual sentinel”<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lu, J., Xiong, C., Parikh, D., & Socher, R. (2017). [Knowing When to Look: Adaptive Attention via a Visual Sentinel for Image Captioning](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8099828). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 3242-3250.
+">[6]</span></a></sup> is proposed to decide when to rely on the visual signals and when to just rely on the language model.</p>
+<h2 id="Spatial-Attention-1"><a href="#Spatial-Attention-1" class="headerlink" title="Spatial Attention"></a>Spatial Attention</h2><p>A spatial attention (fig. (b)) is uesd to compute the context vector <script type="math/tex">\mathbf{c}_t</script> as:</p>
+<script type="math/tex; mode=display">\mathbf{c}_t = g(\mathbf{V}, \mathbf{h}_t)</script><p>where $g$ is the attention function, <script type="math/tex">\mathbf{V}=[\mathbf{v}_1, \cdots, \mathbf{v}_k], \mathbf{v}_i \in \mathbb{R}^d</script> is the $d$-dimensional spatial image feature, <script type="math/tex">\mathbf{h}_t \in \mathbb{R}^d</script> is the hidden state of RNN at time $t$.</p>
+<p><img data-src="/notes/images/Spatial-attn.png" width="60%"/></p>
+<center> (a) Soft attention  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (b) Spatial attention </center>
+
+<p>As in fig. (b), given the spatial image feature <script type="math/tex">\mathbf{V} \in \mathbb{R}^{d \times k}</script> and <script type="math/tex">\mathbf{h}_t</script>, the context vector can be computed as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{z}_t &{}= \mathbf{w}^\top_h \tanh \big(\mathbf{W}_v \mathbf{V} + (\mathbf{W}_g \mathbf{h}_t) \mathbb{I}^\top \big) \\
+\mathbf{\alpha}_t &{}= \textrm{softmax} (\mathbf{z}_t)\\
+\mathbf{c}_t &{}= \sum_{i=1}^k \mathbf{\alpha}_{ti} \mathbf{v}_{ti} \\
+\log p(t_t \vert y-1, \cdots, y_{t-1}, \mathbf{I}) &{}= f(\mathbf{h}_t, \mathbf{c}_t)
+\end{align}</script><p>where $\mathbb{I} \in \mathbb{R}^k$ is a vector with all elements set to 1, <script type="math/tex">\mathbf{W}_v,\mathbf{W}_v \in \mathbb{R}^{k \times d}</script>, <script type="math/tex">\mathbf{w}_h \in \mathbb{R}^k</script> are trainable parameters. $\mathbf{\alpha} \in \mathbb{R}^k$ is the attention weight over features in $\mathbf{V}$. $\mathbf{I}$ is the input image.</p>
+<p>It uses the current hidden state rather than the previous one to generate the context vector, which can be treated as the residual visual information of current hidden state <script type="math/tex">\mathbf{h}_t</script>, diminishing the uncertainty or complements the informativeness of the current hidden state for next word prediction.</p>
+<h2 id="Adaptive-Attention"><a href="#Adaptive-Attention" class="headerlink" title="Adaptive Attention"></a>Adaptive Attention</h2><p>Aforementioned spatial attention cannot determine when to leverage visual signals or language models. The visual sentinel vector <script type="math/tex">\mathbf{s}_t</script> is extended on LSTM:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{g}_t &{}= \sigma (\mathbf{W}_x \mathbf{x}_t + \mathbf{W}_h \mathbf{h}_{t-1}) \\
+\mathbf{s}_t &{}= \mathbf{g}_t \odot \tanh (\mathbf{m}_t) \\
+\hat{\mathbf{c}_t} &{}= \beta_t \mathbf{s}_t + (1- \beta_t) \mathbf{c}_t
+\end{align}</script><p>where the new sentinel gate at time $t$ <script type="math/tex">\beta_t</script> controls the trade-off beween the image information and decoder memory.</p>
+<p>The new sentinel gate <script type="math/tex">\beta_t</script> is computed as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\hat{\mathbf{\alpha}}_t &{}= \textrm{softmax}([ \mathbf{z}_t ; \mathbf{w}_h^\top \tanh \big(\mathbf{W}_s \mathbf{s}_t + \mathbf{W}_g \mathbf{h}_t \big) ]) \\
+\beta_t &{}= \hat{\mathbf{\alpha}}_t [k+1]
+\end{align}</script><p>where <script type="math/tex">\hat{\mathbf{\alpha}}_t \in \mathbb{R}^{k+1}</script> is the attention distribution over both the spatial image feature and visual sentinel vector. In which the last element serves as the gate value <script type="math/tex">\beta_t</script>.</p>
+<p><img data-src="/notes/images/Adaptive-Attn-Model.png" width="60%"/></p>
+<p>The probability over vocabulary at time $t$ is:</p>
+<script type="math/tex; mode=display">\mathbf{p}_t = \textrm{softmax} \big( \mathbf{W}_p (\hat{\mathbf{c}}_t + \mathbf{h}_t) \big)</script><h1 id="Semantic-Compositional-Networks-CVPR-2017"><a href="#Semantic-Compositional-Networks-CVPR-2017" class="headerlink" title="Semantic Compositional Networks (CVPR 2017)"></a>Semantic Compositional Networks (CVPR 2017)</h1><p><strong>Motivation</strong>: LSTM-based generation is quite limited: it only uses semantic concepts through soft attention or initialization at the first step.</p>
+<h2 id="Semantic-Compositional-Network"><a href="#Semantic-Compositional-Network" class="headerlink" title="Semantic Compositional Network"></a>Semantic Compositional Network</h2><p>Semantic Compositional Networks (SCN)<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Gan, Z., Gan, C., He, X., Pu, Y., Tran, K., Gao, J., Carin, L., & Deng, L. (2017). [Semantic Compositional Networks for Visual Captioning](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8099610). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1141-1150.
+">[7]</span></a></sup> detect the <strong>semantic concepts</strong>, <em>i.e.</em>, tags, from each input image. It uses the $K$ most common words in the training captions to determine the vocabulary of tags, including most frequent nouns, verbs, or adjectives. </p>
+<p>The tag detection can be cast as a <strong>multi-label classification</strong> task. Given $N$ training examples, <script type="math/tex">\mathbf{y}_i = [ y_{i1}, \cdots, y_{iK}] \in \{ 0,1 \}^K</script> is the label’s dummy encoding of $i$-th image, wherein 1 and 0 indicate annotation or not respectively. Let <script type="math/tex">\mathbf{v}_i</script> and <script type="math/tex">\mathbf{s}_i</script> be the image feature vector and semantic feature vector of the $i$-th image, the cost function is:</p>
+<script type="math/tex; mode=display">
+\frac{1}{N} \sum_{i=1}^N \sum_{k=1}^K \big( y_{ik} \log s_{ik} + (1- y_{ik}) \log (1-s_{ik}) \big)</script><p>where <script type="math/tex">\mathbf{s}_{i} = \sigma \big( \textrm{MLP}(\mathbf{v}_i) \big)</script> is a $K$-dimensional vector with <script type="math/tex">\mathbf{s}_i = [ s_{i1},\cdots,s_{iK} ]</script>.</p>
+<p><img data-src="/notes/images/ImgCpt-SCN-model.png" width="80%"/></p>
+<h2 id="SCN-RNN"><a href="#SCN-RNN" class="headerlink" title="SCN-RNN"></a>SCN-RNN</h2><p>SCN injects the tag-dependent matrices:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\tilde{\mathbf{x}}_{t-1} &{}= \mathbf{W}_b \mathbf{s} \odot \mathbf{W}_c \mathbf{x}_{t-1} \\
+\tilde{\mathbf{h}}_{t-1} &{}= \mathbf{U}_b \mathbf{s} \odot \mathbf{U}_c \mathbf{h}_{t-1}\\
+\mathbf{z} &{}= \mathbb{I}(t=1) \cdot \mathbf{C}\mathbf{v}\\
+\mathbf{h}_t &{}= \sigma ( \mathbf{W}_a \tilde{\mathbf{x}}_{t-1} + \mathbf{U}_a \tilde{\mathbf{h}}_{t-1} + \mathbf{z} )
+\end{align}</script><p>where <script type="math/tex">\mathbf{x}_t</script> is the $t$-th word in the generated caption, <script type="math/tex">\mathbf{x}_0</script> is defined as the ‘BOS’ token, $\odot$ is the Hadamard product. Trainable parameters <script type="math/tex">\{ \mathbf{W}_a, \mathbf{U}_a \} \in \mathbf{R}^{d \times d^\prime}</script>, <script type="math/tex">\{ \mathbf{W}_b, \mathbf{U}_b \} \in \mathbf{R}^{d^\prime \times K}</script>, where $d$ is the hidden dimension, $d^\prime$ is the number of factors. <script type="math/tex">\mathbf{W}_a</script> and <script type="math/tex">\mathbf{W}_b</script> are shared among all captions, capturing common linguistic patterns; <script type="math/tex">\mathbf{W}_b \mathbf{s}</script> accounts for semantic aspects of the image captured by $\mathbf{s}$.</p>
+<p><img data-src="/notes/images/ImgCpt-SCN-RNN.png" width="50%"/></p>
+<h2 id="SCN-LSTM"><a href="#SCN-LSTM" class="headerlink" title="SCN-LSTM"></a>SCN-LSTM</h2><p>SCN-RNN can be generalized using LSTM units:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\left[\begin{array}{c} \mathbf{i}_t \\ \mathbf{o}_t    \\ \mathbf{f}_t    \\ \tilde{c}_t \end{array}\right]  &{}= \left[\begin{array}{c} \sigma    \\ \sigma    \\ \sigma    \\ \color{red}{\sigma} \end{array}\right]  (\mathbf{W}_{a} \tilde{\mathbf{x}}_{i, t-1} + \mathbf{U}_{a} \mathbf{h}_{t-1} + \mathbf{z}) \\
+\mathbf{c}_t &{}= \mathbf{i}_t \odot \tilde{\mathbf{c}}_t + \mathbf{f}_t \odot \mathbf{c}_{t-1} \\
+\mathbf{h}_{t} &{}= \mathbf{o}_t \odot \tanh (\mathbf{c}_t)
+\end{align}</script><p>where <script type="math/tex">\mathbf{z}=\mathbb{I} (t=1) \cdot \mathbf{C}\mathbf{v}</script>. For $\star = i,f,o,c$, we define</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\tilde{\mathbf{x}}_{\star, t-1} &{}= \mathbf{W}_{\star b }\mathbf{s} \odot \mathbf{W}_{\star c}\mathbf{x}_{t-1} \\
+\tilde{\mathbf{h}}_{\star, t-1} &{}= \mathbf{U}_{\star b }\mathbf{s} \odot \mathbf{U}_{\star c}\mathbf{x}_{t-1}
+\end{align}</script><h2 id="Training-1"><a href="#Training-1" class="headerlink" title="Training"></a>Training</h2><p>Given image $\mathbf{I}$ and corresponding caption $\mathbf{X}$, the objective function is defined as:</p>
+<script type="math/tex; mode=display">
+\log p(\mathbf{X} \vert \mathbf{I}) = \sum_{t=1}^T p(\mathbf{x}_0, \cdots, \mathbf{x}_{t-1}, \mathbf{v}, \mathbf{s})</script><p>Averaged objectives among all (image, caption) pairs are used during training.</p>
+<h1 id="Up-Down-Attention-CVPR-2018"><a href="#Up-Down-Attention-CVPR-2018" class="headerlink" title="Up-Down Attention (CVPR 2018)"></a>Up-Down Attention (CVPR 2018)</h1><p>Up-Down Attention<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Anderson, P., He, X., Buehler, C., Teney, D., Johnson, M., Gould, S., & Zhang, L. (2017). [Bottom-Up and Top-Down Attention for Image Captioning and Visual Question Answering](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8578734). 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 6077-6086.
+">[8]</span></a></sup> combines the bottom-up (based on Faster R-CNN<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ren, S., He, K., Girshick, R.B., & Sun, J. (2015). [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](https://arxiv.org/pdf/1506.01497.pdf). IEEE Transactions on Pattern Analysis and Machine Intelligence, 39, 1137-1149.
+">[9]</span></a></sup>), a top-down attention mechanism to attend to attention at the level of objects and other salient image regions. <code>Top-down</code> uses the non-visual or task-specific contexts to predict an attention distribution over image regions using ResNet-101<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="He, K., Zhang, X., Ren, S., & Sun, J. (2016). [Deep Residual Learning for Image Recognition](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7780459). 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 770-778.
+">[10]</span></a></sup>, whereas <code>bottom-up</code>  proposes a set of salient image regions, wich each region represented by a pooled convolutional feature vector using Faster R-CNN.</p>
+<p><img data-src="/notes/images/ImgCpt-Up-Down-attn-region.png" width="40%"/></p>
+<p>As shown in the left figure, the input regions correspond to a uniform grid of equally sized and shaped neural receptive fields, irrespective of the content of the image. In contrast, the right focuses on the objects and salient image regions for attention.</p>
+<h2 id="Bottom-Up-attention"><a href="#Bottom-Up-attention" class="headerlink" title="Bottom-Up attention"></a>Bottom-Up attention</h2><p>All regions whose class detection probability exceeds a confidence threshold are selected<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ren, S., He, K., Girshick, R.B., & Sun, J. (2015). [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](https://arxiv.org/pdf/1506.01497.pdf). IEEE Transactions on Pattern Analysis and Machine Intelligence, 39, 1137-1149.
+">[9]</span></a></sup>. For each selected region $i$, <script type="math/tex">\mathbf{v}_i</script> is defined as the mean-pooled convolutional feature from this region.</p>
+<h2 id="Decoder-1"><a href="#Decoder-1" class="headerlink" title="Decoder"></a>Decoder</h2><p>A top-down attention LSTM followed by a language model (LM) LSTM is used to generate captions.</p>
+<h3 id="Attention-LSTM"><a href="#Attention-LSTM" class="headerlink" title="Attention LSTM"></a>Attention LSTM</h3><p>Let superscript denotes the layer number, <em>i.e.</em>, $\mathbf{h}^1$ indicates the hidden state in the first LSTM. The top-down attention LSTM receives the concatenated previous output of LM LSTM <script type="math/tex">\mathbf{h}^2_{t-1}</script>, mean-pooled image feature <script type="math/tex">\bar{\mathbf{v}}=\frac{1}{k}\sum_i \mathbf{v}_i</script> and the previous generated word vector <script type="math/tex">\mathbf{x}_t = \mathbf{W}_e \Pi_t</script>, where <script type="math/tex">\mathbf{W}_e \in \mathbb{R}^{\vert V \vert \times D}</script> is the word embedding matrix for vocabulary $V$, and <script type="math/tex">\Pi_t</script> is one-hot encoding of the input word at timestep $t$.</p>
+<script type="math/tex; mode=display">\mathbf{x}_t^1 = [ \mathbf{h}_{t-1}^2, \bar{\mathbf{v}}, W_e \Pi_t ]</script><p>The output <script type="math/tex">\mathbf{h}_t^1</script> of the attention LSTM, a normalized attention weight <script type="math/tex">\alpha_{i,t}</script> for each of the $k$ image features <script type="math/tex">\mathbf{v}_i</script> at each time step $t$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+a_{i,t} &{}= \mathbf{w}_a^\top \tanh \big( \mathbf{W}_{va}\mathbf{v}_i +  \mathbf{W}_{ha} \mathbf{h}_t^1 \big) \\
+\pmb{\alpha}_1 &{}= \textrm{softmax} (\mathbf{a}_t) \\
+\hat{\mathbf{v}}_t &{}= \sum_{i=1}^K \alpha_{i,t} \mathbf{v}_i
+\end{align}</script><p>where <script type="math/tex">\hat{\mathbf{v}}_t</script> is the input to language LSTM, <script type="math/tex">\mathbf{W}_{va} \in \mathbb{R}^{H \times V}, \mathbf{W}_{ha} \in \mathbb{R}^{H \times M}, \mathbf{w}_{a} \in \mathbb{R}^H</script> are learnable parameters.</p>
+<p><img data-src="/notes/images/ImgCpt-Up-Down-Decoder.png" alt="upload successful"></p>
+<h3 id="Language-LSTM"><a href="#Language-LSTM" class="headerlink" title="Language LSTM"></a>Language LSTM</h3><p>The input to LM LSTM is concatated image features and attention LSTM output:</p>
+<script type="math/tex; mode=display">\mathbf{x}_t^2 = [ \hat{\mathbf{v}}_t, \mathbf{h}_t^1 ]</script><p>The predicted caption sequences <script type="math/tex">y_{1:T}=(y_1, \cdots, y_T)</script>:</p>
+<script type="math/tex; mode=display">p(y_t \vert y_{1:t-1}) = \textrm{softmax} (\mathbf{W}_p \mathbf{h}_t^2 + \mathbf{b}_p )</script><p>where <script type="math/tex">\mathbf{W}_p \in \mathbb{R}^{\vert V \vert \times M}</script> and <script type="math/tex">\mathbf{b}_p \in \mathbb{R}^{\vert V \vert}</script> are learnable weights and biases.</p>
+<p>The probability of generated captions is:</p>
+<script type="math/tex; mode=display">p(y_{1:T}) = \prod_{t=1}^T p(y_t \vert y_{1: t-1})</script><h3 id="Objective"><a href="#Objective" class="headerlink" title="Objective"></a>Objective</h3><ol>
+<li><p>Cross-entropy<br>Given the ground truth sequence <script type="math/tex">t_{1:T}^*</script>, the corss entropy loss is:</p>
+<script type="math/tex; mode=display">\mathcal{L}_{ce} (\theta) = - \sum_{t=1}^T \log \big( p_\theta(y_t^* \vert y_{1:t-1}^* ) \big)</script></li>
+<li><p>Negative expected score</p>
+<script type="math/tex; mode=display">
+\mathcal{L}_r (\theta) = - \mathbb{E}_{y_{1:T \sim p_\theta}}[r(y_{1:T})]</script><p>where $r$ is the score function (<em>e.g.</em>, CIDEr).</p>
+</li>
+</ol>
+<h1 id="Stylized-Image-Captioning"><a href="#Stylized-Image-Captioning" class="headerlink" title="Stylized Image Captioning"></a>Stylized Image Captioning</h1><h2 id="StyleNet-CVPR-2017"><a href="#StyleNet-CVPR-2017" class="headerlink" title="StyleNet (CVPR 2017)"></a>StyleNet (CVPR 2017)</h2><p><strong>Motivation</strong>:</p>
+<ul>
+<li>Previous works on image captioning all generate the factual description of the image content while overlooking the style of generated captions. Stylized descriptions can greatly enrich the expressibility and attractiveness of the caption.</li>
+<li>Application: people always struggle to come up with an attractive title when uploading images to a social media platform. Stylized captioning can be a helpful solution.</li>
+</ul>
+<p><img data-src="/notes/images/ImgCpt-StyleNet.png" width="80%"/></p>
+<h3 id="Factored-LSTM"><a href="#Factored-LSTM" class="headerlink" title="Factored LSTM"></a>Factored LSTM</h3><p>StyleNet<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Gan, C., Gan, Z., He, X., Gao, J., & Deng, L. (2017). [StyleNet: Generating Attractive Visual Captions with Styles](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8099591). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 955-964.
+">[11]</span></a></sup> proposed the <code>Factored LSTM</code> to memorize the languge style pattern, by factorizing the parameters <script type="math/tex">\mathbf{W}_x \in \mathbb{R}^{M \times N}</script> in standard LSTMs into three matrices <script type="math/tex">\mathbf{U}_x \in \mathbb{R}^{M \times E}, \mathbf{S}_x \in \mathbb{R}^{E \times E}, \mathbf{V}_x \in \mathbb{R}^{E \times N}</script>. But it retain the weight parameters of recurrent connections <script type="math/tex">\mathbf{W}_{ih}, \mathbf{W}_{fh}, \mathbf{W}_{oh}, \mathbf{W}_{ch}</script>, which captures the long span syntactic dependency of the text.</p>
+<p>The Factored LSTM are defined as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{i}_t &{}= \sigma (\mathbf{U}_{ix}\mathbf{S}_{ix}\mathbf{V}_{ix} \mathbf{x}_t + \mathbf{W}_{ih}\mathbf{h}_{t-1}) \\
+\mathbf{f}_t &{}= \sigma (\mathbf{U}_{fx}\mathbf{S}_{fx}\mathbf{V}_{fx} \mathbf{x}_t + \mathbf{W}_{fh}\mathbf{h}_{t-1}) \\
+\mathbf{o}_t &{}= \sigma (\mathbf{U}_{ox}\mathbf{S}_{ox}\mathbf{V}_{ox} \mathbf{x}_t + \mathbf{W}_{oh}\mathbf{h}_{t-1}) \\
+\tilde{\mathbf{c}}_t &{}= \tanh (\mathbf{U}_{cx}\mathbf{S}_{cx}\mathbf{V}_{cx} \mathbf{x}_t + \mathbf{W}_{ch}\mathbf{h}_{t-1}) \\
+\mathbf{c}_t &{}= \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_{t}\\
+\mathbf{h}_t &{}= \mathbf{o}_t \odot \mathbf{c}_t \\
+\mathbf{p}_{t+1} &{}= \textrm{softmax} (\mathbf{C}\mathbf{h}_t)
+\end{align}</script><p>where ${ \mathbf{U}, \mathbf{V}, \mathbf{W} }$ are shared among different styles. But $\mathbf{S}$ is style-specific.</p>
+<h3 id="Training-StyleNet"><a href="#Training-StyleNet" class="headerlink" title="Training StyleNet"></a>Training StyleNet</h3><p>Two tasks:</p>
+<ol>
+<li>Firstly, train the factored LSTM model to generate factual captions given paired images.</li>
+<li>Train factored LSTM as language model on stylized language corpus, but only update the style-specific matrix $\mathbf{S}$.</li>
+</ol>
+<h2 id="SemStyle-CVPR-2018"><a href="#SemStyle-CVPR-2018" class="headerlink" title="SemStyle (CVPR 2018)"></a>SemStyle (CVPR 2018)</h2><p>SemStyle<sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Mathews, A.P., Xie, L., & He, X. (2018). [SemStyle: Learning to Generate Stylised Image Captions Using Unaligned Text](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8578994). 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 8591-8600.
+">[12]</span></a></sup> proposed a <strong>term generator</strong> by generating an ordered term sequence of image semantics, and a <strong>language generator</strong> trained on styled text data.</p>
+<p><img data-src="/notes/images/Img-Cpt-SemStyle.png" width="80%"/></p>
+<h3 id="Semantic-term"><a href="#Semantic-term" class="headerlink" title="Semantic term"></a>Semantic term</h3><p>Given a setence <script type="math/tex">\mathbf{w} = \{ w_1, w_2, \cdots, w_n \}, w_i \in \mathcal{V}^\text{in}</script>, a set of rules is defined to get ordered semantic terms <script type="math/tex">\mathbf{x} = \{ x_1, x_2, \cdots, x_M \}, x_i \in \mathcal{V}^\text{term}</script>. The rules are as:</p>
+<ol>
+<li>Filtering non-semantic words</li>
+<li>lemmatization and tagging using spaCy.</li>
+<li>Verb abstraction. Use semantic role labeling tool SEMAFOR to annotate frames and reduce frame vocabulary.</li>
+</ol>
+<h3 id="Term-generator"><a href="#Term-generator" class="headerlink" title="Term generator"></a>Term generator</h3><p>Use CNN+GRU to generate semantic terms collected above. The greedy search decoding is used to recover the term sequence from the conditional probabilities. Given input image $I$,</p>
+<script type="math/tex; mode=display">x_{i+1} = \arg\max_{j \in \mathcal{V}^\text{term}} P(x_{i=1}=j \vert I, x_i, \cdots, x_1)</script><p>where <script type="math/tex">x_1</script> is the ‘BOS’ token.</p>
+<h3 id="Language-generator"><a href="#Language-generator" class="headerlink" title="Language generator"></a>Language generator</h3><p>A bi-GRU is used to encode the semantic terms $x$’s, and concatenate the forward and backward hidden states as outputs: <script type="math/tex">\mathbf{h}_(\text{enc}, i) = [\mathbf{h}_(\text{fw},i); \mathbf{h}_(\text{bw},i)]</script>. The last state is used to initialize the first hidden state of decoder: <script type="math/tex">\mathbf{h}_{(\text{dec}, 0)} = \mathbf{h}_{(\text{enc}, M)}</script>.</p>
+<p>The context vector at step $t$ is computed with bi-linear attention:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+v_{t,i} &{}= \mathbf{h}_{\text{enc,i}}^\top \mathbf{W}_a \mathbf{h}_{\text{dec},t} \\
+a_{t,i} &{}= \frac{\exp (v_{t,i})}{\sum_{j=1}^M \exp (v_{t,j})}\\
+\mathbf{c}_t &{}= \sum_{i=1}^M a_{t,i} \mathbf{h}_{\text{enc},i}
+\end{align}</script><p>The output uses a NLP with softmax non-linearity:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{h}^\text{out}_{t} &{}= \mathbf{W}^\text{out}[\mathbf{c}_t, \mathbf{h}^\text{dec}_{t}] + \mathbf{b}^\text{out}\\
+p(y_t =k \vert \mathbf{x}) &{}= \frac{\exp(h^\text{out}_{t,k})}{  \sum_{j=1}^{\vert \mathcal{V}^\text{out} \vert} \exp(h^\text{out}_{t,j})}
+\end{align}</script><h3 id="Training-2"><a href="#Training-2" class="headerlink" title="Training"></a>Training</h3><ul>
+<li><p>Train the term generator on factual descriptions, using mean categorical cross entropy over semantic terms:</p>
+<script type="math/tex; mode=display">\mathcal{L} = -\frac{1}{M} \sum_{i=1}^M \log p(x_i = \hat{x}_i \vert I,\hat{x}_{i-1}, \cdots,\hat{x}_{1} )</script></li>
+<li><p>Train the language generator on both styled and descriptive sentences.</p>
+</li>
+</ul>
+<h2 id="“Factual”-or-“Emotional”-ECCV-2018"><a href="#“Factual”-or-“Emotional”-ECCV-2018" class="headerlink" title="“Factual” or “Emotional” (ECCV 2018)"></a>“Factual” or “Emotional” (ECCV 2018)</h2><h3 id="Style-factual-LSTM"><a href="#Style-factual-LSTM" class="headerlink" title="Style-factual LSTM"></a>Style-factual LSTM</h3><p>Two set of matrices are used in style-factual LSTM:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+i_t &{}= \sigma \big( (g_{xt} S_{xi} + (1- g_{xt})W_{xi})x_t + (g_{ht} S_{hi} + (1-g_{ht})W_{hi})h_{t-1} + b_i \big) \\
+f_t &{}= \sigma \big( (g_{xt} S_{xf} + (1- g_{xt})W_{xf})x_t + (g_{ht} S_{hf} + (1-g_{ht})W_{hf})h_{t-1} + b_f \big) \\
+o_t &{}= \sigma \big( (g_{xt} S_{xo} + (1- g_{xt})W_{xo})x_t + (g_{ht} S_{ho} + (1-g_{ht})W_{ho})h_{t-1} + b_o \big) \\
+\tilde{c}_t &{}= \phi \big( (g_{xt} S_{xc} + (1- g_{xt})W_{xc})x_t + (g_{ht} S_{hc} + (1-g_{ht})W_{hc})h_{t-1} + b_c \big) \\
+c_t &{}= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \\
+h_t &{}= o_t \odot \phi(c_t)
+\end{align}</script><p>where style-related matrices <script type="math/tex">g_{xt}</script> and <script type="math/tex">g_{ht}</script> controls to predict word based on <script type="math/tex">W_x</script> ($\approx 0$), or a styled word ($\approx 1$) <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, T., Zhang, Z., You, Q., Fang, C., Wang, Z., Jin, H., & Luo, J. (2018). ["Factual" or "Emotional": Stylized Image Captioning with Adaptive Learning and Attention](http://openaccess.thecvf.com/content_ECCV_2018/papers/Tianlang_Chen_Factual_or_Emotional_ECCV_2018_paper.pdf). ECCV.
+">[13]</span></a></sup>.</p>
+<p><img data-src="/notes/images/Style-factual-LSTM.png" width="60%"/></p>
+<h3 id="Training-3"><a href="#Training-3" class="headerlink" title="Training"></a>Training</h3><p>Two stages:</p>
+<ol>
+<li>At the first stage, fix <script type="math/tex">g_{xt}=g_{h_t}=0</script> and freeze the style-related matrices <script type="math/tex">S_x</script> and <script type="math/tex">S_h</script>. The model is trained using paired factual captioning datasets with MLE loss.</li>
+<li>At 2nd stage, train the model on paried stylized captioning datasets, but update <script type="math/tex">S_x</script> and <script type="math/tex">S_h</script> for style-factual LSTM, and fix <script type="math/tex">W_x, W_h</script>. The loss for this stage is designed as:<script type="math/tex; mode=display">
+\begin{align}
+\mathbb{KL}(P_s^t \Vert P_r^t) &{}= \sum_{w in W} P_s^t(w) \log \frac{P_s^t(w)}{P_r^t(w)} \\
+g_{ip}^t &{}= P_s^t \cdot P_r^t \\
+\mathcal{L} &{}= \sum_{t=1}^T -(1- g_{ip}^t) \log P_s^t (y_t) + \alpha \cdot \sum_{t=1}^T g_{ip}^t \mathbb{KL}(P_s^t \Vert P_r^t)
+\end{align}</script>where <script type="math/tex">P_s^t</script> and <script type="math/tex">P_r^t</script> are predicted word probability distribution by the real model and the reference, <script type="math/tex">g_{ip}^t</script> represents the similarity between word probability distributions <script type="math/tex">P_s^t</script> and <script type="math/tex">P_r^t</script>. The term <script type="math/tex">g_{ip}^t \rightarrow 0</script> when <script type="math/tex">P_s^t</script> has a higher probability to a stylized word.</li>
+</ol>
+<p><img data-src="/notes/images/ImgCpt-Factual-LSTM-Model.png" width="100%"/></p>
+<h1 id="Adversarial-Training"><a href="#Adversarial-Training" class="headerlink" title="Adversarial Training"></a>Adversarial Training</h1><h2 id="Show-Adapt-and-Tell-ICCV-2017"><a href="#Show-Adapt-and-Tell-ICCV-2017" class="headerlink" title="Show, Adapt and Tell (ICCV 2017)"></a>Show, Adapt and Tell (ICCV 2017)</h2><p>In the source domain, given a set <script type="math/tex">\mathcal{P} = \{ (\mathbf{x}^n, \hat{\mathbf{y}}^n) \}_n</script> with paired image <script type="math/tex">\mathbf{x}^n</script> and ground truth sentence $\hat{\mathbf{y}}^n$. In the target domain, two separate sets are given: a set of example images <script type="math/tex">\chi = \{ \mathbf{x}^n \}_n</script> and example sentences <script type="math/tex">\hat{\mathcal{Y}} = \{ \hat{\mathbf{y}}^n \}_n</script>.</p>
+<p><img data-src="/notes/images/ImgCpt-Show-Adapt-Tell-Model.png" alt="upload successful"></p>
+<h3 id="Captioner-as-an-Agent"><a href="#Captioner-as-an-Agent" class="headerlink" title="Captioner as an Agent"></a>Captioner as an Agent</h3><p>Captioner using the standard CNN-RNN architecture is treated as an agent. At time $t$, the captioner takes an action, <em>i.e.</em>, a word <script type="math/tex">y_t</script>, according to a stochastic policy <script type="math/tex">\pi_\theta (y_t \vert \mathbf{x}, \mathbf{y}_{t-1}</script>. The total per-word loss $J(\theta)$ is minimized:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+J(\theta) &{}= \sum_{n=1}^N \sum_{t=1}^{T_n} \mathcal{L}(\pi_\theta(\hat{y}_t^n \vert \mathbf{x}^n, \hat{\mathbf{y}}_{t-1}^n))\\
+\mathcal{L}(\pi_\theta(\hat{y}_t^n \vert \mathbf{x}^n, \hat{\mathbf{y}}_{t-1}^n)) &{}= - \log \pi_\theta (\hat{y}_t^n \vert \mathbf{x}^n, \hat{\mathbf{y}}_{t-1}^n)
+\end{align}</script><p>where $N$ is the number of images, <script type="math/tex">T_n</script> is the length of the sentence <script type="math/tex">\hat{\mathbf{y}}^n</script>, $\mathcal{L}$ indicates the cross-entropy loss. <script type="math/tex">\hat{\mathbf{y}}_{t-1}^n</script> and <script type="math/tex">\hat{y}_t^n</script> are ground truth partial sentence and word, respectively.</p>
+<p>The state-action function <script type="math/tex">Q((\mathbf{x}, \mathbf{y}_{t-1}), y_t) = \mathbb{E}_{\mathbf{y}_{(t+1):T}} [R( [ \mathbf{y}_{t-1}, y_t, \mathbf{y}_{(t+1):T} ] \vert \mathbf{x}, \mathcal{Y}, \mathcal{P} )]</script></p>
+<p>The object function:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+J(\theta) &{}= \sum_{n=1}^N J_n (\theta) \\
+J_n(\theta) &{}= \sum_{t=1}^{T_n} \mathbb{E}_{\mathbf{y}_t^n} [ \pi_\theta (y_t^n \vert \mathbf{x}^n, \mathbf{y}_{t-1}^n) Q \big((\mathbf{x}^n, \mathbf{y}_{t-1}^n), y_t^n \big) ]
+\end{align}</script><p>Since the action sapce of <script type="math/tex">\mathbf{y}_t</script> is huge, $M$ sentences <script type="math/tex">\{ \mathbf{y}^m \}_m</script> is generated and replace expectation with the mean:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+J_n(\theta) &\simeq \frac{1}{M} \sum_{m=1}^M J_{n,m}(\theta) \\
+J_{n,m} (\theta) &{}= \sum_{t=1}^{T_m} \pi_\theta (y_t^m \vert \mathbf{x}, \mathbf{y}_{t-1}^m) Q \big( (\mathbf{x}, \mathbf{y}_{t-1}^m), y_t^m \big)
+\end{align}</script><p>The policy gradient is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_\theta J_{n,m} (\theta) &{}= \sum_{t=1}^{T_m} \nabla_\theta \pi_\theta (y_t^m \vert \mathbf{x}, \mathbf{y}_{t-1}^m) Q \big( (\mathbf{x}, \mathbf{y}_{t-1}^m), y_t^m \big) \\
+&{}= \sum_{t=1}^{T_m} \pi_\theta (y_t^m \vert \mathbf{x}, \mathbf{y}_{t-1}^m) \nabla_\theta \log \pi_\theta (y_t^m \vert \mathbf{x}, \mathbf{y}_{t-1}^m) Q((\mathbf{x}, \mathbf{y}_{t-1}^m), y_t^m) \\
+\nabla_\theta J(\theta) &\simeq \frac{1}{M} \sum_{n=1}^N \sum_{m=1}^M \nabla_\theta J_{n,m}(\theta)
+\end{align}</script><p>Monte Carlo roolout is used to replace the expectation of Q function:</p>
+<script type="math/tex; mode=display">
+Q((\mathbf{x}, \mathbf{y}_{t-1}), y_t) \simeq \frac{1}{K} \sum_{k=1}^K R(\big[ \mathbf{y}_{t-1}, y_t, \mathbf{y}_{(t+1):T_k}^k \big] \vert \mathbf{x}, \mathcal{Y}, \mathcal{P})</script><p>where <script type="math/tex">\{\mathbf{y}_{(t+1):T_k}^k \}</script> are generated future words, and $K$ complete sentences are sampled with policy <script type="math/tex">\pi_\theta</script>.</p>
+<h3 id="Critics"><a href="#Critics" class="headerlink" title="Critics"></a>Critics</h3><h4 id="Domain-critic"><a href="#Domain-critic" class="headerlink" title="Domain critic"></a>Domain critic</h4><p>Domain critic (DC) model uses an encoder with a classifier. A sentence $\mathbf{y}$ is encoded using TextCNNs with highway connection, the pass to an MLP followed by a softmax to generate probability <script type="math/tex">C_d (l \vert \mathbf{y})</script>, where $l \in$ {source, target, generated}.</p>
+<p><strong>Training DC</strong>: the goal is to classify a sentence into source, target, and generated data.</p>
+<script type="math/tex; mode=display">\mathcal{L}_d (\phi) = - \sum_{n=1}^N \log C_d (l^n \vert \mathbf{y}^n; \phi)</script><h4 id="Multi-modal-critic"><a href="#Multi-modal-critic" class="headerlink" title="Multi-modal critic"></a>Multi-modal critic</h4><p>Multi-modal critic (MC) classifies $(\mathbf{x}, \mathbf{y})$ as “paired”, “unpaired”, or “generated” data. The model is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{c} &{}= \textrm{LSTM}(\mathbf{y}) \\
+f &{}= \tanh(\mathbf{W}_x \mathbf{x} + \mathbf{b}_x) \odot \tanh (\mathbf{W}_c \mathbf{c} + \mathbf{b}_c) \\
+C_m &{}= \textrm{softmax} ( \mathbf{W}_m f + \mathbf{b}_m)
+\end{align}</script><p>where <script type="math/tex">\mathbf{W}_x, \mathbf{b}_x, \mathbf{W}_c, \mathbf{b}_c,\mathbf{W}_m, \mathbf{b}_m</script> are learnable parameters, $\odot$ denotes the element-wise product, <script type="math/tex">C_m</script> is the probabilities over three classes: paired, unpaired, and genrated data. <script type="math/tex">C_m</script> indicates how a generated caption $\mathbf{y}$ is relevant to an image $\mathbf{x}$.</p>
+<p><strong>Training MC</strong>: the goal is to classify the image-sentence pair into paired, unpaired, and generated data.</p>
+<script type="math/tex; mode=display">\mathcal{L}_m (\eta) = - \sum_{n=1}^N \log C_m (l^n \vert \mathbf{x}^n, \mathbf{y}^n; \eta)</script><h4 id="Sentence-reward"><a href="#Sentence-reward" class="headerlink" title="Sentence reward"></a>Sentence reward</h4><p>The sentence reward <script type="math/tex">R(\mathbf{y} \vert \cdot) = C_d(\text{target}\vert \cdot) \cdot C_m(\textrm{paired} \vert \cdot)</script></p>
+<h3 id="Training-algorithm"><a href="#Training-algorithm" class="headerlink" title="Training algorithm"></a>Training algorithm</h3><p><strong>Require</strong>: captioner <script type="math/tex">\pi_\theta</script>, domain critic <script type="math/tex">C_d</script>, multi-modal critic <script type="math/tex">C_m</script>, and empty set of generated sentences <script type="math/tex">\mathcal{Y}_{\pi\theta}</script>, and an empty set for paired image-generated-sentence <script type="math/tex">\mathcal{P}_\textrm{gen}</script>.</p>
+<p><strong>Input</strong>: sentences <script type="math/tex">\hat{\mathcal{Y}}_\textrm{src}</script>, image-sentence pairs <script type="math/tex">\mathcal{P}_\text{src}</script>, unpaired data <script type="math/tex">\acute{\mathcal{P}}_\textrm{src}</script> in source domain; sentences <script type="math/tex">\hat{\mathcal{Y}}_\textrm{tgt}</script>, images <script type="math/tex">\chi_\textrm{tgt}</script> in target domain.</p>
+<p>1, Pretrain <script type="math/tex">\pi_\theta</script> on <script type="math/tex">\mathcal{P}_\text{src}</script>;</p>
+<ol>
+<li><strong>while</strong> $\theta$ has not converged <strong>do</strong>:<ol>
+<li>for $i=0, \cdots, N_c$ do<ol>
+<li><script type="math/tex">\mathcal{Y}_{\pi_\theta} \leftarrow \{  \mathbf{y} \}</script>, where <script type="math/tex">\mathbf{y} \sim \pi_\theta (\cdot \vert, \cdot)</script> and <script type="math/tex">\mathbf{x} \sim \chi_\textrm{tgt}</script>;</li>
+<li>Compute <script type="math/tex">g_d = \nabla_\phi \mathcal{L}_d (\phi)</script>;</li>
+<li><script type="math/tex">\mathcal{Y}_{\pi_\theta} \leftarrow \{  \mathbf{y} \}</script>, where <script type="math/tex">\mathbf{y} \sim \pi_\theta (\cdot \vert, \cdot)</script> and <script type="math/tex">\mathbf{x} \sim \chi_\textrm{src}</script>;</li>
+<li><script type="math/tex">\mathcal{P}_\text{gen} \leftarrow \{ \mathbf{x}, \mathbf{y}\}</script>;</li>
+<li>Compute <script type="math/tex">g_m = \nabla_\eta \mathcal{L}_m (\eta)</script>;</li>
+<li>Adam update for $\eta$ for <script type="math/tex">C_m</script> using <script type="math/tex">g_m</script>;</li>
+</ol>
+</li>
+<li>for <script type="math/tex">i = 0, \cdots, N_g</script> do<ol>
+<li><script type="math/tex">\mathcal{Y}_{\pi_\theta} \leftarrow \{  \mathbf{y} \}</script>, where <script type="math/tex">\mathbf{y} \sim \pi_\theta (\cdot \vert, \cdot)</script> and <script type="math/tex">\mathbf{x} \sim \chi_\textrm{tgt}</script>;</li>
+<li><script type="math/tex">\mathcal{P}_\text{gen} \leftarrow \{ \mathbf{x}, \mathbf{y}\}</script>;</li>
+<li>for $t=1, \cdots, T$ do<ol>
+<li>Compute <script type="math/tex">Q((\mathbf{x}, \mathbf{y}_{t-1}), y_t)</script> with Monte Carlo rollouts;</li>
+</ol>
+</li>
+<li>Compute <script type="math/tex">g_\theta = \nabla_\theta J(\theta)</script>;</li>
+<li>Adam update of $\theta$ using <script type="math/tex">g_\theta</script>.</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="Poetry-generation-ACM-MM-2018"><a href="#Poetry-generation-ACM-MM-2018" class="headerlink" title="Poetry generation (ACM MM 2018)"></a>Poetry generation (ACM MM 2018)</h2><p><sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Liu, B., Fu, J., Kato, M.P., & Yoshikawa, M. (2018). [Beyond Narrative Description: Generating Poetry from Images by Multi-Adversarial Training](https://arxiv.org/pdf/1804.08473.pdf). ArXiv, abs/1804.08473.
+">[15]</span></a></sup><br><img data-src="/notes/images/ImgCpt-Poetry-generation.png" alt="upload successful"></p>
+<h1 id="Reinforcement-Learning"><a href="#Reinforcement-Learning" class="headerlink" title="Reinforcement Learning"></a>Reinforcement Learning</h1><h2 id="Self-Critical-Sequence-Training-CVPR-2017"><a href="#Self-Critical-Sequence-Training-CVPR-2017" class="headerlink" title="Self-Critical Sequence Training (CVPR 2017)"></a>Self-Critical Sequence Training (CVPR 2017)</h2><p><strong>Motivation</strong>: </p>
+<ol>
+<li>Teacher-Forcing leads to the <strong>mismatch</strong> between training and testing, and <strong>exposure bias</strong>, resulting in error accumulation during generation at test time.</li>
+<li>While training with cross-entropy loss, discrete and non-differentiable NLP metrics such as BLEU, ROUGE, METEOR, CIDEr are evaluated at test time.</li>
+<li>Ideally, sequence models should be trained to avoid exposure bias and directly optimize metrics for the task at hand.</li>
+</ol>
+<h3 id="Policy-Gradient"><a href="#Policy-Gradient" class="headerlink" title="Policy Gradient"></a>Policy Gradient</h3><p>Reinforcement Learning (RL) can be used to directly optimize NLP metrics and address the exposuire bias issue, such as REINFORCE and Actor-Critic. LSTM can be treated as an agent that interacts with an external environment (state: words and image features, action: predicted words, done: “EOS”). The policy network <script type="math/tex">p_\theta</script> results in an action of next word prediction. After each action, the agent updates its internal state (parameters) until generating the EOS token. The reward $r$ is the NLP metric, like CIDEr score of generated sentence by comparing with ground-truth sequences. The goal is to minimize the negative expected reward:</p>
+<script type="math/tex; mode=display">\mathcal{L} (\theta) = - \mathbb{E}_{w^s \sim p_\theta} [r(w^s)]</script><p>where <script type="math/tex">w^s = (w_1^s, \cdots, w_T^s)</script> and <script type="math/tex">w_t^s</script> is the word sampled from the model at the time step $t$. In practive, $ \mathcal{L} (\theta)$ is typically estimated with a single sample from <script type="math/tex">p_\theta</script>:</p>
+<script type="math/tex; mode=display">\mathcal{L} (\theta) \approx -r (w^s),\quad w^s \sim p_\theta</script><h4 id="Policy-gradient-with-REINFORCE"><a href="#Policy-gradient-with-REINFORCE" class="headerlink" title="Policy gradient with REINFORCE"></a>Policy gradient with REINFORCE</h4><p>REINFORCE is based on the observation that the expected graident of a non-differentiable reward function:</p>
+<script type="math/tex; mode=display">\nabla_\theta \mathcal{L}(\theta) = - \mathbb{E}_{w^s \sim p_\theta} [r(w^s)\nabla_\theta \log p_\theta (w^s)]</script><p>In practice, a single MC sample <script type="math/tex">w^s = (w_1^s,\cdots,w_T^s)</script> from <script type="math/tex">p_\theta</script>, for each training example in the minibatch:</p>
+<script type="math/tex; mode=display">\nabla_\theta \mathcal{L}(\theta) \approx -r (w^s) \nabla_\theta \log p_\theta (w^s)</script><h4 id="REINFORCE-with-Baseline"><a href="#REINFORCE-with-Baseline" class="headerlink" title="REINFORCE with Baseline"></a>REINFORCE with Baseline</h4><p>To reduce the variance of the gradient estimate, it minus a reference reward or baseline $b$:</p>
+<script type="math/tex; mode=display">\nabla_\theta \mathcal{L}(\theta) = - \mathbb{E}_{w^s \sim p_\theta} [(r(w^s) - b) \nabla_\theta \log p_\theta (w^s)]</script><p>The baseline can be arbitrary function, as long as it does not depend on the action $w^s$ because:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbb{E}_{w^s \sim p_\theta} [b \nabla_\theta \log p_\theta (w^s)] &{}= b \sum_{w_s} \nabla_\theta p_\theta (w^s) \\
+&{}= b \nabla_\theta \sum_{w_s} p_\theta (w^s)\\
+&{}= b \nabla_\theta 1 = 0
+\end{align}</script><p>This shows that the baseline does not change the expected gradient but can reduce the variance.</p>
+<p>For each training case, it can be approximated with a single sample <script type="math/tex">w^s \sim p_\theta</script> as:</p>
+<script type="math/tex; mode=display">\nabla_\theta \mathcal{L}(\theta) \approx - (r(w^s) -b) \nabla_\theta \log p_\theta (w^s)</script><p>Note if $b$ is a function of $\theta$ or $t$, this is sill valid.</p>
+<p>The gradient is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_\theta \mathcal{L}(\theta) &{}= \sum_{t=1}^T \frac{\partial \mathcal{L}(\theta)}{\partial s_t} \frac{\partial s_t}{\partial \theta}\\
+\frac{\nabla_\theta \mathcal{L}(\theta)}{\partial s_t} &{}\approx (r(w^s)-b) (p_\theta (w_t \vert h_t) - 1_{w_t^s})
+\end{align}</script><p>where <script type="math/tex">s_t</script> is the input to the softmax function;</p>
+<h3 id="Self-Critical-Sequence-Training-SCST"><a href="#Self-Critical-Sequence-Training-SCST" class="headerlink" title="Self-Critical Sequence Training (SCST)"></a>Self-Critical Sequence Training (SCST)</h3><p>Self-Critical Sequence Training <sup id="fnref:16"><a href="#fn:16" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rennie, S.J., Marcheret, E., Mroueh, Y., Ross, J., & Goel, V. (2016). [Self-Critical Sequence Training for Image Captioning](https://arxiv.org/pdf/1612.00563.pdf). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1179-1195.
+">[16]</span></a></sup> applies the reward obtained by the current model under the inference mode at test time as the baseline in REINFORCE. The gradient at time step $t$ becomes:</p>
+<script type="math/tex; mode=display">
+\frac{\nabla_\theta \mathcal{L}(\theta)}{\partial s_t} \approx (r(w^s)- \color{green}{r(\hat{w})}) (p_\theta (w_t \vert h_t) - 1_{w_t^s})</script><p>where <script type="math/tex">r(\hat{w})</script> is the reward obtained by the current model at test time.</p>
+<p><img data-src="/notes/images/ImgCpt-SCST.png" width="70%"/></p>
+<div class="note info">
+            <ol><li>SCST directly optimizes the true, sequence-level, evaluation metric, encouraging train/test time consistency.</li><li>SCST avoids the usual scenario of having to learn a (context-dependent) estimate of expected future rewards as a baseline.</li><li>In practice, it has much lower variance and is more effective on mini-batches using SGD.</li><li>It avoids the training problems with actor-critic methods, where the actor is trained on value functions estimated by a critic rather than actual rewards.</li></ol>
+          </div>
+<p>It uses the greedy decoding:</p>
+<script type="math/tex; mode=display">\hat{w}_t = \arg\max_{w_t} p(w_t \vert h_t)</script><h2 id="RL-with-Embedding-Reward-CVPR-2017"><a href="#RL-with-Embedding-Reward-CVPR-2017" class="headerlink" title="RL with Embedding Reward (CVPR 2017)"></a>RL with Embedding Reward (CVPR 2017)</h2><p>This work<sup id="fnref:17"><a href="#fn:17" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ren, Z., Wang, X., Zhang, N., Lv, X., & Li, L. (2017). [Deep Reinforcement Learning-Based Image Captioning with Embedding Reward](https://arxiv.org/pdf/1704.03899.pdf). 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1151-1159.">[17]</span></a></sup> utilized the Actor-Critic algorithm with the reward of visual-semantic embedding for image captioning. The policy and value network jointly determine the next best word at each time step. The former provides a <strong>local guidance</strong> by predicting the confidence of predicted next words, whereas the latter serves as the <strong>global and lookahead guidance</strong> by evaluating the reward value of the current state.</p>
+<p><img data-src="/notes/images/ImgCpt-RL-Embed-Reward.png" width="60%"/></p>
+<h3 id="Policy-Network"><a href="#Policy-Network" class="headerlink" title="Policy Network"></a>Policy Network</h3><p>The policy network <script type="math/tex">p_\pi</script> consists of standard CNN-RNN encoder-decoder architecture, with the huge vocabulary size as its action space. </p>
+<h3 id="Value-Network"><a href="#Value-Network" class="headerlink" title="Value Network"></a>Value Network</h3><p>The value function <script type="math/tex">v^p</script> is predicted by a value network <script type="math/tex">v_\theta</script>.</p>
+<script type="math/tex; mode=display">\begin{align}
+v^p (s) &= \mathbb{E} [r \vert s_t =s, a_{t,\cdots, T} \sim p] \\
+v_\theta (s) &\approx v^p(s)
+\end{align}</script><p>where <script type="math/tex">s_t = \{ \mathbf{I}, w_1, \cdots, w_t \}</script>. </p>
+<p>As in the figure, the value network consists of a CNN, an RNN, and an MLP, where CNN encodes the raw image $\mathbf{I}$, RNN encodes the semantic information of partially generated sentence <script type="math/tex">\{ w_1,\cdots, w_t \}</script>. The concatenated representation is projected to a scalar reward from <script type="math/tex">s_t</script> using MLP.</p>
+<p><img data-src="/notes/images/ImgCpt-RL-Value-Network.png" width="50%"/></p>
+<h3 id="Visual-Semantic-Embedding-Reward"><a href="#Visual-Semantic-Embedding-Reward" class="headerlink" title="Visual-Semantic Embedding Reward"></a>Visual-Semantic Embedding Reward</h3><p>Give an image with feature <script type="math/tex">\mathbf{v}^*</script>, the reward of generated sentence $\hat{S}$ is defined to be the embedding similarity between $\hat{S}$ and $\mathbf{v}^*$:</p>
+<script type="math/tex; mode=display">
+r = \frac{f_e (\mathbf{v}^*) \cdot \mathbf{h}^\prime_T (\hat{S})}{\Vert \mathbf{v}^* \Vert \Vert \mathbf{h}^\prime_T (\hat{S}) \Vert}</script><p>The bidirectional ranking loss is defined as:</p>
+<script type="math/tex; mode=display">\mathcal{L}_e = \sum_\mathbf{v} \sum_{S^-} \max (0, \beta - f_e (\mathbf{v})\cdot \mathbf{h}^\prime_T (S) + f_e (\mathbf{v})\cdot \mathbf{h}^\prime_T (S^-)) +  \sum_{S}\sum_{\mathbf{v}^-} \max (0, \beta - \mathbf{h}^\prime_T (S) \cdot f_e (\mathbf{v}) + \mathbf{h}^\prime_T (S) \cdot f_e (\mathbf{v}^-) )</script><p>where $\beta$ is margin cross-validated, $(\mathbf{v}, S)$ are ground truth image-sentence pair, $S^-$ is a negetive description for image corresponding to $\mathbf{v}$, and vice-versa with $\mathbf{v}^-$.</p>
+<h3 id="Training-4"><a href="#Training-4" class="headerlink" title="Training"></a>Training</h3><p>Two steps:</p>
+<ol>
+<li>Train policy network use cross entropy loss;</li>
+<li>Train <script type="math/tex">p_\pi</script> and <script type="math/tex">v_\theta</script> jointly using reinforcement learning and curriculum learning. And the value network <script type="math/tex">v_\theta</script> serves as a moving baseline.<script type="math/tex; mode=display">
+\begin{align}
+\nabla_\pi J &{}\approx \sum_{t=1}^T \nabla_\pi \log p_\pi (a_t \vert s_t) (r - v_\theta (s_t)) \\
+\nabla_\theta J &{}= \nabla_\theta v_\theta (s_t) (r - v_\theta (s_t))
+\end{align}</script></li>
+</ol>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Vinyals, O., Toshev, A., Bengio, S., &amp; Erhan, D. (2015). <a target="_blank" rel="noopener" href="https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Vinyals_Show_and_Tell_2015_CVPR_paper.pdf">Show and tell: A neural image caption generator</a>. 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 3156-3164.<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Xu, K., Ba, J., Kiros, R., Cho, K., Courville, A.C., Salakhutdinov, R., Zemel, R.S., &amp; Bengio, Y. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1502.03044.pdf">Show, Attend, and Tell: Neural Image Caption Generation with Visual Attention</a>. ICML.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Karpathy, A., &amp; Li, F. (2015). <a target="_blank" rel="noopener" href="https://doi.org/10.1109/CVPR.2015.7298932">Deep visual-semantic alignments for generating image descriptions</a>. CVPR.<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">You, Q., Jin, H., Wang, Z., Fang, C., &amp; Luo, J. (2016). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7780872">Image Captioning with Semantic Attention</a>. 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 4651-4659.<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, L., Zhang, H., Xiao, J., Nie, L., Shao, J., Liu, W., &amp; Chua, T. (2017). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8100150">SCA-CNN: Spatial and Channel-Wise Attention in Convolutional Networks for Image Captioning</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 6298-6306.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lu, J., Xiong, C., Parikh, D., &amp; Socher, R. (2017). <a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8099828">Knowing When to Look: Adaptive Attention via a Visual Sentinel for Image Captioning</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 3242-3250.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Gan, Z., Gan, C., He, X., Pu, Y., Tran, K., Gao, J., Carin, L., &amp; Deng, L. (2017). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8099610">Semantic Compositional Networks for Visual Captioning</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1141-1150.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Anderson, P., He, X., Buehler, C., Teney, D., Johnson, M., Gould, S., &amp; Zhang, L. (2017). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8578734">Bottom-Up and Top-Down Attention for Image Captioning and Visual Question Answering</a>. 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 6077-6086.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ren, S., He, K., Girshick, R.B., &amp; Sun, J. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1506.01497.pdf">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</a>. IEEE Transactions on Pattern Analysis and Machine Intelligence, 39, 1137-1149.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7780459">Deep Residual Learning for Image Recognition</a>. 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 770-778.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Gan, C., Gan, Z., He, X., Gao, J., &amp; Deng, L. (2017). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8099591">StyleNet: Generating Attractive Visual Captions with Styles</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 955-964.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Mathews, A.P., Xie, L., &amp; He, X. (2018). <a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=8578994">SemStyle: Learning to Generate Stylised Image Captions Using Unaligned Text</a>. 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 8591-8600.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, T., Zhang, Z., You, Q., Fang, C., Wang, Z., Jin, H., &amp; Luo, J. (2018). <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_ECCV_2018/papers/Tianlang_Chen_Factual_or_Emotional_ECCV_2018_paper.pdf">&quot;Factual&quot; or &quot;Emotional&quot;: Stylized Image Captioning with Adaptive Learning and Attention</a>. ECCV.<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, T., Liao, Y., Chuang, C., Hsu, W.T., Fu, J., &amp; Sun, M. (2017). <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_ICCV_2017/papers/Chen_Show_Adapt_and_ICCV_2017_paper.pdf">Show, Adapt, and Tell: Adversarial Training of Cross-Domain Image Captioner</a>. 2017 IEEE International Conference on Computer Vision (ICCV), 521-530.<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Liu, B., Fu, J., Kato, M.P., &amp; Yoshikawa, M. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1804.08473.pdf">Beyond Narrative Description: Generating Poetry from Images by Multi-Adversarial Training</a>. ArXiv, abs/1804.08473.<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rennie, S.J., Marcheret, E., Mroueh, Y., Ross, J., &amp; Goel, V. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1612.00563.pdf">Self-Critical Sequence Training for Image Captioning</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1179-1195.<a href="#fnref:16" rev="footnote"> ↩</a></span></li><li id="fn:17"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">17.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ren, Z., Wang, X., Zhang, N., Lv, X., &amp; Li, L. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1704.03899.pdf">Deep Reinforcement Learning-Based Image Captioning with Embedding Reward</a>. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 1151-1159.<a href="#fnref:17" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Vision-Language/" rel="tag"># Vision & Language</a>
+              <a href="/notes/tags/Image-Captioning/" rel="tag"># Image Captioning</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2020/04/23/NN/An-Introduction-to-Capsules/" rel="prev" title="An Introduction to Capsules">
+      <i class="fa fa-chevron-left"></i> An Introduction to Capsules
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2020/05/12/Shell-Command-Notes/" rel="next" title="Shell Command Notes">
+      Shell Command Notes <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Neural-Image-Captioning-CVPR-2015"><span class="nav-number">1.</span> <span class="nav-text">Neural Image Captioning (CVPR 2015)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Show-Attend-and-Tell-ICML-2015"><span class="nav-number">2.</span> <span class="nav-text">Show, Attend and Tell (ICML 2015)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Encoder"><span class="nav-number">2.1.</span> <span class="nav-text">Encoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Decoder"><span class="nav-number">2.2.</span> <span class="nav-text">Decoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention"><span class="nav-number">2.3.</span> <span class="nav-text">Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stochastic-Hard-Attention"><span class="nav-number">2.3.1.</span> <span class="nav-text">Stochastic Hard Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deterministic-Soft-Attention"><span class="nav-number">2.3.2.</span> <span class="nav-text">Deterministic Soft Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Doubly-Stochastic-Attention"><span class="nav-number">2.3.3.</span> <span class="nav-text">Doubly Stochastic Attention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training"><span class="nav-number">2.4.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Semantic-Attention-CVPR-2016"><span class="nav-number">3.</span> <span class="nav-text">Semantic Attention (CVPR 2016)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Architecture"><span class="nav-number">3.1.</span> <span class="nav-text">Architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-attention-phi"><span class="nav-number">3.2.</span> <span class="nav-text">Input attention $\phi$</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-attention-varphi"><span class="nav-number">3.3.</span> <span class="nav-text">Output attention $\varphi$</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-training"><span class="nav-number">3.4.</span> <span class="nav-text">Model training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SCA-CNN-CVPR-2017"><span class="nav-number">4.</span> <span class="nav-text">SCA-CNN (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spatial-and-Channel-wise-Attention-CNN"><span class="nav-number">4.1.</span> <span class="nav-text">Spatial and Channel-wise Attention CNN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spatial-Attention"><span class="nav-number">4.2.</span> <span class="nav-text">Spatial Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Channel-wise-Attention"><span class="nav-number">4.3.</span> <span class="nav-text">Channel-wise Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Channel-Spatial"><span class="nav-number">4.3.1.</span> <span class="nav-text">Channel-Spatial</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Adaptive-Attention-CVPR-2017"><span class="nav-number">5.</span> <span class="nav-text">Adaptive Attention (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spatial-Attention-1"><span class="nav-number">5.1.</span> <span class="nav-text">Spatial Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Adaptive-Attention"><span class="nav-number">5.2.</span> <span class="nav-text">Adaptive Attention</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Semantic-Compositional-Networks-CVPR-2017"><span class="nav-number">6.</span> <span class="nav-text">Semantic Compositional Networks (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Semantic-Compositional-Network"><span class="nav-number">6.1.</span> <span class="nav-text">Semantic Compositional Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SCN-RNN"><span class="nav-number">6.2.</span> <span class="nav-text">SCN-RNN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SCN-LSTM"><span class="nav-number">6.3.</span> <span class="nav-text">SCN-LSTM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training-1"><span class="nav-number">6.4.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Up-Down-Attention-CVPR-2018"><span class="nav-number">7.</span> <span class="nav-text">Up-Down Attention (CVPR 2018)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bottom-Up-attention"><span class="nav-number">7.1.</span> <span class="nav-text">Bottom-Up attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Decoder-1"><span class="nav-number">7.2.</span> <span class="nav-text">Decoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Attention-LSTM"><span class="nav-number">7.2.1.</span> <span class="nav-text">Attention LSTM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Language-LSTM"><span class="nav-number">7.2.2.</span> <span class="nav-text">Language LSTM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Objective"><span class="nav-number">7.2.3.</span> <span class="nav-text">Objective</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Stylized-Image-Captioning"><span class="nav-number">8.</span> <span class="nav-text">Stylized Image Captioning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#StyleNet-CVPR-2017"><span class="nav-number">8.1.</span> <span class="nav-text">StyleNet (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Factored-LSTM"><span class="nav-number">8.1.1.</span> <span class="nav-text">Factored LSTM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-StyleNet"><span class="nav-number">8.1.2.</span> <span class="nav-text">Training StyleNet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SemStyle-CVPR-2018"><span class="nav-number">8.2.</span> <span class="nav-text">SemStyle (CVPR 2018)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Semantic-term"><span class="nav-number">8.2.1.</span> <span class="nav-text">Semantic term</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Term-generator"><span class="nav-number">8.2.2.</span> <span class="nav-text">Term generator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Language-generator"><span class="nav-number">8.2.3.</span> <span class="nav-text">Language generator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-2"><span class="nav-number">8.2.4.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%80%9CFactual%E2%80%9D-or-%E2%80%9CEmotional%E2%80%9D-ECCV-2018"><span class="nav-number">8.3.</span> <span class="nav-text">“Factual” or “Emotional” (ECCV 2018)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Style-factual-LSTM"><span class="nav-number">8.3.1.</span> <span class="nav-text">Style-factual LSTM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-3"><span class="nav-number">8.3.2.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Adversarial-Training"><span class="nav-number">9.</span> <span class="nav-text">Adversarial Training</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Show-Adapt-and-Tell-ICCV-2017"><span class="nav-number">9.1.</span> <span class="nav-text">Show, Adapt and Tell (ICCV 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Captioner-as-an-Agent"><span class="nav-number">9.1.1.</span> <span class="nav-text">Captioner as an Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Critics"><span class="nav-number">9.1.2.</span> <span class="nav-text">Critics</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Domain-critic"><span class="nav-number">9.1.2.1.</span> <span class="nav-text">Domain critic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-modal-critic"><span class="nav-number">9.1.2.2.</span> <span class="nav-text">Multi-modal critic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Sentence-reward"><span class="nav-number">9.1.2.3.</span> <span class="nav-text">Sentence reward</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-algorithm"><span class="nav-number">9.1.3.</span> <span class="nav-text">Training algorithm</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Poetry-generation-ACM-MM-2018"><span class="nav-number">9.2.</span> <span class="nav-text">Poetry generation (ACM MM 2018)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reinforcement-Learning"><span class="nav-number">10.</span> <span class="nav-text">Reinforcement Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-Critical-Sequence-Training-CVPR-2017"><span class="nav-number">10.1.</span> <span class="nav-text">Self-Critical Sequence Training (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Policy-Gradient"><span class="nav-number">10.1.1.</span> <span class="nav-text">Policy Gradient</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Policy-gradient-with-REINFORCE"><span class="nav-number">10.1.1.1.</span> <span class="nav-text">Policy gradient with REINFORCE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#REINFORCE-with-Baseline"><span class="nav-number">10.1.1.2.</span> <span class="nav-text">REINFORCE with Baseline</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Self-Critical-Sequence-Training-SCST"><span class="nav-number">10.1.2.</span> <span class="nav-text">Self-Critical Sequence Training (SCST)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RL-with-Embedding-Reward-CVPR-2017"><span class="nav-number">10.2.</span> <span class="nav-text">RL with Embedding Reward (CVPR 2017)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Policy-Network"><span class="nav-number">10.2.1.</span> <span class="nav-text">Policy Network</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Value-Network"><span class="nav-number">10.2.2.</span> <span class="nav-text">Value Network</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Visual-Semantic-Embedding-Reward"><span class="nav-number">10.2.3.</span> <span class="nav-text">Visual-Semantic Embedding Reward</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-4"><span class="nav-number">10.2.4.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2020/05/01/NLG/Image-Captioning-A-Summary/";
+    this.page.identifier = "2020/05/01/NLG/Image-Captioning-A-Summary/";
+    this.page.title = "Image Captioning: A Summary!";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>
