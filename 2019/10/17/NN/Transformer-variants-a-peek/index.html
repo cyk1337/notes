@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="This is an introduction of variant Transformers.[1]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transformer Variants: A Peek">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/10/17/NN/Transformer-variants-a-peek/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="This is an introduction of variant Transformers.[1]">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transformer.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transformer_decoding.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/vanilla-transformer-LM.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transformer-vanilla-eval.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transformer-xl-segment-level-recurrence.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transformer-xl-eval.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/R-Transformer.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/R-transformer-my-draw.png">
+<meta property="article:published_time" content="2019-10-17T04:39:00.000Z">
+<meta property="article:modified_time" content="2019-10-17T04:39:00.000Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="NN">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/transformer.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/10/17/NN/Transformer-variants-a-peek/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Transformer Variants: A Peek | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/10/17/NN/Transformer-variants-a-peek/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Transformer Variants: A Peek
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-10-17 12:39:00" itemprop="dateCreated datePublished" datetime="2019-10-17T12:39:00+08:00">2019-10-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/" itemprop="url" rel="index"><span itemprop="name">NN</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/Transformer/" itemprop="url" rel="index"><span itemprop="name">Transformer</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/10/17/NN/Transformer-variants-a-peek/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/10/17/NN/Transformer-variants-a-peek/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>This is an introduction of variant Transformers.<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf). In Advances in neural information processing systems (pp. 5998-6008).
+">[1]</span></a></sup></p>
+<span id="more"></span>
+<div class="note success">
+            <p><strong>Relevant notes</strong>:</p><ol><li><a href="/notes/2019/01/22/NLP/Attention-in-a-nutshell/#Transformer">Transformer detailed explanation</a></li><li><a href="/notes/2019/10/17/NN/Transformer-variants-a-peek/">Transformer variant architectures</a></li><li><a href="/notes/2019/12/14/NLP/BERTology-an-introduction/">BERTology introduction</a></li></ol>
+          </div>
+<h1 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h1><p>The details of transformer is explained in previous blogs. The schema of Transformer is as following fig.</p>
+<ul>
+<li>Architecture<br><img data-src='/notes/images/transformer.png' width='60%'/></li>
+<li>Decoding<br><img data-src='/notes/images/transformer_decoding.gif'/></li>
+</ul>
+<h1 id="Vanilla-Transformer"><a href="#Vanilla-Transformer" class="headerlink" title="Vanilla Transformer"></a>Vanilla Transformer</h1><p>It is impossible to preprocess the entire context sequence in the whole corpus from the beginning, due to the limited resource in practice.</p>
+<p><img data-src='/notes/images/vanilla-transformer-LM.gif' width='100%'/></p>
+<p><strong>Vanilla Transformer</strong> (Al-Rfou et. al 2019)<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Al-Rfou, R., Choe, D., Constant, N., Guo, M., & Jones, L. (2019, July). [Character-level language modeling with deeper self-attention](https://www.aaai.org/ojs/index.php/AAAI/article/download/4182/4060). In Proceedings of the AAAI Conference on Artificial Intelligence (Vol. 33, pp. 3159-3166).
+">[2]</span></a></sup> splits the entire corpus into shorter segments, and train within each segment. This leads to the <strong><span class="label danger">context fragmentation problem</span></strong> by ignoreing all contextual information from previous segments.</p>
+<p>As in above fig., information never flows across segements.</p>
+<ul>
+<li>Evaluation<br><img data-src='/notes/images/transformer-vanilla-eval.gif' width='100%'/><br>During evaluation, for each output step, the segment shifts right by only one position, which hurts the decoding efficiency and speed.</li>
+</ul>
+<h1 id="Relative-Positional-Representation-RPR"><a href="#Relative-Positional-Representation-RPR" class="headerlink" title="Relative Positional Representation(RPR)"></a>Relative Positional Representation(RPR)</h1><ul>
+<li><strong>Relation-aware self-attn</strong><br>Consider the pairwise relationships between input elements, which can be seen as a labeled, directed fully-connected graph. Let <script type="math/tex">a_{ij}^V,a_{ij}^K \in \mathbb{R}^{d_a}</script> represent the edge between input elements <script type="math/tex">x_i</script> and <script type="math/tex">x_j</script>.</li>
+</ul>
+<p>Then add the pairwise information to the sublayer output:</p>
+<script type="math/tex; mode=display">\begin{align}
+e_{ij} &= \frac{x_i W^Q (x_j W^K \color{red}{+a_{ij}^K})^\top}{\sqrt{d_z}} \\
+&= \frac{x_i W^Q (x_jW^K)^\top + \overbrace{\color{green}{\pmb{x_iW^Q(a_{ij}^K)^\top}}}^\text{efficient implementation}}{\sqrt{d_z}} \\
+\alpha_{ij} &= \frac{\exp e_{ij}}{\sum_{k=1}^n \exp e_{ik}} \\
+z_i &= \sum_{j=1}^n \alpha_{ij}(x_jW^V \color{red}{+ a_{ij}^V} )\\
+\end{align}</script><ul>
+<li>Clip RPR<br>$k$ denotes the maximum relative position. The relative position information beyond $k$ will be clipped to the maximum value, which generalizes to the unseen sequence lengths during training.<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Shaw, P., Uszkoreit, J., & Vaswani, A. (2018). [Self-attention with relative position representations](https://arxiv.org/pdf/1803.02155). arXiv preprint arXiv:1803.02155.
+">[5]</span></a></sup> In other words, RPR only considers context in a fixed window size $2k+1$, indicating $k$ elements on the l.h.s, and $k$ elements on the r.h.s, as well as itself.</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align}
+\text{clip}(x,k) &= \max(-k, \min(k,x)) \\
+a_{ij}^K &= w_{\text{clip}(j-i, k)}^K \\
+a_{ij}^V &= w_{\text{clip}(j-i, k)}^V
+\end{align}</script><p>where rpr <script type="math/tex">w^K = (w_{-k}^K, \cdots, w_k^K) \in \mathbb{R}^{d_a}</script> and <script type="math/tex">w^V = (w_{-k}^V, \cdots, w_k^V) \in \mathbb{R}^{d_a}</script> are learnable.</p>
+<p>Trainable param number:</p>
+<ul>
+<li>MADPA: <script type="math/tex">\overbrace{4 \times \big(\text{d_model} \times \text{d_model} + \text{d_model} \big)}^\text{4 dense layers}</script></li>
+<li><p>MADPA with RPR: <script type="math/tex">\underbrace{4 \times \big(\text{d_model} \times \text{d_model} + \text{d_model} \big)}_\text{4 dense layers} + \underbrace{\color{red}{2 \times (\text{seq_len}^2 \times d_k )}}_\text{2 RPR matrices}</script> </p>
+</li>
+<li><p>My PyTorch implementation</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MultiHeadedAttention_RPR</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot; @ author: Yekun CHAI &quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d_model, h, max_relative_position, dropout=<span class="number">.0</span></span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        multi-head attention</span></span><br><span class="line"><span class="string">        :param h: nhead</span></span><br><span class="line"><span class="string">        :param d_model: d_model</span></span><br><span class="line"><span class="string">        :param dropout: float</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>(MultiHeadedAttention_RPR, self).__init__()</span><br><span class="line">        <span class="keyword">assert</span> d_model % h == <span class="number">0</span></span><br><span class="line">        <span class="comment">#  assume d_v always equals d_k</span></span><br><span class="line">        self.d_k = d_model // h</span><br><span class="line">        self.h = h</span><br><span class="line">        self.linears = utils.clones(nn.Linear(d_model, d_model), <span class="number">4</span>)</span><br><span class="line">        self.dropout = nn.Dropout(p=dropout)</span><br><span class="line"></span><br><span class="line">        self.max_relative_position = max_relative_position</span><br><span class="line">        self.vocab_size = max_relative_position * <span class="number">2</span> + <span class="number">1</span></span><br><span class="line">        self.embed_K = nn.Embedding(self.vocab_size, self.d_k)</span><br><span class="line">        self.embed_V = nn.Embedding(self.vocab_size, self.d_k)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, query, key, value, mask=<span class="literal">None</span></span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        ---------------------------</span></span><br><span class="line"><span class="string">        L : target sequence length</span></span><br><span class="line"><span class="string">        S : source sequence length:</span></span><br><span class="line"><span class="string">        N : batch size</span></span><br><span class="line"><span class="string">        E : embedding dim</span></span><br><span class="line"><span class="string">        ---------------------------</span></span><br><span class="line"><span class="string">        :param query: (N,L,E)</span></span><br><span class="line"><span class="string">        :param key: (N,S,E)</span></span><br><span class="line"><span class="string">        :param value: (N,S,E)</span></span><br><span class="line"><span class="string">        :param mask:</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        nbatches = query.size(<span class="number">0</span>)  <span class="comment"># batch size</span></span><br><span class="line">        seq_len = query.size(<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># 1) split embedding dim to h heads : from d_model =&gt; h * d_k</span></span><br><span class="line">        <span class="comment"># dim: (nbatch, h, seq_length, d_model//h)</span></span><br><span class="line">        query, key, value = \</span><br><span class="line">            [l(x).view(nbatches, -<span class="number">1</span>, self.h, self.d_k).transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">             <span class="keyword">for</span> l, x <span class="keyword">in</span> <span class="built_in">zip</span>(self.linears, (query, key, value))]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2) rpr</span></span><br><span class="line">        relation_keys = self.generate_relative_positions_embeddings(seq_len, seq_len, self.embed_K)</span><br><span class="line">        relation_values = self.generate_relative_positions_embeddings(seq_len, seq_len, self.embed_V)</span><br><span class="line">        logits = self._relative_attn_inner(query, key, relation_keys, <span class="literal">True</span>)</span><br><span class="line">        weights = self.dropout(F.softmax(logits, -<span class="number">1</span>))</span><br><span class="line">        x = self._relative_attn_inner(weights, value, relation_values, <span class="literal">False</span>)</span><br><span class="line">        <span class="comment"># 3) &quot;Concat&quot; using a view and apply a final linear.</span></span><br><span class="line">        <span class="comment"># dim: (nbatch, h, d_model)</span></span><br><span class="line">        x = x.transpose(<span class="number">1</span>, <span class="number">2</span>).contiguous().view(nbatches, -<span class="number">1</span>, self.h * self.d_k)</span><br><span class="line">        <span class="keyword">return</span> self.linears[-<span class="number">1</span>](x)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_generate_relative_positions_matrix</span>(<span class="params">self, len_q, len_k</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        genetate rpr matrix</span></span><br><span class="line"><span class="string">        ---------------------------</span></span><br><span class="line"><span class="string">        :param len_q: seq_len</span></span><br><span class="line"><span class="string">        :param len_k: seq_len</span></span><br><span class="line"><span class="string">        :return: rpr matrix, dim: (len_q, len_q)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">assert</span> len_q == len_k</span><br><span class="line">        range_vec_q = range_vec_k = torch.arange(len_q)</span><br><span class="line">        distance_mat = range_vec_k.unsqueeze(<span class="number">0</span>) - range_vec_q.unsqueeze(-<span class="number">1</span>)</span><br><span class="line">        disntance_mat_clipped = torch.clamp(distance_mat, -self.max_relative_position, self.max_relative_position)</span><br><span class="line">        <span class="keyword">return</span> disntance_mat_clipped + self.max_relative_position</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">generate_relative_positions_embeddings</span>(<span class="params">self, len_q, len_k, embedding_table</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        generate relative position embedding</span></span><br><span class="line"><span class="string">        ----------------------</span></span><br><span class="line"><span class="string">        :param len_q:</span></span><br><span class="line"><span class="string">        :param len_k:</span></span><br><span class="line"><span class="string">        :return: rpr embedding, dim: (len_q, len_q, d_k)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        relative_position_matrix = self._generate_relative_positions_matrix(len_q, len_k)</span><br><span class="line">        <span class="keyword">return</span> embedding_table(relative_position_matrix)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_relative_attn_inner</span>(<span class="params">self, x, y, z, transpose</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        efficient implementation</span></span><br><span class="line"><span class="string">        ------------------------</span></span><br><span class="line"><span class="string">        :param x: </span></span><br><span class="line"><span class="string">        :param y: </span></span><br><span class="line"><span class="string">        :param z: </span></span><br><span class="line"><span class="string">        :param transpose: </span></span><br><span class="line"><span class="string">        :return: </span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        nbatches = x.size(<span class="number">0</span>)</span><br><span class="line">        heads = x.size(<span class="number">1</span>)</span><br><span class="line">        seq_len = x.size(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># (N, h, s, s)</span></span><br><span class="line">        xy_matmul = torch.matmul(x, y.transpose(-<span class="number">1</span>, -<span class="number">2</span>) <span class="keyword">if</span> transpose <span class="keyword">else</span> y)</span><br><span class="line">        <span class="comment"># (s, N, h, d) =&gt; (s, N*h, d)</span></span><br><span class="line">        x_t_v = x.permute(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>).contiguous().view(seq_len, nbatches * heads, -<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># (s, N*h, d) @ (s, d, s) =&gt; (s, N*h, s)</span></span><br><span class="line">        x_tz_matmul = torch.matmul(x_t_v, z.transpose(-<span class="number">1</span>, -<span class="number">2</span>) <span class="keyword">if</span> transpose <span class="keyword">else</span> z)</span><br><span class="line">        <span class="comment"># (N, h, s, s)</span></span><br><span class="line">        x_tz_matmul_v_t = x_tz_matmul.view(seq_len, nbatches, heads, -<span class="number">1</span>).permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>)</span><br><span class="line">        <span class="keyword">return</span> xy_matmul + x_tz_matmul_v_t</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Tensorflow implementation: <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Tensor2Tensor tensorflow code](https://github.com/tensorflow/tensor2tensor/blob/9e0a894034d8090892c238df1bd9bd3180c2b9a3/tensor2tensor/layers/common_attention.py#L1556-L1587)
+">[7]</span></a></sup></p>
+</li>
+</ul>
+<h1 id="Transformer-XL"><a href="#Transformer-XL" class="headerlink" title="Transformer-XL"></a>Transformer-XL</h1><p>Transformer-XL<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dai, Z., Yang, Z., Yang, Y., Cohen, W. W., Carbonell, J., Le, Q. V., & Salakhutdinov, R. (2019). [Transformer-xl: Attentive language models beyond a fixed-length context](https://arxiv.org/pdf/1901.02860). arXiv preprint arXiv:1901.02860.
+">[3]</span></a></sup> is capable of learning the long-term dependency between different context fragments in Vanilla Transformers. It mainly employs the segment-level recurrence and relative positional encoding scheme.</p>
+<h2 id="Segment-level-recurrence"><a href="#Segment-level-recurrence" class="headerlink" title="Segment-level recurrence"></a>Segment-level recurrence</h2><p><img data-src='/notes/images/transformer-xl-segment-level-recurrence.gif' width='100%'/><br>During training, transformer-xl adopts both current and the previous segments, levaraging the recurrence mechanism on segement level.</p>
+<p>Let the consecutive segment of length $L$ be <script type="math/tex">\pmb{s}_\tau = [x_{\tau,1}, \cdots, x_{\tau,L}]</script> and <script type="math/tex">\pmb{s}_{\tau+1}=[x_{\tau+1,1}, \cdots, x_{\tau+1,L}]</script>. Denote the $d$-dimensional hidden state of $n$-th layer for the $\tau$-th segment <script type="math/tex">\pmb{s}_\tau</script>, be <script type="math/tex">\pmb{h}_\tau^n \in \mathbb{R}^{L \times d}</script>.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\pmb{q}_{\tau+1}^{n} &= \pmb{h}_{\color{red}{\tau+1}}^{n-1} \pmb{W}_q^\top \\
+\pmb{k}_{\tau+1}^{n} &= [\overbrace{\text{SG}(\pmb{h}_{\color{red}{\tau}}^{n-1})}^\text{stop gradient}; \pmb{h}_{\color{red}{\tau+1}}^{n-1})] \pmb{W}_k^\top & \text{concat hidden states of prev segments} \\
+\pmb{v}_{\tau+1}^{n} &= [\underbrace{\text{SG}(\pmb{h}_{\color{red}{\tau}}^{n-1})}_\text{stop gradient}; \pmb{h}_{\color{red}{\tau+1}}^{n-1})] \pmb{W}_v^\top & \text{concat hidden states of prev segments}\\
+\pmb{h}_{\tau+1}^n &= \text{Transformer}(\pmb{q}_{\tau+1}^n, \pmb{k}_{\tau+1}^n, \pmb{v}_{\tau+1}^{n}) \\
+
+\end{align}</script><p>Thus, the recurrent dependency between <script type="math/tex">\pmb{h}_{\tau+1}^n</script> and <script type="math/tex">\pmb{h}_{\tau}^{n-1}</script> <strong>shifts one layer vertically and one segment horizontally</strong>, unlike the recurrence of same layer in RNNs. As a result, the largest long-range dependency length is linearly w.r.t # of layers times segment length, i.e. $O(N \times L)$.</p>
+<ul>
+<li>Evaluation<br>During evaluation process, the representation from previous segments can be reused, which is much faster compared with vanilla Transformers (as below fig.).<br><img data-src='/notes/images/transformer-xl-eval.gif' width='100%'/></li>
+</ul>
+<h2 id="Positional-Encoding"><a href="#Positional-Encoding" class="headerlink" title="Positional Encoding"></a>Positional Encoding</h2><h3 id="Absolute-Positional-Encoding"><a href="#Absolute-Positional-Encoding" class="headerlink" title="Absolute Positional Encoding"></a>Absolute Positional Encoding</h3><ul>
+<li>Problems: In the segment $\tau$, using the same absolute positional encoding <script type="math/tex">\pmb{U}_{1:L}</script> for all segments cannot distinguish the positional difference between the same place in different segments, i.e. <script type="math/tex">x_{\tau,j}</script> and <script type="math/tex">x_{\tau+1,j}</script> for any $j=1, \cdots, L$.<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf). In Advances in neural information processing systems (pp. 5998-6008).
+">[1]</span></a></sup></li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align}
+\pmb{A}_{i,j}^\text{abs} &= q_i^\top k_j \\ & = \big(W_q(E+\color{red}{U})_{i,\bullet} \big)^\top \big(W_k(E+\color{orange}{U})_{\bullet,j}\big) \\
+&= (E_{i,\bullet}^\top W_q^\top + \color{red}{U_{i,\bullet}^\top W_q^\top} ) (W_k E_{\bullet,j} + \color{orange}{W_k U_{\bullet,j}}) \\
+&= \underbrace{E_{i,\bullet}^\top W_q^\top W_k E_{\bullet,j} }_\text{(a)} + \underbrace{E_{i,\bullet}^\top W_q^\top \color{orange}{W_k U_{\bullet,j}} }_\text{(b)} \\&+ \underbrace{\color{red}{U_{i,\bullet}^\top W_q^\top} W_k E_{\bullet,j}}_\text{(c)} + \underbrace{ \color{red}{U_{i,\bullet}^\top W_q^\top} \color{orange}{W_k U_{\bullet,j}} }_\text{(d)}
+\end{align}</script><p>Here,</p>
+<ul>
+<li>(a) captures <strong>content-based information</strong>, i.e., how much attention the word in row-$i$ pays  to word in col-$j$ despite the position.</li>
+<li>(b) captures <strong>content-dependent positional bias</strong>, representing how much the word in row-$i$ should attend to position $j$. </li>
+<li>(c) defines the <strong>global content biases</strong>, denoting how much the position-$i$ should attend to words in $j$-th position.</li>
+<li>(d) denotes the <strong>global positional bias</strong>, i.e., the soft attention that words in position $i$ should pay to a row in position $j$.</li>
+</ul>
+<h3 id="Relative-positional-encoding"><a href="#Relative-positional-encoding" class="headerlink" title="Relative positional encoding"></a>Relative positional encoding</h3><p><strong>Solution</strong>: use relative positional encoding. Conceptionally, positional encoding (pe) gives the <strong>temporal clue or biases</strong> about how information should be gathered, i.e., where to attend.<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dai, Z., Yang, Z., Yang, Y., Cohen, W. W., Carbonell, J., Le, Q. V., & Salakhutdinov, R. (2019). [Transformer-xl: Attentive language models beyond a fixed-length context](https://arxiv.org/pdf/1901.02860). arXiv preprint arXiv:1901.02860.
+">[3]</span></a></sup> It is sufficient to know the relative distance beween each key vector <script type="math/tex">k_{\tau,j}</script> and itself <script type="math/tex">k_{\tau,i}</script>, i.e. $i-j$.</p>
+<p>Replacement:</p>
+<ol>
+<li>replace all absolute pe’s <script type="math/tex">U_j</script> in (b) and (d) with relative counterpart <script type="math/tex">\color{cyan}{R_{i-j}}</script>, which is a <strong>sinusoid encoding matrix</strong> without learnable weights.</li>
+<li>replace the query <script type="math/tex">\color{red}{U_{i,\bullet}^\top W_q^\top}</script> with a trainable parameter $\color{blue}{u \in \mathbb{R}^d}$ and similarly, $\color{blue}{v \in \mathbb{R}^d}$ in (d). Because the query vector is the same for all query positions, meaning that <strong>the query bias attending to words at various positions should be identical</strong>, no matter the query positions. </li>
+<li>substitude the weight of key vector with two matrices <script type="math/tex">\color{Salmon}{W_{k,E}}</script> and <script type="math/tex">\color{ForestGreen}{W_{k,R}}</script> respectively, to produce the $\color{Salmon}{\text{content-based}}$ and $\color{Green}{\text{location-based}}$ key vectors.<script type="math/tex; mode=display">
+\begin{align}
+A_{i,j}^\text{rel} &= \underbrace{E_{i,\bullet}^\top W_q^\top \color{Salmon}{W_{k,E}}  E_{\bullet,j} }_\text{(a)} + \underbrace{E_{i,\bullet}^\top W_q^\top \color{Green}{W_{k,R} }  \color{cyan}{R_{i-j}} }_\text{(b)} \\&+ \underbrace{\color{blue}{u^\top} \color{Salmon}{W_{k,E}} E_{\bullet,j}}_\text{(c)} + \underbrace{ \color{blue}{v^\top} \color{Green}{W_{k,R}} \color{Cyan}{R_{i-j}} }_\text{(d)}
+\end{align}</script></li>
+</ol>
+<p>Thus, </p>
+<ul>
+<li>(a) denotes <strong>content-based addressing</strong> </li>
+<li>(b) captures <strong>content-dependent positional bias</strong></li>
+<li>(c) denotes the <strong>global bias</strong></li>
+<li>(d) represents the <strong>global positional bias</strong></li>
+</ul>
+<p>The PyTorch implementation:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransformerXL</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d_model, n_head, d_head, mem_len, n_layer, clamp_len, tgt_len,</span></span></span><br><span class="line"><span class="params"><span class="function">                 ext_len, dropatt, d_inner, pre_lnorm, dropout</span>):</span></span><br><span class="line">        self.n_layer = n_layer</span><br><span class="line">        self.mem_len = mem_len</span><br><span class="line">        self.word_emb = _</span><br><span class="line">        self.clamp_len = clamp_len</span><br><span class="line">        self.d_model = d_model</span><br><span class="line">        self.n_head = n_head</span><br><span class="line">        self.d_head = d_head</span><br><span class="line">        self.drop = nn.Dropout(p=dropout)</span><br><span class="line">        self.layers = nn.ModuleList()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n_layer):</span><br><span class="line">            self.layers = self.layers.append(RelPartialLearnableDecLayer(</span><br><span class="line">                n_head, d_model, d_head, d_inner, dropout, tgt_len=tgt_len,</span><br><span class="line">                ext_len=ext_len, mem_len=mem_len, dropatt=dropatt, pre_lnorm=pre_lnorm))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_create_params</span>(<span class="params">self</span>):</span></span><br><span class="line">        self.pos_emb = PositionEmbedding(self.d_model)</span><br><span class="line">        self.r_w_bias = nn.Parameter(torch.Tensor(self.n_head, self.d_head))</span><br><span class="line">        self.r_r_bias = nn.Parameter(torch.Tensor(self.n_head, self.d_head))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">init_mems</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">if</span> self.mem_len &gt; <span class="number">0</span>:</span><br><span class="line">            mems = []</span><br><span class="line">            param = <span class="built_in">next</span>(self.parameters())</span><br><span class="line">            <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(self.n_layer + <span class="number">1</span>):</span><br><span class="line">                empty = torch.empty(<span class="number">0</span>, dtype=param.dtype, device=param.device)</span><br><span class="line">                mems.append(empty)</span><br><span class="line">            <span class="keyword">return</span> mems</span><br><span class="line">        <span class="keyword">else</span>:  <span class="comment"># do not use mems</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_update_mems</span>(<span class="params">self, hids, mems, qlen, mlen</span>):</span></span><br><span class="line">        <span class="keyword">if</span> mems <span class="keyword">is</span> <span class="literal">None</span>: <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">assert</span> <span class="built_in">len</span>(hids) == <span class="built_in">len</span>(mems), <span class="string">&#x27;len(hids) != len(mems)!&#x27;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            new_mems = []</span><br><span class="line">            end_idx = mlen + qlen</span><br><span class="line">            beggin_idx = <span class="built_in">max</span>(<span class="number">0</span>, end_idx - self.mem_len)</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(hids)):</span><br><span class="line">                cat = torch.cat((mems[i], hids[i]), dim=<span class="number">0</span>)</span><br><span class="line">                new_mems.append(cat[beggin_idx:end_idx].detach())</span><br><span class="line">        <span class="keyword">return</span> new_mems</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_forward</span>(<span class="params">self, inp, mems=<span class="literal">None</span></span>):</span></span><br><span class="line">        qlen, bsz = inp.szie()</span><br><span class="line">        word_emb = self.word_emb(inp)</span><br><span class="line"></span><br><span class="line">        mlen = mems[<span class="number">0</span>].size(<span class="number">0</span>) <span class="keyword">if</span> mems <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">        klen = mlen + qlen</span><br><span class="line"></span><br><span class="line">        dec_attn_mask = torch.triu(word_emb.new_ones(qlen, klen), diagnal=<span class="number">1</span> + mlen).byte()[:, :, <span class="literal">None</span>]</span><br><span class="line"></span><br><span class="line">        hiddens = []</span><br><span class="line">        pos_seq = torch.arange(klen - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1.0</span>, device=word_emb.device, dtype=word_emb.dtype)</span><br><span class="line">        <span class="keyword">if</span> self.clamp_len &gt; <span class="number">0</span>:</span><br><span class="line">            pos_seq.clamp_(<span class="built_in">max</span>=self.clamp_len)</span><br><span class="line">        pos_emb = self.pos_emb(pos_seq)</span><br><span class="line"></span><br><span class="line">        core_out = self.drop(word_emb)</span><br><span class="line">        pos_emb = self.drop(pos_emb)</span><br><span class="line"></span><br><span class="line">        hiddens.append(core_out)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i, layer <span class="keyword">in</span> <span class="built_in">enumerate</span>(self.layers):</span><br><span class="line">            mems_i = <span class="literal">None</span> <span class="keyword">if</span> mems <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> mems[i]</span><br><span class="line">            core_out = layer(core_out, pos_emb, self.r_w_bias, self.r_r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i)</span><br><span class="line">            hiddens.append(core_out)</span><br><span class="line"></span><br><span class="line">        core_out = self.drop(core_out)</span><br><span class="line"></span><br><span class="line">        new_mems = self._update_mems(hiddens, mems, mlen, qlen)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> core_out, new_mems</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x, y, *mems</span>):</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> mems: mems = self.init_mems()</span><br><span class="line"></span><br><span class="line">        tgt_len = y.size(<span class="number">0</span>)</span><br><span class="line">        hidden, new_mems = self._forward(x, mems=mems)</span><br><span class="line">        pred_hid = hidden[-tgt_len:]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RelPartialLearnableDecLayer</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d_model, n_head, d_head, d_inner, dropout, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(RelPartialLearnableDecLayer, self).__init__()</span><br><span class="line">        self.dec_attn = RelPartialLearnableMHDPA(n_head, d_model, d_head, dropout, **kwargs)</span><br><span class="line">        self.ffn = PositionwiseFF(d_model, d_inner, dropout, pre_lnorm=kwargs.get(<span class="string">&#x27;pre_lnorm&#x27;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, inp, r, r_w_bias, r_r_bias, dec_attn_mask=<span class="literal">None</span>, mems=<span class="literal">None</span></span>):</span></span><br><span class="line">        out = self.dec_attn(inp, r, r_w_bias, r_r_bias, dec_attn_mask, mems)</span><br><span class="line">        out = self.ffn(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RelPartialLearnableMHDPA</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, n_head, d_model, d_head, dropout, tgt_len=<span class="literal">None</span>, mem_len=<span class="literal">None</span>, pre_lnorm=<span class="literal">False</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(RelPartialLearnableMHDPA, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.n_head = n_head</span><br><span class="line">        self.d_model = d_model</span><br><span class="line">        self.d_head = d_head</span><br><span class="line">        self.dropout = dropout</span><br><span class="line"></span><br><span class="line">        self.qkv_net = nn.Linear(d_model, <span class="number">3</span> * n_head * d_head, bias=<span class="literal">False</span>)</span><br><span class="line">        self.drop = nn.Dropout(p=dropout)</span><br><span class="line">        self.dropatt = nn.Dropout(p=dropout)</span><br><span class="line">        self.o_net = nn.Linear(n_head * d_head, d_model, bias=<span class="literal">False</span>)</span><br><span class="line">        self.layer_norm = nn.LayerNorm(d_model)</span><br><span class="line"></span><br><span class="line">        self.scale = <span class="number">1</span> / (d_head ** <span class="number">.5</span>)</span><br><span class="line">        self.pre_ln = pre_lnorm</span><br><span class="line">        <span class="comment"># xl</span></span><br><span class="line">        self.r_net = nn.Linear(self.d_model, self.n_head * self.d_head, bias=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_rel_shift</span>(<span class="params">self, x, zero_triu=<span class="literal">False</span></span>):</span></span><br><span class="line">        bsz, klen, n_head, d_head = x.size()</span><br><span class="line">        zero_pad = torch.zeros((bsz, <span class="number">1</span>, n_head, d_head), device=x.device, dtype=x.dtype)</span><br><span class="line">        x_padded = torch.cat((zero_pad, x), <span class="number">1</span>)  <span class="comment"># bsz, klen+1, n_head, d_head</span></span><br><span class="line">        x_padded = x_padded.view(klen + <span class="number">1</span>, bsz, n_head, d_head)</span><br><span class="line">        x = x_padded[<span class="number">1</span>:].view_as(x)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> zero_triu:</span><br><span class="line">            ones = torch.ones((x.size(<span class="number">0</span>), x.size(<span class="number">1</span>)))</span><br><span class="line">            x = x * torch.tril(ones, x.size(<span class="number">1</span>) - x.size(<span class="number">0</span>))[:, :, <span class="literal">None</span>, <span class="literal">None</span>]</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, w, r, r_w_bias, r_r_bias, attn_mask=<span class="literal">None</span>, mems=<span class="literal">None</span></span>):</span></span><br><span class="line">        qlen, rlen, bsz = w.size(<span class="number">0</span>), r.size(<span class="number">0</span>), w.size(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> mems <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            cat = torch.cat((mems, w), <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">if</span> self.pre_ln:</span><br><span class="line">                w_heads = self.qkv_net(self.layer_norm(cat))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                w_heads = self.qkv_net(cat)</span><br><span class="line"></span><br><span class="line">            r_head_k = self.r_net(r)</span><br><span class="line">            w_head_q, w_head_k, w_head_v = torch.chunk(w_heads, <span class="number">3</span>, dim=-<span class="number">1</span>)</span><br><span class="line">            w_head_q = w_head_q[-qlen:]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> self.pre_ln:</span><br><span class="line">                w_heads = self.qkv_net(self.layer_norm(w))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                w_heads = self.qkv_net(w)</span><br><span class="line">            r_head_k = self.r_net(r)</span><br><span class="line">            w_head_q, w_head_k, w_head_v = torch.chunk(w_heads, <span class="number">3</span>, dim=-<span class="number">1</span>)</span><br><span class="line">        klen = w_head_k.size(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        w_head_q = w_head_q.view(qlen, bsz, self.n_head, self.d_head)  <span class="comment"># qlen, bsz, n_head, d_head</span></span><br><span class="line">        w_head_k = w_head_k.view(klen, bsz, self.n_head, self.d_head)  <span class="comment"># memlen + qlen, bsz, n_head, d_head</span></span><br><span class="line">        w_head_v = w_head_v.view(klen, bsz, self.n_head, self.d_head)  <span class="comment"># memlen + qlen, bsz, n_head, d_head</span></span><br><span class="line"></span><br><span class="line">        r_head_k = r_head_k.view(rlen, self.n_head, self.d_head)  <span class="comment"># qlen x n_head x d_head</span></span><br><span class="line"></span><br><span class="line">        rw_head_q = w_head_q + r_w_bias</span><br><span class="line">        AC = torch.einsum(<span class="string">&#x27;ibnd, jbnd-&gt;ijbn&#x27;</span>, (rw_head_q, w_head_q))</span><br><span class="line"></span><br><span class="line">        rr_head_q = w_head_q + r_r_bias</span><br><span class="line">        BD = torch.einsum(<span class="string">&#x27;ibnd,jnd-&gt;ijbn&#x27;</span>, (rr_head_q, r_head_k))</span><br><span class="line">        BD = self._rel_shift(BD)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># qlen, klen, bsz, n_head</span></span><br><span class="line">        attn_score = AC + BD</span><br><span class="line">        attn_score.mul_(self.scale)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> attn_mask <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> attn_mask.<span class="built_in">any</span>().item():</span><br><span class="line">            <span class="keyword">if</span> attn_mask.dim() == <span class="number">2</span>:</span><br><span class="line">                attn_score = attn_mask.<span class="built_in">float</span>().masked_fill(attn_mask[<span class="literal">None</span>, :, :, <span class="literal">None</span>], -<span class="built_in">float</span>(<span class="string">&#x27;inf&#x27;</span>)).type_as(</span><br><span class="line">                    attn_score)</span><br><span class="line">            <span class="keyword">elif</span> attn_mask.dim() == <span class="number">3</span>:</span><br><span class="line">                attn_score = attn_mask.<span class="built_in">float</span>().masked_fill(attn_mask[:, :, :, <span class="literal">None</span>], -<span class="built_in">float</span>(<span class="string">&#x27;inf&#x27;</span>)).type_as(attn_score)</span><br><span class="line"></span><br><span class="line">        attn_p = F.softmax(attn_score, -<span class="number">1</span>)</span><br><span class="line">        attn_p = self.dropatt(attn_p)</span><br><span class="line"></span><br><span class="line">        attn_vec = torch.einsum(<span class="string">&#x27;ijbn,jbnd-&gt;ibnd&#x27;</span>, (attn_p, w_head_v))</span><br><span class="line"></span><br><span class="line">        attn_vec = attn_vec.contiguous().view(attn_vec.size(<span class="number">0</span>), attn_vec.size(<span class="number">1</span>), self.n_head * self.d_head)</span><br><span class="line"></span><br><span class="line">        attn_out = self.o_net(attn_vec)</span><br><span class="line">        attn_out = self.drop(attn_out)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.pre_ln:</span><br><span class="line">            out = w + attn_out</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            out = self.layer_norm(w + attn_out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PositionwiseFF</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d_model, d_inner, dropout, pre_ln=<span class="literal">False</span></span>):</span></span><br><span class="line">        self.d_model = d_model</span><br><span class="line">        self.d_inner = d_inner</span><br><span class="line">        self.dropout = dropout</span><br><span class="line"></span><br><span class="line">        self.coreNet = nn.Sequential(</span><br><span class="line">            nn.Linear(d_model, d_inner), nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.Dropout(dropout),</span><br><span class="line">            nn.Linear(d_inner, d_model),</span><br><span class="line">            nn.Dropout(dropout),</span><br><span class="line">        )</span><br><span class="line">        self.layer_norm = nn.LayerNorm(d_model)</span><br><span class="line">        self.pre_ln = pre_ln</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, inp</span>):</span></span><br><span class="line">        core_out = self.coreNet(inp)</span><br><span class="line">        <span class="keyword">if</span> self.pre_ln:</span><br><span class="line">            out = core_out + inp</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            out = self.layer_norm(inp + core_out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PositionEmbedding</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot; R_&#123;i-j&#125; in Att_rel in xl &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d_emb</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(PositionEmbedding, self).__init__()</span><br><span class="line">        self.d_emb = d_emb</span><br><span class="line">        inv_freq = <span class="number">1</span> / (<span class="number">10000</span> ** (torch.arange(<span class="number">.0</span>, d_emb, <span class="number">2.0</span>) / d_emb))</span><br><span class="line">        self.register_buffer(<span class="string">&#x27;inv_freq&#x27;</span>, inv_freq)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, pos_seq, bsz=<span class="literal">None</span></span>):</span></span><br><span class="line">        sinuisoid_inp = torch.ger(pos_seq, self.inv_freq)  <span class="comment"># outer product</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> bsz <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">return</span> pos_seq[:, <span class="literal">None</span>, :].expand(-<span class="number">1</span>, bsz, -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> pos_seq[:, <span class="literal">None</span>, :]</span><br></pre></td></tr></table></figure>
+<h4 id="Comparison-with-Shaw-et-al-2018"><a href="#Comparison-with-Shaw-et-al-2018" class="headerlink" title="Comparison with Shaw et. al(2018)"></a>Comparison with Shaw et. al(2018)</h4><p>Relative positional representation (RPR) (Shaw et. al, 2018) merely leveraged relative postional embedding, throwing away the sinusoid hard encodings. The RPR term <script type="math/tex">\color{red}{a_{ij}^K}</script> introduces the trainable parameters. See my attention blog <sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Attention in a nutshell!](/notes/2019/01/22/NLP/Attention-in-a-nutshell)
+">[6]</span></a></sup> for more details.</p>
+<ul>
+<li>The terms in the numerator correspond to terms (a) and (b) in relative PE in Transformer-XL. It is obvious that RPR shows a lack of the (c) and (d) terms.</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align}
+e_{ij} &= \frac{x_i W^Q (x_j W^K \color{red}{+a_{ij}^K})^T}{\sqrt{d_z}} \\
+&= \frac{ \overbrace{x_i W^Q (x_jW^K)^T}^\text{(a)} + \overbrace{\color{green}{\pmb{x_iW^Q(a_{ij}^Q)^T}}}^\text{(b)}}{\sqrt{d_z}} \\
+\alpha_{ij} &= \frac{\exp e_{ij}}{\sum_{k=1}^n \exp e_{ik}} \\
+z_i &= \sum_{j=1}^n \alpha_{ij}(x_jW^V \color{red}{+ a_{ij}^V} )\\
+\end{align}</script><h1 id="R-Transformer"><a href="#R-Transformer" class="headerlink" title="R-Transformer"></a>R-Transformer</h1><ul>
+<li>Argument: multi-head attention only learn the global dependencies, but it <span class="label danger">ignores the inherent local structures</span>.<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Z., Ma, Y., Liu, Z., & Tang, J. (2019). [R-Transformer: Recurrent Neural Network Enhanced Transformer](https://arxiv.org/pdf/1907.05572). arXiv preprint arXiv:1907.05572.
+">[4]</span></a></sup></li>
+</ul>
+<h2 id="LocalRNN"><a href="#LocalRNN" class="headerlink" title="LocalRNN"></a>LocalRNN</h2><p><strong>R-Transformer</strong><sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Z., Ma, Y., Liu, Z., & Tang, J. (2019). [R-Transformer: Recurrent Neural Network Enhanced Transformer](https://arxiv.org/pdf/1907.05572). arXiv preprint arXiv:1907.05572.
+">[4]</span></a></sup> employs <em>LocalRNN</em> to model local structures, only focusing on local short-term dependencies with a local short sequence of length $M$: <script type="math/tex">x_{t-M-1}, x_{t-M-2}, \cdots, x_t</script>. The last hidden state <script type="math/tex">h_t</script> is the representation of the local short sequences of a fixed length $M$.</p>
+<ul>
+<li>LocalRNNs pad $(M-1)$ positions before the start of a sequence.</li>
+<li>R-Transformers <strong>do not use any position embeddings</strong>.</li>
+<li>Here, the LocalRNN resembles the 1D ConvNets but the op for each window is not convolution. However, the conv op completely ignores the sequential information of positions within the local window.</li>
+</ul>
+<p><img data-src="/notes/images/R-Transformer.png" alt="upload successful"></p>
+<center>Image source:<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Z., Ma, Y., Liu, Z., & Tang, J. (2019). [R-Transformer: Recurrent Neural Network Enhanced Transformer](https://arxiv.org/pdf/1907.05572). arXiv preprint arXiv:1907.05572.
+">[4]</span></a></sup></center>
+
+<p>Given sequence of length $m$: <script type="math/tex">x_1, x_2, x_3, \cdots, x_m</script> and window size $k=4$, localRNN encodes segmented short sub-sequence as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&\text{the 1-st LocalRNN:} & \quad \text{<pad>}, \text{<pad>}, \text{<pad>}, x_1 \\
+&\text{the 2-nd LocalRNN:} & \quad \text{<pad>}, \text{<pad>}, x_1, x_2  \\
+&\text{the 3-rd LocalRNN:} & \quad  \text{<pad>}, x_1, x_2, x_3 \\
+&\text{the 4-th LocalRNN:} & \quad x_1, x_2, x_3, x_4  \\
+&\text{the 5-th LocalRNN:} & \quad x_2, x_3, x_4, x_5 \\
+&\text{the 6-th LocalRNN:} & \quad x_3, x_4, x_5, x_6  \\
+& \cdots & \cdots\\
+&\text{the m-th LocalRNN:} & \quad \underbrace{x_{m-3}, x_{m-2}, x_{m-1}, x_m}_\text{window size k=4}
+\end{align}</script><p><img data-src="/notes/images/R-transformer-my-draw.png" alt="upload successful"></p>
+<p>When doing implementation,</p>
+<ol>
+<li>first pad the sequence with embeddings of all 0s on the left hand side (kernel size-1) positions;</li>
+<li>then segment the subsequence of window size $k$, with one position shift right per time step. (See above digram.)</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalRNN</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot; R transformer&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, input_size, output_size, window_size, rnn_type=<span class="string">&#x27;GRU&#x27;</span>, MAX_LENGTH=<span class="number">10000</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(LocalRNN, self).__init__()</span><br><span class="line">        self.window_size = window_size</span><br><span class="line">        <span class="keyword">if</span> rnn_type == <span class="string">&#x27;GRU&#x27;</span>:</span><br><span class="line">            <span class="comment"># set `batch_first`=True so that the input and output dim are both (nBatch, seq_len, d_model)</span></span><br><span class="line">            self.rnn = nn.GRU(output_size, output_size, batch_first=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">elif</span> rnn_type == <span class="string">&#x27;LSTM&#x27;</span>:</span><br><span class="line">            self.rnn = nn.LSTM(output_size, output_size, batch_first=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.rnn = nn.RNN(output_size, output_size, batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># generate segments according to window_size.</span></span><br><span class="line">        <span class="comment"># -&gt; e.g. window size = 4, generate [1,2,3,4,</span></span><br><span class="line">        <span class="comment">#                                      2,3,4,5,</span></span><br><span class="line">        <span class="comment">#                                        3,4,5,6,</span></span><br><span class="line">        <span class="comment">#                                          4,5,6,7,</span></span><br><span class="line">        <span class="comment">#                                              ...</span></span><br><span class="line">        <span class="comment">#                                                  MAX_LEN - 1 -k ,... , MAX_LEN-2, MAX_LEN-1]</span></span><br><span class="line">        idx = [i <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(window_size - <span class="number">1</span>, MAX_LENGTH) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(j - (window_size - <span class="number">1</span>), j + <span class="number">1</span>)]</span><br><span class="line">        self.idx = torch.LongTensor(idx)</span><br><span class="line">        <span class="comment"># padding (k-1) before the beginning of the sequence</span></span><br><span class="line">        self.zeros_pad = torch.zeros((window_size - <span class="number">1</span>, input_size))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot; regard window size dim as batch dim&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">assert</span> x.dim() == <span class="number">3</span>, <span class="string">&#x27;3 dimensions of input expected!&#x27;</span></span><br><span class="line">        nbatches, seq_len, d_model = x.size()</span><br><span class="line"></span><br><span class="line">        x = self._gather_seg_sequence(x)</span><br><span class="line">        output, _ = self.rnn(x)</span><br><span class="line">        h_last_per_batch = output[:, -<span class="number">1</span>, :]</span><br><span class="line">        <span class="keyword">return</span> h_last_per_batch.view(nbatches, seq_len, d_model)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_gather_seg_sequence</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        nbatch, seq_len, d_model = x.size()</span><br><span class="line">        <span class="comment"># use `repeat` to pad one batch -&gt; (nbatch, k01, input_size)</span></span><br><span class="line">        zeros = self.zeros_pad.repeat(bsz, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># concat padded zeros and the sequence along the sequence dim</span></span><br><span class="line">        x = torch.cat((zeros, x), dim=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># gather the corresponding embeddings along the sequence dim (1)</span></span><br><span class="line">        idx = self.idx[:self.window_size * seq_len]  <span class="comment">#</span></span><br><span class="line">        x_ = torch.index_select(<span class="built_in">input</span>=x, dim=<span class="number">1</span>, index=idx)</span><br><span class="line">        <span class="comment"># reshape -&gt; (bsz * seq_len, window_size, d_model)</span></span><br><span class="line">        x_ = x_.reshape(nbatch * seq_len, self.window_size, -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> x_</span><br><span class="line">        </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SublayerConnection</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    a residual connection followed by a layer norm</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, size, dropout</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(SublayerConnection, self).__init__()</span><br><span class="line">        self.norm = LayerNorm(size)</span><br><span class="line">        self.dropout = nn.Dropout(dropout)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x, sublayer</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot; Apply residual connection to any sublayer with the same size&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> x + self.dropout(sublayer(self.norm(x)))</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalRNNLayer</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, size, dropout=<span class="number">.0</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(LocalRNNLayer, self).__init__()</span><br><span class="line">        self.local_rnn = LocalRNN(size, size, window_size=<span class="number">5</span>)</span><br><span class="line">        self.sublayer = SublayerConnection(size, dropout)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">return</span> self.sublayer(x, self.local_rnn)</span><br></pre></td></tr></table></figure>
+<p>For $i$-th layer, (<script type="math/tex">i \in {1,2,\cdots,N}</script>)</p>
+<script type="math/tex; mode=display">\begin{align}
+h_1^i, h_2^i, \cdots, h_T^i &= \text{LocalRNN}(x_1^i, x_2^i, \cdots, x_T^i) \\
+\hat{h}_1^i, \hat{h}_2^i, \cdots, \hat{h}_T^i &= \text{LayerNorm}(h_1^i + x_1^i, h_2^i+x_2^i, \cdots, h_T^i+x_T^i) \\
+o_1^i,o_2^i,\cdots,o_T^{i} &= \text{Transformer-Layer}(\hat{h}_1^i, \hat{h}_2^i, \cdots, \hat{h}_T^i)
+\end{align}</script><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... &amp; Polosukhin, I. (2017). <a target="_blank" rel="noopener" href="https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf">Attention is all you need</a>. In Advances in neural information processing systems (pp. 5998-6008).<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Al-Rfou, R., Choe, D., Constant, N., Guo, M., &amp; Jones, L. (2019, July). <a target="_blank" rel="noopener" href="https://www.aaai.org/ojs/index.php/AAAI/article/download/4182/4060">Character-level language modeling with deeper self-attention</a>. In Proceedings of the AAAI Conference on Artificial Intelligence (Vol. 33, pp. 3159-3166).<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Dai, Z., Yang, Z., Yang, Y., Cohen, W. W., Carbonell, J., Le, Q. V., &amp; Salakhutdinov, R. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1901.02860">Transformer-xl: Attentive language models beyond a fixed-length context</a>. arXiv preprint arXiv:1901.02860.<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, Z., Ma, Y., Liu, Z., &amp; Tang, J. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1907.05572">R-Transformer: Recurrent Neural Network Enhanced Transformer</a>. arXiv preprint arXiv:1907.05572.<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Shaw, P., Uszkoreit, J., &amp; Vaswani, A. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1803.02155">Self-attention with relative position representations</a>. arXiv preprint arXiv:1803.02155.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a href="/notes/2019/01/22/NLP/Attention-in-a-nutshell">Attention in a nutshell!</a><a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://github.com/tensorflow/tensor2tensor/blob/9e0a894034d8090892c238df1bd9bd3180c2b9a3/tensor2tensor/layers/common_attention.py#L1556-L1587">Tensor2Tensor tensorflow code</a><a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://www.peterbloem.nl/blog/transformers">TRANSFORMERS FROM SCRATCH</a><a href="#fnref:8" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NN/" rel="tag"># NN</a>
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/10/12/NN/FLOPs-Computation/" rel="prev" title="FLOPs Computation">
+      <i class="fa fa-chevron-left"></i> FLOPs Computation
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/10/22/NN/Relational-Reasoning-Networks/" rel="next" title="Relational Reasoning Networks">
+      Relational Reasoning Networks <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transformer"><span class="nav-number">1.</span> <span class="nav-text">Transformer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Vanilla-Transformer"><span class="nav-number">2.</span> <span class="nav-text">Vanilla Transformer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Relative-Positional-Representation-RPR"><span class="nav-number">3.</span> <span class="nav-text">Relative Positional Representation(RPR)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Transformer-XL"><span class="nav-number">4.</span> <span class="nav-text">Transformer-XL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Segment-level-recurrence"><span class="nav-number">4.1.</span> <span class="nav-text">Segment-level recurrence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Positional-Encoding"><span class="nav-number">4.2.</span> <span class="nav-text">Positional Encoding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Absolute-Positional-Encoding"><span class="nav-number">4.2.1.</span> <span class="nav-text">Absolute Positional Encoding</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Relative-positional-encoding"><span class="nav-number">4.2.2.</span> <span class="nav-text">Relative positional encoding</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Comparison-with-Shaw-et-al-2018"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Comparison with Shaw et. al(2018)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#R-Transformer"><span class="nav-number">5.</span> <span class="nav-text">R-Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LocalRNN"><span class="nav-number">5.1.</span> <span class="nav-text">LocalRNN</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/10/17/NN/Transformer-variants-a-peek/";
+    this.page.identifier = "2019/10/17/NN/Transformer-variants-a-peek/";
+    this.page.title = "Transformer Variants: A Peek";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

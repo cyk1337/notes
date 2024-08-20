@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A summary of large language models (LLMs) on a large scale (beyond 10B).">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scaling Up Large Language Models: A Summary">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2021/10/09/PTMs/Scaling-Up-LLMs/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="A summary of large language models (LLMs) on a large scale (beyond 10B).">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-10-09T05:37:00.000Z">
+<meta property="article:modified_time" content="2024-08-01T10:23:58.664Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2021/10/09/PTMs/Scaling-Up-LLMs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Scaling Up Large Language Models: A Summary | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2021/10/09/PTMs/Scaling-Up-LLMs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scaling Up Large Language Models: A Summary
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-10-09 13:37:00" itemprop="dateCreated datePublished" datetime="2021-10-09T13:37:00+08:00">2021-10-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/LLM/" itemprop="url" rel="index"><span itemprop="name">LLM</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/LLM/Scaling/" itemprop="url" rel="index"><span itemprop="name">Scaling</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2021/10/09/PTMs/Scaling-Up-LLMs/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/10/09/PTMs/Scaling-Up-LLMs/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A summary of large language models (LLMs) on a large scale (beyond 10B).<br><span id="more"></span></p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>As shown in following table, I summarize the most popular LLMs at a large scale. It is clear that the size of LLMs has become larger and larger in recent years, ranging from 2.6 billion to even 175 billion parameters. Although the training methods are different among these models, they all use Transformers as the standard backbone in LLMs due to the nature of efficient parallel computing and training. Since training large-scale models needs massive unsupervised data corpus, research on scaling up PTMs focuses on high-resource languages such as English and Chinese.</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Model</th>
+<th style="text-align:center">#Params</th>
+<th style="text-align:center">#Training Tokens</th>
+<th style="text-align:center">Masked LM</th>
+<th style="text-align:center">Causal LM</th>
+<th style="text-align:center">Prefix LM</th>
+<th style="text-align:center">Seq2Seq LM</th>
+<th style="text-align:center">Pre-Training Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">T5</td>
+<td style="text-align:center">11B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">C4 Corpus (~750GB)</td>
+</tr>
+<tr>
+<td style="text-align:center">mT5</td>
+<td style="text-align:center">13B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">mC4 Corpus (6.3T tokens)</td>
+</tr>
+<tr>
+<td style="text-align:center">Switch Transformers</td>
+<td style="text-align:center"><strong>1751B</strong></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">C4 Corpus (~750GB)</td>
+</tr>
+<tr>
+<td style="text-align:center">CPM-2</td>
+<td style="text-align:center">11B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">WuDao Corpus (2.3TB Chinese + 300GB English)</td>
+</tr>
+<tr>
+<td style="text-align:center">CPM-2-MoE</td>
+<td style="text-align:center">198B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">WuDao Corpus (2.3TB Chinese + 300GB English)</td>
+</tr>
+<tr>
+<td style="text-align:center">Turing-NLG</td>
+<td style="text-align:center">17B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">English data</td>
+</tr>
+<tr>
+<td style="text-align:center">GPT-3</td>
+<td style="text-align:center">175B</td>
+<td style="text-align:center">300B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">cleaned CommonCrawl, WebText</td>
+</tr>
+<tr>
+<td style="text-align:center">CPM</td>
+<td style="text-align:center">2.6B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Chinese corpus (100GB)</td>
+</tr>
+<tr>
+<td style="text-align:center">HyperCLOVA</td>
+<td style="text-align:center">204B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Korean data</td>
+</tr>
+<tr>
+<td style="text-align:center">PanGu-$\alpha$</td>
+<td style="text-align:center">200B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Chinese data (1.1TB, 250B tokens)</td>
+</tr>
+<tr>
+<td style="text-align:center">DeBERTa1.5B</td>
+<td style="text-align:center">1.5B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">English corpus</td>
+</tr>
+<tr>
+<td style="text-align:center">ERNIE 3.0</td>
+<td style="text-align:center">10B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Chinese data (4TB); English</td>
+</tr>
+<tr>
+<td style="text-align:center">Yuan 1.0</td>
+<td style="text-align:center">245B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Chinese data (5TB)</td>
+</tr>
+<tr>
+<td style="text-align:center">Megatron-Turing NLG</td>
+<td style="text-align:center">530B</td>
+<td style="text-align:center">270B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">The Pile, CommonCrawl, RealNews, CC-Stories</td>
+</tr>
+<tr>
+<td style="text-align:center">OPT</td>
+<td style="text-align:center">175B</td>
+<td style="text-align:center">300B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">BookCorpus, Stories, CCNews (RoBERTa) The Pile PuhsShift.io Reddit.</td>
+</tr>
+<tr>
+<td style="text-align:center">Gopher</td>
+<td style="text-align:center">280B</td>
+<td style="text-align:center">300B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">MassiveText（10.5TB data) including webpages, books, news article, code.</td>
+</tr>
+<tr>
+<td style="text-align:center">Jurassic-1</td>
+<td style="text-align:center">178B</td>
+<td style="text-align:center">300B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">GPT-3 data</td>
+</tr>
+<tr>
+<td style="text-align:center">Chinchilla</td>
+<td style="text-align:center">70B</td>
+<td style="text-align:center">1.4T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Same as Gopher.</td>
+</tr>
+<tr>
+<td style="text-align:center">Sparrow</td>
+<td style="text-align:center">70B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:center">LaMDA</td>
+<td style="text-align:center">137B</td>
+<td style="text-align:center">168B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">2.97B documents, 1.12B dialogs, and 13.39B dialog utterances, for a total of 1.56T words</td>
+</tr>
+<tr>
+<td style="text-align:center">PaLM</td>
+<td style="text-align:center">540B</td>
+<td style="text-align:center">780B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">780B token, dataset from LamDA, GLaM, and code</td>
+</tr>
+<tr>
+<td style="text-align:center">BLOOM</td>
+<td style="text-align:center">176B</td>
+<td style="text-align:center">366B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">ROOTS dataset of 498 huggingface datasets. 46 natural languages，13 programming languages.</td>
+</tr>
+<tr>
+<td style="text-align:center">GLM-130B</td>
+<td style="text-align:center">130B</td>
+<td style="text-align:center">400B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">English: 1.2T the Pile Chinese: 1T Chinese WuDao corpora; 250GB crawled from online forum, encyclopedia, QA.</td>
+</tr>
+<tr>
+<td style="text-align:center">ChatGLM-6B</td>
+<td style="text-align:center">6B</td>
+<td style="text-align:center">1T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Chinese-English bilingual data.</td>
+</tr>
+<tr>
+<td style="text-align:center">LLaMA</td>
+<td style="text-align:center">65B</td>
+<td style="text-align:center">1.4T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">1.4T token. CommonCrawl, C4, GitHub, Wikipedia, Books, ArXiv, StackExchange.</td>
+</tr>
+<tr>
+<td style="text-align:center">Alpaca</td>
+<td style="text-align:center">7B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">52K instruction-following data</td>
+</tr>
+<tr>
+<td style="text-align:center">Vicuna</td>
+<td style="text-align:center">1.3B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">finetune 70K ChatGPT data</td>
+</tr>
+<tr>
+<td style="text-align:center">ChatRWKV (100% RNN)</td>
+<td style="text-align:center">14B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:center">Galactica</td>
+<td style="text-align:center">120B</td>
+<td style="text-align:center">450B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">106 billion tokens from papers, reference material, encyclopedias and other scientific sources</td>
+</tr>
+<tr>
+<td style="text-align:center">Codex</td>
+<td style="text-align:center">12B</td>
+<td style="text-align:center">100B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">159GB Python code.</td>
+</tr>
+<tr>
+<td style="text-align:center">AlphaCode</td>
+<td style="text-align:center">41B/9B</td>
+<td style="text-align:center">967B/ 1250B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">715GB code from GitHub.</td>
+</tr>
+<tr>
+<td style="text-align:center">Flamingo</td>
+<td style="text-align:center">80B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">M3W, 43M webpaes Image/video-text pairs: ALIGN, LTIP/VTP</td>
+</tr>
+<tr>
+<td style="text-align:center">BEiT-3</td>
+<td style="text-align:center">1.9B</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">21M image-text pairs, 14M images, 160GB documents</td>
+</tr>
+<tr>
+<td style="text-align:center">Kosmos-1</td>
+<td style="text-align:center">1.6B</td>
+<td style="text-align:center">360B</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">1. text: The Pile, Common Crawl exclude GitHub/arXiv/Stack Exchange/PubMed Central, + CC-Stories, RealNews  2. Image-caption pairs LAION-2B/400M/COYO-700M/Comceptual Captions  3. Interleaved image-text data from Common Crawl</td>
+</tr>
+<tr>
+<td style="text-align:center">GPT-4</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Open-sourced data and third-party data</td>
+</tr>
+<tr>
+<td style="text-align:center">Llama 1</td>
+<td style="text-align:center">65B</td>
+<td style="text-align:center">1.4T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">English CC (67\%), C4 (15\%), GitHub (4.5\%), Wiki (4.5\%), Gutenberg and Books3 (4.5\%), ArXiv (2.5\%), Stack Exchange (2\%)</td>
+</tr>
+<tr>
+<td style="text-align:center">Llama 2</td>
+<td style="text-align:center">70B</td>
+<td style="text-align:center">1.8T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">A new mix of data from publicly available sources</td>
+</tr>
+<tr>
+<td style="text-align:center">Llama 3</td>
+<td style="text-align:center">405B</td>
+<td style="text-align:center">15.6T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">Gemma</td>
+<td style="text-align:center">7B</td>
+<td style="text-align:center">6T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Primarily-English data from web documents, mathematics, and code.</td>
+</tr>
+<tr>
+<td style="text-align:center">Gemma 2</td>
+<td style="text-align:center">27B</td>
+<td style="text-align:center">13T</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">Web documents, code, and science articles.</td>
+</tr>
+<tr>
+<td style="text-align:center">Gemini</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>According to different design of pre-training architectures, large-scale LLMs can be generally classified into three classes: <em>encoder only</em>, <em>decoder only</em>, and <em>encoder-decoder</em>. The majority of large LLMs leverage the <em>decoder only</em> and <em>encoder-decoder</em> architecture whereas seldom large models adopt the <em>encoder only</em> design. This is due to that <em>encoder only</em> architectures, such as BERT and DeBERTa, employ stacked Transformer encoders only to attend to bidirectional contexts in language, in which their bidirectional nature prevent them from applying to NLG tasks. In contrast, <em>decoder only</em> models are good at NLG tasks by nature and can perform NLU tasks via prompt-based methods. Examples inlucde GPT series and Turing-NLG. </p>
+<ul>
+<li><strong>Encoder only</strong>, i.e., pre-training on stacked Transformer encoders. Examples: DeBERTa<sub>1.5B</sub><sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="He, Pengcheng, et al. ["Deberta: Decoding-enhanced bert with disentangled attention."](https://arxiv.org/pdf/2006.03654) arXiv preprint arXiv:2006.03654 (2020).
+">[10]</span></a></sup>.</li>
+<li><strong>Decoder only</strong>. This line of large PTMs pre-trained Transformer decoders by applying auto-regressive masks to prevent the current token from attending to future ones. Examples: Turing-NLG <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Turing-NLG: A 17-billion-parameter language model by Microsoft](https://www.microsoft.com/en-us/research/blog/turing-nlg-a-17-billion-parameter-language-model-by-microsoft/). February 13, 2020.
+">[5]</span></a></sup>, GPT-3 <sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Brown, Tom B., et al. ["Language models are few-shot learners."](https://arxiv.org/pdf/2005.14165) arXiv preprint arXiv:2005.14165 (2020).
+">[6]</span></a></sup>, CPM <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Zhengyan, et al. ["CPM: A large-scale generative Chinese pre-trained language model."](https://arxiv.org/pdf/2012.00413.pdf) AI Open 2 (2021): 93-99.
+">[7]</span></a></sup>, HyperCLOVA  <sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kim, Boseop, et al. ["What changes can large-scale language models bring? intensive study on hyperclova: Billions-scale korean generative pretrained transformers."](https://arxiv.org/pdf/2109.04650.pdf) arXiv preprint arXiv:2109.04650 (2021).
+">[8]</span></a></sup>, PanGu-$\alpha$ <sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zeng, Wei, et al. ["PanGu-$\alpha $: Large-scale Autoregressive Pretrained Chinese Language Models with Auto-parallel Computation."](https://arxiv.org/pdf/2104.12369.pdf) arXiv preprint arXiv:2104.12369 (2021).
+">[9]</span></a></sup>, Yuan 1.0 <sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wu, Shaohua, et al. ["Yuan 1.0: Large-Scale Pre-trained Language Model in Zero-Shot and Few-Shot Learning."](https://arxiv.org/pdf/2110.04725) arXiv preprint arXiv:2110.04725 (2021).
+">[12]</span></a></sup>, Megatron-Turing NLG <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Paresh Kharya and Ali Alvi, [Using DeepSpeed and Megatron to Train Megatron-Turing NLG 530B, the World’s Largest and Most Powerful Generative Language Model](https://developer.nvidia.com/blog/using-deepspeed-and-megatron-to-train-megatron-turing-nlg-530b-the-worlds-largest-and-most-powerful-generative-language-model/). Oct 11, 2021.">[13]</span></a></sup>.</li>
+<li><strong>Encoder-decoder</strong>, including (1) conventional sequence-to-sequence encoder-decoder, such as T5 <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="(T5) Raffel, Colin, et al. ["Exploring the limits of transfer learning with a unified text-to-text transformer."](https://www.jmlr.org/papers/volume21/20-074/20-074.pdf) JMLR (2020).
+">[1]</span></a></sup>, mT5 <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="(mT5) Xue, Linting, et al. ["mt5: A massively multilingual pre-trained text-to-text transformer."](https://arxiv.org/pdf/2010.11934) arXiv preprint arXiv:2010.11934 (2020).
+">[2]</span></a></sup>, CPM-2 <sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Zhengyan, et al. "CPM-2: Large-scale Cost-effective Pre-trained Language Models." arXiv preprint arXiv:2106.10715 (2021).
+">[3]</span></a></sup>; and (2) Unified encoder-decoder, such as ERNIE 3.0 <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Sun, Yu, et al. ["Ernie 3.0: Large-scale knowledge enhanced pre-training for language understanding and generation."](https://arxiv.org/pdf/2107.02137) arXiv preprint arXiv:2107.02137 (2021).
+">[11]</span></a></sup>.</li>
+</ul>
+<p>For attribution in academic contexts, please cite this work as:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@misc&#123;chai2021scaling-ptms-summary,</span><br><span class="line">  author = &#123;Chai, Yekun&#125;,</span><br><span class="line">  title = &#123;&#123;Scaling Up Large Language Models: A Summary&#125;&#125;,</span><br><span class="line">  year = &#123;2021&#125;,</span><br><span class="line">  howpublished = &#123;\url&#123;https://cyk1337.github.io/notes/2021/10/09/PTMs/Scaling-Up-LLMs/&#125;&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">(T5) Raffel, Colin, et al. <a target="_blank" rel="noopener" href="https://www.jmlr.org/papers/volume21/20-074/20-074.pdf">&quot;Exploring the limits of transfer learning with a unified text-to-text transformer.&quot;</a> JMLR (2020).<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">(mT5) Xue, Linting, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2010.11934">&quot;mt5: A massively multilingual pre-trained text-to-text transformer.&quot;</a> arXiv preprint arXiv:2010.11934 (2020).<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, Zhengyan, et al. &quot;CPM-2: Large-scale Cost-effective Pre-trained Language Models.&quot; arXiv preprint arXiv:2106.10715 (2021).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Fedus, William, Barret Zoph, and Noam Shazeer. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2101.03961">&quot;Switch transformers: Scaling to trillion parameter models with simple and efficient sparsity.&quot;</a> arXiv preprint arXiv:2101.03961 (2021).<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/research/blog/turing-nlg-a-17-billion-parameter-language-model-by-microsoft/">Turing-NLG: A 17-billion-parameter language model by Microsoft</a>. February 13, 2020.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Brown, Tom B., et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2005.14165">&quot;Language models are few-shot learners.&quot;</a> arXiv preprint arXiv:2005.14165 (2020).<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, Zhengyan, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2012.00413.pdf">&quot;CPM: A large-scale generative Chinese pre-trained language model.&quot;</a> AI Open 2 (2021): 93-99.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kim, Boseop, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2109.04650.pdf">&quot;What changes can large-scale language models bring? intensive study on hyperclova: Billions-scale korean generative pretrained transformers.&quot;</a> arXiv preprint arXiv:2109.04650 (2021).<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zeng, Wei, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2104.12369.pdf">&quot;PanGu-$\alpha $: Large-scale Autoregressive Pretrained Chinese Language Models with Auto-parallel Computation.&quot;</a> arXiv preprint arXiv:2104.12369 (2021).<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">He, Pengcheng, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2006.03654">&quot;Deberta: Decoding-enhanced bert with disentangled attention.&quot;</a> arXiv preprint arXiv:2006.03654 (2020).<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Sun, Yu, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2107.02137">&quot;Ernie 3.0: Large-scale knowledge enhanced pre-training for language understanding and generation.&quot;</a> arXiv preprint arXiv:2107.02137 (2021).<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wu, Shaohua, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2110.04725">&quot;Yuan 1.0: Large-Scale Pre-trained Language Model in Zero-Shot and Few-Shot Learning.&quot;</a> arXiv preprint arXiv:2110.04725 (2021).<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Paresh Kharya and Ali Alvi, <a target="_blank" rel="noopener" href="https://developer.nvidia.com/blog/using-deepspeed-and-megatron-to-train-megatron-turing-nlg-530b-the-worlds-largest-and-most-powerful-generative-language-model/">Using DeepSpeed and Megatron to Train Megatron-Turing NLG 530B, the World’s Largest and Most Powerful Generative Language Model</a>. Oct 11, 2021.<a href="#fnref:13" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/" rel="prev" title="Sequence GANs in a Nutshell">
+      <i class="fa fa-chevron-left"></i> Sequence GANs in a Nutshell
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2021/11/29/Subword-Tokenization-in-NLP/" rel="next" title="Subword Tokenization in Natural Language Processing">
+      Subword Tokenization in Natural Language Processing <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">1.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">2.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2021/10/09/PTMs/Scaling-Up-LLMs/";
+    this.page.identifier = "2021/10/09/PTMs/Scaling-Up-LLMs/";
+    this.page.title = "Scaling Up Large Language Models: A Summary";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

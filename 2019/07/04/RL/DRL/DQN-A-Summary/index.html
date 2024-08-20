@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A summary of key advances of Deep Q-Networks.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deep Q-Networks: A Summary">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/07/04/RL/DRL/DQN-A-Summary/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="A summary of key advances of Deep Q-Networks.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-dqn-architecture.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-dqn-model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-dqn-alg.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-drqn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-propotional-prioritization.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-dueling%20dqn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-rainbow-dqn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-rainbow-ablation.png">
+<meta property="article:published_time" content="2019-07-04T01:18:00.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.850Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="RL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/rl-dqn-architecture.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/07/04/RL/DRL/DQN-A-Summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Deep Q-Networks: A Summary | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/07/04/RL/DRL/DQN-A-Summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Deep Q-Networks: A Summary
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-04 09:18:00" itemprop="dateCreated datePublished" datetime="2019-07-04T09:18:00+08:00">2019-07-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/RL/" itemprop="url" rel="index"><span itemprop="name">RL</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/RL/DRL/" itemprop="url" rel="index"><span itemprop="name">DRL</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/RL/DRL/DQN/" itemprop="url" rel="index"><span itemprop="name">DQN</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/07/04/RL/DRL/DQN-A-Summary/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/07/04/RL/DRL/DQN-A-Summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A summary of key advances of Deep Q-Networks.</p>
+<span id="more"></span>
+<h1 id="Nature-DQN-Nature-2015"><a href="#Nature-DQN-Nature-2015" class="headerlink" title="Nature DQN (Nature 2015)"></a>Nature DQN (Nature 2015)</h1><div class="note danger">
+            <p><strong>Challenge</strong>:</p><ol><li><code>Sparse, noisy and delayed reward</code>. The scalar reward signal is frequently <strong>sparse, noisy and delayed</strong>. The delay between actions and rewards can be thousands of time steps long.</li><li><code>Highly-correlated data</code>. Deep learning assume the <em>data samples to be independent</em>, whilst in RL one typically encounters sequences of <strong>highly correlated states</strong>.</li><li><code>Non-staionary distribution</code>. In RL, the <strong>data distribution changes as the algorithm learns new behaviours</strong>, while can be problematic for deep learning that assume a <em>fixed underlying distribution</em>.</li></ol>
+          </div>
+<p>Deep Q-Nerwork <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Mnih, V., Kavukcuoglu, K., Silver, D., Rusu, A. A., Veness, J., Bellemare, M. G., ... & Petersen, S. (2015). [Human-level control through deep reinforcement learning](https://daiwk.github.io/assets/dqn.pdf). Nature, 518(7540), 529.
+">[1]</span></a></sup><sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Mnih, V., Kavukcuoglu, K., Silver, D., Graves, A., Antonoglou, I., Wierstra, D., & Riedmiller, M. (2013). [Playing atari with deep reinforcement learning](https://arxiv.org/pdf/1312.5602.pdf)). arXiv preprint arXiv:1312.5602.
+">[2]</span></a></sup> leveraged <em>convolutional nets</em> and <em>experience replay</em>, receiving raw pixes as the input.</p>
+<h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><ul>
+<li>Input: gray-scale raw pixels.</li>
+<li>Output: Q-values of each action.</li>
+</ul>
+<p><img data-src="/notes/images/rl-dqn-architecture.png" alt="upload successful"></p>
+<p><strong>Model architecture</strong>:</p>
+<ol>
+<li>conv1 + ReLU (32 filters of $8 \times 8$ with stride 4)</li>
+<li>conv2 + ReLU (64 filters of $4 \times 4$ with stride 2)</li>
+<li>conv3 + ReLU (64 filters of $3 \times 3$ with stride 1)</li>
+<li>FC layer + ReLU(512)</li>
+<li>FC layer with single output for each action</li>
+</ol>
+<p><img data-src="/notes/images/rl-dqn-model.png" alt="upload successful"></p>
+<h2 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h2><ul>
+<li>Optimizer: RMSProp</li>
+<li>$\epsilon$-greedy with $\epsilon$ annealed linearly from 1.0 to 0.1 over the 1st 1,000,000 frames, and fixed at 0.1 thereafter.</li>
+<li>Experience replay memory: 1,000,000 most recent frames.</li>
+<li>Training data: 50 million frames, i.e. ~38 days of game experiences</li>
+<li>Frame-skipping technique: select actions on every $k$-th frame instead of every frame, $k=4$.</li>
+<li><strong>Tricks</strong> of <code>Error clipping</code>:<br>Clip the error term from the update <script type="math/tex">r+\gamma \max_{a'} Q(s',a';\theta_i^{-}) - Q(s,a;\theta_i)</script> to be in $[-1,1]$.</li>
+</ul>
+<p>To perform experience replay, store the agents experience <script type="math/tex">e_t = (s_t, a_t, r_t, s_{t+1})</script> at each time step $t$ in a dataset <script type="math/tex">D_t=\{e_1,\cdots,e_t\}</script>. During learning, at each time step, apply Q-learning updates on samples(or minibaches) of experience <script type="math/tex">(s,a,r,s')\sim \text{U(D)}</script>, <em>drawn uniformly at random</em> from the pool of stored samples. The target Q-network do <strong>periodical updates</strong>, so as to reduce the corerlations with the target. The loss function at iteration $i$:</p>
+<script type="math/tex; mode=display">L_{i}(\theta_i) = \mathbb{E}_{(s,a,r,s')\sim \text{U(D)}} \left[ \left( \underbrace{r + \gamma \max_{a'} Q(s',a';\theta_i^{-})}_\text{target Q-network} - Q(s,a;\theta_i) \right) \right]</script><p>where the target Q-network parameters <script type="math/tex">\theta_i^{-}</script> are only updated with the Q-network parameters <script type="math/tex">\theta_i</script> <strong>every $C$ steps</strong>, and are held fixed between individual updates.</p>
+<p><img data-src="/notes/images/rl-dqn-alg.png" alt="upload successful"></p>
+<h1 id="Deep-Recurrent-Q-Network-AAAI-2015"><a href="#Deep-Recurrent-Q-Network-AAAI-2015" class="headerlink" title="Deep Recurrent Q-Network(AAAI 2015)"></a>Deep Recurrent Q-Network(AAAI 2015)</h1><h2 id="Model-architecture"><a href="#Model-architecture" class="headerlink" title="Model architecture"></a>Model architecture</h2><p>Replace the 1st FC layer with LSTMs<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hausknecht, M., & Stone, P. (2015, September). [Deep recurrent q-learning for partially observable mdps](https://www.aaai.org/ocs/index.php/FSS/FSS15/paper/download/11673/11503). In 2015 AAAI Fall Symposium Series.
+">[3]</span></a></sup>.<br><strong>Model architecture</strong>:</p>
+<ol>
+<li>conv1 + ReLU (32 filters of $8 \times 8$ with stride 4)</li>
+<li>conv2 + ReLU (64 filters of $4 \times 4$ with stride 2)</li>
+<li>conv3 + ReLU (64 filters of $3 \times 3$ with stride 1)</li>
+<li>LSTM layer</li>
+<li>FC layer with single output for each action</li>
+</ol>
+<p><img data-src="/notes/images/rl-drqn.png" alt="upload successful"></p>
+<ul>
+<li>No explicit improvement in comparison with Nature DQN </li>
+<li>Recurrency confers benefits with partial observability, when adapting at evaluation time if the quality of observation changes.</li>
+<li>Replacing LSTMs with 1st FC layer in DQN achive the best performance, intuitionally indicating that this allows LSTM direct access to the convolutional features.</li>
+</ul>
+<h2 id="Training-1"><a href="#Training-1" class="headerlink" title="Training"></a>Training</h2><ul>
+<li>Bootstrapped <strong>squential updates</strong>: randomly select episodes from the replay memory and updates begin <strong>at the beginning of the episode</strong>.</li>
+<li>Boostrapped <strong>random updates</strong>: randomly select eposides from the replay memory and updates <strong>begin at randomly points</strong> in the episode and proceed.</li>
+</ul>
+<p>Both are viable and yield convergent policies with similar performance. Therefore, apply randomized update strategy.</p>
+<h1 id="Double-DQN-AAAI-2016"><a href="#Double-DQN-AAAI-2016" class="headerlink" title="Double DQN (AAAI 2016)"></a>Double DQN (AAAI 2016)</h1><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li>Q-learning algorithms lead to <code>overestimation</code>, since the $\max$ op <em>employs the same values to both select and evaluate an action</em>. </li></ul>
+          </div>
+<p>In <strong>DQN</strong>, the target Q-function is:</p>
+<script type="math/tex; mode=display">y_t^{DQN} = R_{t+1} + \gamma Q(S_{t+1}, \arg\max_a Q(S_{t+1},a;\pmb{\theta}_t); \pmb{\theta}_t)</script><p>In <code>Double DQN</code>, the target is:</p>
+<script type="math/tex; mode=display">y_t^{DDQN} = R_{t+1} + \gamma Q(S_{t+1}, \arg\max_a Q(S_{t+1},a;\pmb{\theta}_t); \pmb{\theta}_t^{-})</script><p>The weights of target Q-network <script type="math/tex">\pmb{\theta}_t^{-}</script> stayed unchanged from DQN, and remains a <em>periodic copy</em> of the online network.</p>
+<h1 id="Prioritized-Experience-Replay"><a href="#Prioritized-Experience-Replay" class="headerlink" title="Prioritized Experience Replay"></a>Prioritized Experience Replay</h1><h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><ul>
+<li>Online RL incrementally update the parameters while observing a  stream of experience. This leads to problems:<ul>
+<li>strongly correlated updates break the i.i.d assumption of SGD algorithms;</li>
+<li>rapid forgetting of possibly rare experiences.</li>
+</ul>
+</li>
+<li><em>Experience replay</em> uses a large sliding window replay memory, uniformly sampling experience transition from a replay memory at random. Experience replay frees online learning agents from processing transitions in the <strong>exact order that they are experienced</strong>, but suffer from sampling transitions with the <strong>same frequency that they are experienced</strong>.</li>
+</ul>
+<h2 id="Prioritized-Experience-Replay-1"><a href="#Prioritized-Experience-Replay-1" class="headerlink" title="Prioritized Experience Replay"></a>Prioritized Experience Replay</h2><ul>
+<li>Intuition: RL agent can learn more effectively from some transitions than from others. Prioritized replay liberatres agents from considering transitions with the same frequency that they are experienced. </li>
+</ul>
+<h3 id="greedy-TD-error-prioritization"><a href="#greedy-TD-error-prioritization" class="headerlink" title="greedy TD-error prioritization"></a>greedy TD-error prioritization</h3><ul>
+<li><p>Prioritize the experience transitions according to <strong>the magnitude of temporal-difference(TD) error</strong> $\delta$ <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Schaul, T., Quan, J., Antonoglou, I., & Silver, D. (2015). [Prioritized experience replay](https://arxiv.org/pdf/1511.05952.pdf). arXiv preprint arXiv:1511.05952.">[7]</span></a></sup>, indicating how surprising or unexpected the transition is: </p>
+<script type="math/tex; mode=display">\delta = | R_{t+1} + \gamma_{t+1} \max_{a'} q_{\theta}^{-}(S_{t+1,a'}) - q_\theta (S_t, A_t) |</script></li>
+<li><p>Implementation: priority queue with binary heap data structure.</p>
+<ul>
+<li>the complexity of searching for the maximum $O(1)$</li>
+<li>Update complexity $O(\log N)$</li>
+</ul>
+</li>
+</ul>
+<h3 id="Stochastic-prioritization"><a href="#Stochastic-prioritization" class="headerlink" title="Stochastic prioritization"></a>Stochastic prioritization</h3><ul>
+<li><p>The <strong>problems</strong> of greedy TD-error prioritization:</p>
+<ol>
+<li>TD errors are only updated for replayed transitions, resulting in that transitions with low TD error on first visit may not be replayed for a long time.</li>
+<li>It is sensitive to noise spikes(e.g. when rewards are stochastic), which can be exacerbated by bootstrapping where approximation errors appear as another source of noise.</li>
+<li>It focuses on a small subset of the experience: error shrink slowly, especially when using function approximation. This means initially high error transitions get replayed frequently, which is lack of diversity, making it prone to overfitting.</li>
+</ol>
+</li>
+<li><p><strong>Stochastic prioritization</strong> interpolates between pure greedy prioritization and uniform random sampling. We ensure the sampling probability is <em>monotonic</em> and guarantee non-zero prob. even for lowest-priority transition.</p>
+</li>
+<li>Define the probability of sample transition $i$ as:<script type="math/tex; mode=display">P(i) = \frac{p_i^\alpha}{\sum_k p_k^\alpha}</script>where <script type="math/tex">p_i > 0</script> is the priority of transition $i$. $\alpha$ determins how much prioritization is used, $\alpha = 0$ denotes to the uniform case.</li>
+</ul>
+<h4 id="Proportional-prioritization"><a href="#Proportional-prioritization" class="headerlink" title="Proportional prioritization"></a>Proportional prioritization</h4><script type="math/tex; mode=display">p_i = |\delta_i| + \epsilon</script><p>where $\epsilon$ is a small positive constant that prevents the edge-case of transitions not being revisited once their error is zero.</p>
+<p><img data-src="/notes/images/rl-propotional-prioritization.png" alt="upload successful"></p>
+<ul>
+<li>Implementation: ‘sum-tree’ data structure.</li>
+</ul>
+<h4 id="Rank-based-prioritization"><a href="#Rank-based-prioritization" class="headerlink" title="Rank-based prioritization"></a>Rank-based prioritization</h4><script type="math/tex; mode=display">p_i = \frac{1}{\text{rank}(i)}</script><p>where $\text{rank}(i)$ denotes the rank of transition $i$ according to <script type="math/tex">|\delta_i|</script></p>
+<h1 id="Dueling-DQN-ICML-2016"><a href="#Dueling-DQN-ICML-2016" class="headerlink" title="Dueling DQN (ICML 2016)"></a>Dueling DQN (ICML 2016)</h1><h2 id="Background-1"><a href="#Background-1" class="headerlink" title="Background"></a>Background</h2><p>$Q$ measures the value of choosing a particular action when in this state:</p>
+<script type="math/tex; mode=display">Q^{\pi}(s,a) = \mathbb{E}[R_t \vert s_t=s, a_t=a, \pi]</script><p>$V$ measures how good it is to be in a particular state $s$:</p>
+<script type="math/tex; mode=display">V^{\pi}(s) = \mathbb{E}_{a \sim \pi(s)}[Q^\pi (s,a)]</script><p>The <strong>Advantage function</strong> <script type="math/tex">A^\pi</script> measures the relative measure of the importance of each action:</p>
+<script type="math/tex; mode=display">A^\pi(s,a) = Q^{\pi}(s,a) - V^{\pi}(s)</script><div class="note info">
+            <p><strong>Intuition</strong>:</p><ul><li>It is unnecessary to estimate the value of each action choice. In some states, it is of paramount importance to know which action to take, but in many other states the coice of action has no repercussion on what happens.</li><li>In bootstrapping-based methods, the estimation of state values if of great importance for every state.</li></ul>
+          </div>
+<h2 id="Model-architecture-1"><a href="#Model-architecture-1" class="headerlink" title="Model architecture"></a>Model architecture</h2><p>Dueling DQN decouples the <strong>value</strong> and <strong>advantage</strong> functions in separate streams <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Z., Schaul, T., Hessel, M., Hasselt, H.V., Lanctot, M., & Freitas, N.D. (2016). [Dueling network architectures for deep reinforcement learning](https://arxiv.org/pdf/1511.06581). ICML.
+">[5]</span></a></sup>.<br><img data-src="/notes/images/rl-dueling dqn.png" alt="upload successful"></p>
+<ul>
+<li>Replace the 1st FC layer with two sequences(streams) of FC layers, which separately estimate the <strong>scalar state value</strong> <script type="math/tex">V(s;\theta, \beta)</script> and $|\mathcal{A}|$-dimensional vector <strong>advantange</strong> <script type="math/tex">A(s,a;\theta,\alpha)</script>, where $\theta$ denotes parameters of conv layers, $\alpha$ and $\beta$ are the parameters of two streams of FC layers. Afterwards, combine both of them:<script type="math/tex; mode=display">Q(s,a; \theta,\alpha,\beta) = V(s;\theta,\beta) + A(s,a;\theta,\alpha)</script>To form the matrix form of $Q$, we need to replicate the scalar $V(s;\theta,\beta)$ $|\mathcal{A}|$ times, i.e. <strong>broadcasting</strong> the scalar value $V$ to $|\mathcal{A}|$ dimensions.    </li>
+</ul>
+<p>The above equation lead to identifiability that given $Q$ we cannot recover $V$ and $A$ uniquely. In other words, the resulting value remains the same if adding a constant substracted from $V$, to the advantage $\mathcal{A}$.<br>Thus, they forced the advantage function to zero by substracting the $\max$ value of $\mathcal{A}$:</p>
+<script type="math/tex; mode=display">Q(s,a; \theta,\alpha,\beta) = V(s;\theta,\beta) + \left( A(s,a;\theta,\alpha) - \max_{a' \in |\mathcal{A}|} A(s,a'; \theta, \alpha) \right)</script><p>Here, for <script type="math/tex">a^* = \arg\max_{a' \in \mathcal{A}} Q(s,a';\theta,\alpha,\beta) = \arg\max_{a' \in \mathcal{A}} A(s,a';\theta,\alpha)</script>.</p>
+<p>An alternative way is replace $\max$ with average op:</p>
+<script type="math/tex; mode=display">Q(s,a; \theta,\alpha,\beta) = \underbrace{V(s;\theta,\beta)}_\text{scalar} + \left( \underbrace{A(s,a;\theta,\alpha)}_{|\mathcal{A}|-\text{dimensional vector}} - \underbrace{\frac{1}{|\mathcal{A}|} \sum_{a'} A(s,a'; \theta, \alpha)}_\text{scalar} \right)</script><p>This alternative loses the original semantics of $V$ and $A$ since they are off-target by a constant, but it increases the stabiliity of the optimization.</p>
+<p>The $\text{softmax}$ version’s performance matched the above average version.</p>
+<h1 id="Rainbow-DQN-AAAI-2018"><a href="#Rainbow-DQN-AAAI-2018" class="headerlink" title="Rainbow DQN (AAAI 2018)"></a>Rainbow DQN (AAAI 2018)</h1><ul>
+<li>RainBow DQN integrates the ingredients of Double DQN, Prioritized replay, Dueling DQN, multi-step learning, distributional RL and Noisy Net<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hessel, M., Modayil, J., Van Hasselt, H., Schaul, T., Ostrovski, G., Dabney, W., ... & Silver, D. (2018, April). [Rainbow: Combining improvements in deep reinforcement learning](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/17204/16680). In Thirty-Second AAAI Conference on Artificial Intelligence.
+">[6]</span></a></sup>.</li>
+</ul>
+<p><img data-src="/notes/images/rl-rainbow-dqn.png" alt="upload successful"></p>
+<ul>
+<li><p>Apply <strong>Adam</strong> optimizer: less sensitive to the choice of learning rate then RMSProp.</p>
+</li>
+<li><p>The ablation studies illustrate that <strong>prioritized replay</strong> and <strong>multi-step learning</strong> were the two most crucial components of Rainbow, in that removing either component caused a large drop.</p>
+</li>
+</ul>
+<p><img data-src="/notes/images/rl-rainbow-ablation.png" alt="upload successful"></p>
+<ul>
+<li>Other ingredients to research: Bootstrapped DQN, instrinsic motivation, count-bsed exploration.</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Mnih, V., Kavukcuoglu, K., Silver, D., Rusu, A. A., Veness, J., Bellemare, M. G., ... &amp; Petersen, S. (2015). <a target="_blank" rel="noopener" href="https://daiwk.github.io/assets/dqn.pdf">Human-level control through deep reinforcement learning</a>. Nature, 518(7540), 529.<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Mnih, V., Kavukcuoglu, K., Silver, D., Graves, A., Antonoglou, I., Wierstra, D., &amp; Riedmiller, M. (2013). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1312.5602.pdf">Playing atari with deep reinforcement learning</a>). arXiv preprint arXiv:1312.5602.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Hausknecht, M., &amp; Stone, P. (2015, September). <a target="_blank" rel="noopener" href="https://www.aaai.org/ocs/index.php/FSS/FSS15/paper/download/11673/11503">Deep recurrent q-learning for partially observable mdps</a>. In 2015 AAAI Fall Symposium Series.<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Van Hasselt, H., Guez, A., &amp; Silver, D. (2016, March). <a target="_blank" rel="noopener" href="https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/download/12389/11847">Deep reinforcement learning with double q-learning</a>. In Thirtieth AAAI Conference on Artificial Intelligence.<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, Z., Schaul, T., Hessel, M., Hasselt, H.V., Lanctot, M., &amp; Freitas, N.D. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1511.06581">Dueling network architectures for deep reinforcement learning</a>. ICML.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Hessel, M., Modayil, J., Van Hasselt, H., Schaul, T., Ostrovski, G., Dabney, W., ... &amp; Silver, D. (2018, April). <a target="_blank" rel="noopener" href="https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/17204/16680">Rainbow: Combining improvements in deep reinforcement learning</a>. In Thirty-Second AAAI Conference on Artificial Intelligence.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Schaul, T., Quan, J., Antonoglou, I., &amp; Silver, D. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1511.05952.pdf">Prioritized experience replay</a>. arXiv preprint arXiv:1511.05952.<a href="#fnref:7" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/RL/" rel="tag"># RL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/05/20/NN/Optimization-methods-introduction/" rel="prev" title="Optimization Methods in Deep Learning">
+      <i class="fa fa-chevron-left"></i> Optimization Methods in Deep Learning
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/07/07/Algorithms/sorting-alg/" rel="next" title="Sorting Algorithms">
+      Sorting Algorithms <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Nature-DQN-Nature-2015"><span class="nav-number">1.</span> <span class="nav-text">Nature DQN (Nature 2015)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Model"><span class="nav-number">1.1.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training"><span class="nav-number">1.2.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deep-Recurrent-Q-Network-AAAI-2015"><span class="nav-number">2.</span> <span class="nav-text">Deep Recurrent Q-Network(AAAI 2015)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-architecture"><span class="nav-number">2.1.</span> <span class="nav-text">Model architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training-1"><span class="nav-number">2.2.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Double-DQN-AAAI-2016"><span class="nav-number">3.</span> <span class="nav-text">Double DQN (AAAI 2016)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Prioritized-Experience-Replay"><span class="nav-number">4.</span> <span class="nav-text">Prioritized Experience Replay</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">4.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Prioritized-Experience-Replay-1"><span class="nav-number">4.2.</span> <span class="nav-text">Prioritized Experience Replay</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#greedy-TD-error-prioritization"><span class="nav-number">4.2.1.</span> <span class="nav-text">greedy TD-error prioritization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stochastic-prioritization"><span class="nav-number">4.2.2.</span> <span class="nav-text">Stochastic prioritization</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Proportional-prioritization"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Proportional prioritization</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Rank-based-prioritization"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Rank-based prioritization</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dueling-DQN-ICML-2016"><span class="nav-number">5.</span> <span class="nav-text">Dueling DQN (ICML 2016)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background-1"><span class="nav-number">5.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-architecture-1"><span class="nav-number">5.2.</span> <span class="nav-text">Model architecture</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rainbow-DQN-AAAI-2018"><span class="nav-number">6.</span> <span class="nav-text">Rainbow DQN (AAAI 2018)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/07/04/RL/DRL/DQN-A-Summary/";
+    this.page.identifier = "2019/07/04/RL/DRL/DQN-A-Summary/";
+    this.page.title = "Deep Q-Networks: A Summary";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

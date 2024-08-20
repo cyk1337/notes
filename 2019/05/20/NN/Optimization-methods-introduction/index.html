@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="Optimization Methods in Deep Learning">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/05/20/NN/Optimization-methods-introduction/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/optimization-comp2.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/optimization-AdaDelta.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Optimization-Adam.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/optmization-comparison.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/optimization-AdamW.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RAdam.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/optimizer-Lookahead.png">
+<meta property="article:published_time" content="2019-05-20T08:09:00.000Z">
+<meta property="article:modified_time" content="2019-05-20T08:09:00.000Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="NN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/optimization-comp2.gif">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/05/20/NN/Optimization-methods-introduction/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Optimization Methods in Deep Learning | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/05/20/NN/Optimization-methods-introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Optimization Methods in Deep Learning
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-05-20 16:09:00" itemprop="dateCreated datePublished" datetime="2019-05-20T16:09:00+08:00">2019-05-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/" itemprop="url" rel="index"><span itemprop="name">NN</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/05/20/NN/Optimization-methods-introduction/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/05/20/NN/Optimization-methods-introduction/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p><img data-src="/notes/images/optimization-comp2.gif" alt="optimization"><br><span id="more"></span></p>
+<h1 id="Vanilla-gradient-descent"><a href="#Vanilla-gradient-descent" class="headerlink" title="Vanilla gradient descent"></a>Vanilla gradient descent</h1><p>Let <script type="math/tex">d_i(t) = \frac{\partial E}{\partial w_i(t)}</script> be the gradient of the error function $E$ w.r.t a weight <script type="math/tex">w_i</script> at update time $t$.</p>
+<ul>
+<li>“Vanilla” gradient descent updates the weight along the nagative gradient direction:<script type="math/tex; mode=display">\Delta w_i(t) = - \eta d_i(t)</script><script type="math/tex; mode=display">w_i(t+1) = w_i(t) + \Delta w_i(t)</script>where $\eta$ denotes the learning rate.</li>
+</ul>
+<h2 id="How-to-set-the-learning-rate"><a href="#How-to-set-the-learning-rate" class="headerlink" title="How to set the learning rate?"></a>How to set the learning rate?</h2><p>Initialize the $\eta$, and update as the training processes</p>
+<ul>
+<li>Learning rate schedules: typically initial larger steps followed by smaller steps for fine tuning: results in <strong>faster convergence and better solutions</strong>.</li>
+</ul>
+<div class="note info">
+            <p><strong>Learning Rate Schedules</strong>:</p><ol><li><strong>Time-dependent</strong> schedules:<script type="math/tex; mode=display">\Delta w_i(t) = - \eta(t) d_i(t)</script><ul><li><strong>Piecewise constant</strong>: pre-determined $\eta$ for each epoch</li><li><strong>Exponential</strong>:<br><script type="math/tex">\eta(t) = \eta(0) \exp(-t/r)</script>, where $r \sim \text{training set size}$</li><li><strong>Reciprocal</strong>:<br><script type="math/tex">\eta(t) = \eta(0)(1+ \frac{t}{r})^{-c}</script>, where $c \sim 1$.</li></ul></li><li><strong>Performance-dependent</strong> $\eta$: fixd $\eta$ until validation set stops improving, then halve $\eta$ each epoch (i.e. constant, then exponential)</li></ol>
+          </div>
+<h1 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h1><script type="math/tex; mode=display">\Delta w_i(t) = - \eta d_i(t) + \alpha \Delta w_i(t-1)</script><ul>
+<li>Momentum hyperparameter: $\alpha \sim 0.9$</li>
+<li><p>Momentum term encourages the weight change to go in the  previous direction</p>
+</li>
+<li><p><strong>Problems</strong>: tuning learning rate and momentum parameters can be expensive.</p>
+</li>
+</ul>
+<h1 id="Adaptive-learning-rates"><a href="#Adaptive-learning-rates" class="headerlink" title="Adaptive learning rates"></a>Adaptive learning rates</h1><ul>
+<li>Tuning learning rate parameters is expensive (grid search)<div class="note warn">
+            <ul><li><strong>AdaGrad</strong>: normalize the update for each weight</li><li><strong>RMSProp</strong>: AdaGrad forces the learning rate to always decrease, this constraint is relexed with RMSProp</li><li><strong>Adam</strong>: “RMSProp with momentum”</li></ul>
+          </div>
+</li>
+</ul>
+<h2 id="AdaGrad"><a href="#AdaGrad" class="headerlink" title="AdaGrad"></a>AdaGrad</h2><ul>
+<li>Separate, nomalized update for each weight</li>
+<li>Normalized by the sum squared gradient $S$<script type="math/tex; mode=display">\begin{align}
+S_i(0) &= 0 \\
+S_i(t) & = S_i(t-1) + d_i(t)^2  \\
+\Delta w_i(t)& = \frac{-\eta}{\sqrt{S_i(t)}+\epsilon} d_i(t) 
+\end{align}</script>where $\epsilon \sim 10^{-8}$ is a small constant to prevent division by zero errors.</li>
+<li>The update step for <script type="math/tex">w_i</script> is normalized by the (square root of) the sum squared gradients for that parameter<ul>
+<li>Weights with larger gradient magnitudes will have smaller effective learning rates</li>
+<li><script type="math/tex">S_i</script> cannot get smaller, so the effective learningr rates monotonically decrease</li>
+</ul>
+</li>
+<li>AdaGrad can decrease the <strong>effective learning rate</strong> too aggressively in NNs.</li>
+</ul>
+<h2 id="RMSProp"><a href="#RMSProp" class="headerlink" title="RMSProp"></a>RMSProp</h2><ul>
+<li>Backgroud: RProp<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Riedmiller, M., & Braun, H. (1993, March). A direct adaptive method for faster backpropagation learning: The RPROP algorithm. In Proceedings of the IEEE international conference on neural networks (Vol. 1993, pp. 586-591).
+">[3]</span></a></sup> is for batch gradient descent with an adaptive learning rate for each parameter, and uses only the sign of the gradient (equivalent to normalizing by the gradient)</li>
+<li>RMSProp can be viewed as a <code>stochastic gradient descent version of RProp normalized by a moving average of the squared gradient</code><sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[csc321 Neural Networks for Machine Learning Lecure6](http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
+">[4]</span></a></sup>. It is similar to AdaGrad, but replacing the sum by a moving average for $S$:<script type="math/tex; mode=display">\begin{align}
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2  \\
+\Delta w_i(t)& = \frac{-\eta}{\sqrt{S_i(t)}+\epsilon} d_i(t) 
+\end{align}</script>where $\beta \sim 0.9$ is the decay rate.</li>
+<li>Effective learning rates no longer guaranteed to decrease.</li>
+</ul>
+<h2 id="AdaDelta"><a href="#AdaDelta" class="headerlink" title="AdaDelta"></a>AdaDelta</h2><div class="note danger">
+            <p><strong>Background</strong>:<br>AdaGrad has two main drawbacks:</p><ol><li>the continual decay of learning rates throughout training;</li><li>the need for a manually selected global learning rate.</li></ol>
+          </div>
+<p>Let $\beta$ denote the decay rate.</p>
+<script type="math/tex; mode=display">\begin{align}
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2  &\text{accumulate gradients}\\
+
+\mathbf{\Delta w_i(t)}& = - \frac{\sqrt{ C_i(t)+\epsilon}}{\sqrt{ S_i(t)+\epsilon}} d_i(t) & \text{compute update} \\
+C_i(t) &= \beta C_i(t-1) + (1-\beta)\Delta w_i(t)^2 & \text{accumulate update} \\
+\end{align}</script><p>The numerator of update term is not manually $\eta$, resulting in insensitivity of pre-defined learning rate.</p>
+<div class="note success">
+            <p><strong>Pros</strong>:</p><ul><li>Requires <code>no manually setting of a learning rate</code>;</li><li>insensitive to hyperparameters;</li><li>minimal computation over gradient descent.</li></ul>
+          </div>
+<p><img data-src="/notes/images/optimization-AdaDelta.png" alt="upload successful"><br>where $\text{RMS}[x]_t = \sqrt{E[x^2]_t + \epsilon}$</p>
+<h2 id="Adam-ICLR-2015"><a href="#Adam-ICLR-2015" class="headerlink" title="Adam (ICLR 2015)"></a>Adam (ICLR 2015)</h2><ul>
+<li>Adam can be viewed as a variant of RMSProp with momentum:<script type="math/tex; mode=display">\begin{align}
+M_i(t) & = \alpha M_i(t-1) + (1-\alpha)d_i(t) & \text{momentum-smoothed gradient}\\
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2 &\text{RMSProp update} \\
+\hat{M}_i(t) &\rightarrow M_i(t) / (1-\alpha) & \text{correct bias}\\ 
+\hat{S}_i(t) &\rightarrow S_i(t) / (1-\beta) & \text{correct bias} \\
+\Delta w_i(t)& = \frac{-\eta}{\sqrt{\hat{S}_i(t)}+\epsilon} \hat{M}_i(t) 
+\end{align}</script>where $\alpha \sim 0.9$, $\beta \sim 0.999$, $\epsilon \sim 1e-8$</li>
+</ul>
+<p><img data-src="/notes/images/Optimization-Adam.png" alt="upload successful"></p>
+<p><img data-src="/notes/images/optmization-comparison.gif" alt="upload successful"></p>
+<h2 id="AdamW-ICLR-2018"><a href="#AdamW-ICLR-2018" class="headerlink" title="AdamW (ICLR 2018)"></a>AdamW (ICLR 2018)</h2><p><img data-src="/notes/images/optimization-AdamW.png" alt="upload successful"></p>
+<h2 id="AMSGrad"><a href="#AMSGrad" class="headerlink" title="AMSGrad"></a>AMSGrad</h2><ul>
+<li>AMSGrad<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Reddi, S. J., Kale, S., & Kumar, S. (2019). [On the convergence of adam and beyond](https://arxiv.org/pdf/1904.09237.pdf). arXiv preprint arXiv:1904.09237.
+">[6]</span></a></sup> maintains the <code>maximum</code> of all <script type="math/tex">S_i(t)</script> unitl the present time step to normalizing the running average of the gradient instead of directly using <script type="math/tex">S_i(t)</script> in Adam.</li>
+<li>AMSGrad results in a non-increasing step size and avoids pitfalls of Adam and RMSProp.<script type="math/tex; mode=display">\begin{align}
+M_i(t) & = \alpha M_i(t-1) + (1-\alpha)d_i(t) & \text{momentum-smoothed gradient}\\
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2 &\text{RMSProp update} \\
+\hat{S}_i(t) &= \max(\hat{S}_i(t-1), S_i(t)) & \text{keep the maximum value} \\
+\Delta w_i(t)& = \frac{-\eta}{\sqrt{\hat{S}_i(t)}+\epsilon} M_i(t) 
+\end{align}</script></li>
+</ul>
+<h2 id="AdaBound"><a href="#AdaBound" class="headerlink" title="AdaBound"></a>AdaBound</h2><ul>
+<li>AdaBound<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Luo, L., Xiong, Y., Liu, Y., & Sun, X. (2019). Adaptive gradient methods with dynamic bound of learning rate. arXiv preprint arXiv:1902.09843.
+">[7]</span></a></sup> applies a gradient clipping on the learning rate. It behaves like Adam at the beginning as the bounds have little impact on learning rates, and it gradually transforms to SGD.</li>
+</ul>
+<script type="math/tex; mode=display">\begin{align}
+M_i(t) & = \alpha M_i(t-1) + (1-\alpha)d_i(t) & \text{momentum-smoothed gradient}\\
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2 &\text{RMSProp update} \\
+\eta_i(t) &= \text{Clip} \left(\frac{\eta}{\sqrt{S_i(t)}}, \eta_{l}(t), \eta_{u}(t) \right) / \sqrt{t} & \text{clip to the range }[\eta_{l}(t), \eta_{u}(t)] \text{, then scale}\\ 
+\Delta w_i(t)& = \eta_i(t) M_i(t) 
+\end{align}</script><h2 id="Rectified-Adam-RAdam"><a href="#Rectified-Adam-RAdam" class="headerlink" title="Rectified Adam (RAdam)"></a>Rectified Adam (RAdam)</h2><div class="note danger">
+            <h3 id="Problems"><a href="#Problems" class="headerlink" title="Problems"></a>Problems</h3><ul><li>Adaptive learning rate has an undesirably large variance due to <em>the lack of samples in the early stage</em>, leading to suspicious local optima.</li></ul>
+          </div>
+<h3 id="Previous-solution"><a href="#Previous-solution" class="headerlink" title="Previous solution"></a>Previous solution</h3><ul>
+<li>Warmup heuistics: using a <em>small learning rate in the first few epochs of training</em></li>
+<li>E.g. Linear warmup, set <script type="math/tex">\alpha_t = t \alpha_0</script>, when <script type="math/tex">t<T_w</script>.<h3 id="RAdam"><a href="#RAdam" class="headerlink" title="RAdam"></a>RAdam</h3>Rectified Adam (RAdam) induced a rectification term <script type="math/tex">r_t</script> to mitigate the variance of adaptive learning rate, inspired by Exponential Moving Average (EMA)<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Liu, L., Jiang, H., He, P., Chen, W., Liu, X., Gao, J., & Han, J. (2019). [On the Variance of the Adaptive Learning Rate and Beyond](https://arxiv.org/pdf/1908.03265.pdf). ArXiv, abs/1908.03265.
+">[10]</span></a></sup>.</li>
+</ul>
+<p>Let <script type="math/tex">\rho_t</script> denote the length of Simple Moving Average (SMA), <script type="math/tex">\rho_\infty \leftarrow \frac{2}{(1-\beta_2) -1}</script> be the maximum length of the approximated SMA.</p>
+<script type="math/tex; mode=display">\begin{align}
+M_i(t) & = \alpha M_i(t-1) + (1-\alpha)d_i(t) & \text{momentum-smoothed gradient}\\
+S_i(t) & = \beta S_i(t-1) + (1-\beta)d_i(t)^2 &\text{RMSProp update} \\
+\hat{M}_i(t) & \leftarrow M_i(t) / (1-\alpha) & \text{correct bias for 1st moment}\\ 
+\rho_t &\leftarrow \rho_\infty - 2t \beta / (1-\beta) & \text{the length of approximated SMA} \\
+\end{align}</script><p>if $\rho_t &gt; 4$ i.e., the variance is tractable:</p>
+<script type="math/tex; mode=display">\begin{align}
+\hat{S}_i(t) &\rightarrow S_i(t) / (1-\beta) & \text{correct bias for 2nd moment} \\
+\mathbf{r_t} &\leftarrow \sqrt{\frac{(\rho_t-4)(\rho_t-2)\rho_\infty}{(\rho_t-4)(\rho_t-2)\rho_t}} & \text{compute the variance rectification term}\\
+\Delta w_i(t)& = \frac{-\eta}{\sqrt{\hat{S}_i(t)}} \hat{M}_i(t) \mathbf{r_t} \\
+\end{align}</script><p>else:</p>
+<script type="math/tex; mode=display">\begin{align}
+\Delta w_i(t)& = \eta \hat{M}_i(t) & \text{ momentum without adaptation}
+\end{align}</script><p><img data-src="/notes/images/RAdam.png" alt="upload successful"></p>
+<ul>
+<li>The heuristic linear warmup can be viewed as setting <script type="math/tex">r_t = \frac{\min(t, T_w)}{T_w}</script></li>
+</ul>
+<h1 id="Lookahead"><a href="#Lookahead" class="headerlink" title="Lookahead"></a>Lookahead</h1><p>Lookahead  <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, M.R., Lucas, J., Hinton, G.E., & Ba, J. (2019). [Lookahead Optimizer: k steps forward, 1 step back](https://arxiv.org/pdf/1907.08610.pdf). ArXiv, abs/1907.08610.
+">[11]</span></a></sup> is orthogonal to 1) adaptive learning rate schemes, such as AdaGrad and Adam, and 2) accelerated schemes, e.g. heavy-ball and Nesterov momentum. It iteratively updates two sets of weights.</p>
+<ul>
+<li><p>Intuition: choose a search direction by <em>loking ahead</em> at the sequence of “fast weights”, generated by another optimizer.</p>
+</li>
+<li><p>Process: Lookahead first updates the “fast weights” $k$ times using any standard optimizer in the inner loop, before updating the “slow weights” once, in the direction of the <strong>final fast weights</strong>.</p>
+</li>
+<li><p>It is empirically robust to the suboptimal hyperparameters, changes in the inner loop optimizer, # of fast weight updates and the slow weights learning rate.</p>
+</li>
+</ul>
+<h2 id="Lookahead-optimizer"><a href="#Lookahead-optimizer" class="headerlink" title="Lookahead optimizer"></a>Lookahead optimizer</h2><p>Lookahead maintains a set of slow weights $\phi$ and fast weights $\theta$,which synced with fast weights every $k$ updates. </p>
+<ul>
+<li>Init parameters <script type="math/tex">\phi_0</script>, loss function $L$</li>
+<li>sync period $k$, <strong>slow</strong> weights step size $\alpha$, optimizer $A$</li>
+<li>for t = 1,2,…:<ul>
+<li>sync updated slow weights to the inner loop fast weights: <script type="math/tex">\theta_{t,0} \leftarrow \phi_{t-1}</script></li>
+<li>for i in 1,2,…,k:<ul>
+<li>sample mini-batch of data $d \sim \mathcal{D}$</li>
+<li>update fast weights with standard optimizer <script type="math/tex">\theta_{t,i} \leftarrow \theta_{t, i-1} + A(L, \theta_{t,i-1},d)</script></li>
+</ul>
+</li>
+<li>update slow weights with interpolation <script type="math/tex">\phi_t \leftarrow \phi_{t-1} + \alpha (\underbrace{\theta_{t,k} - \phi_{t-1})}_\text{linear interpolation}</script>  </li>
+</ul>
+</li>
+</ul>
+<p>After $k$ inner updates using $A$, the slow weights are updated towards the fast weights by linearly interpolating in weight space $\theta - \phi$. Then after each slow weights update, the fast weights are reset to the current slow weights.</p>
+<p><img data-src="/notes/images/optimizer-Lookahead.png" alt="upload successful"></p>
+<ul>
+<li>Benefit: Loopahead benefits from large learning rate in the inner loop. The fast weights updates make rapid progress along the low curvature direction, whilst the <strong>slow weights</strong> help <strong>smooth out the oscillation through the parameter interpolation</strong>.</li>
+</ul>
+<p><strong>Slow weights trajectory</strong></p>
+<ul>
+<li><p>an exponential moving average (EMA) of the <strong>final fast weights</strong> within each inner loop after $k$ innerloop steps:</p>
+<script type="math/tex; mode=display">\begin{align}
+\phi_{t+1} & = \phi_t + \alpha (\theta_{t,k} - \phi_t) \\
+      & = \alpha\left[ \theta_{t,k} + (1-\alpha) \theta_{t-1,k} + \cdots + (1-\alpha)^{t-1} \theta_{0,k} \right] + (1-\alpha)^t \phi_0
+\end{align}</script></li>
+<li><p>Intuition: slow weights use recent fast weights but matain the effect from previous fast weights.</p>
+</li>
+</ul>
+<p><strong>Fast weights trajectory</strong></p>
+<ul>
+<li>maintaining</li>
+<li>interpolating update: <script type="math/tex">\theta_{t,i+1} = \theta_{t,i} + A(L , \theta_{t,i-1},d)</script></li>
+<li>resetting to current slow weights</li>
+</ul>
+<h2 id="Ranger"><a href="#Ranger" class="headerlink" title="Ranger"></a>Ranger</h2><p>Ranger<sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[https://medium.com/@lessw/new-deep-learning-optimizer-ranger-synergistic-combination-of-radam-lookahead-for-the-best-of-2dc83f79a48d](https://medium.com/@lessw/new-deep-learning-optimizer-ranger-synergistic-combination-of-radam-lookahead-for-the-best-of-2dc83f79a48d)
+">[12]</span></a></sup> applies <em>RAdam</em> as the optimizer $A$ in <em>Lookahead</em> algorithms (source code: <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer](https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer)">[13]</span></a></sup>).</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://cs231n.github.io/neural-networks-3/">cs231n neural-networks-3</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Duchi, J., Hazan, E., &amp; Singer, Y. (2011). Adaptive subgradient methods for online learning and stochastic optimization. Journal of Machine Learning Research, 12(Jul), 2121-2159.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Riedmiller, M., &amp; Braun, H. (1993, March). A direct adaptive method for faster backpropagation learning: The RPROP algorithm. In Proceedings of the IEEE international conference on neural networks (Vol. 1993, pp. 586-591).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf">csc321 Neural Networks for Machine Learning Lecure6</a><a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kingma, D. P., &amp; Ba, J. (2014). <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1412.6980">Adam: A method for stochastic optimization</a>. arXiv preprint arXiv:1412.6980.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Reddi, S. J., Kale, S., &amp; Kumar, S. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1904.09237.pdf">On the convergence of adam and beyond</a>. arXiv preprint arXiv:1904.09237.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Luo, L., Xiong, Y., Liu, Y., &amp; Sun, X. (2019). Adaptive gradient methods with dynamic bound of learning rate. arXiv preprint arXiv:1902.09843.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Loshchilov, I., &amp; Hutter, F. (2017). Fixing weight decay regularization in adam. arXiv preprint arXiv:1711.05101.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zeiler, M. D. (2012). ADADELTA: an adaptive learning rate method. arXiv preprint arXiv:1212.5701.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Liu, L., Jiang, H., He, P., Chen, W., Liu, X., Gao, J., &amp; Han, J. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1908.03265.pdf">On the Variance of the Adaptive Learning Rate and Beyond</a>. ArXiv, abs/1908.03265.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, M.R., Lucas, J., Hinton, G.E., &amp; Ba, J. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1907.08610.pdf">Lookahead Optimizer: k steps forward, 1 step back</a>. ArXiv, abs/1907.08610.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://medium.com/@lessw/new-deep-learning-optimizer-ranger-synergistic-combination-of-radam-lookahead-for-the-best-of-2dc83f79a48d">https://medium.com/@lessw/new-deep-learning-optimizer-ranger-synergistic-combination-of-radam-lookahead-for-the-best-of-2dc83f79a48d</a><a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer">https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer</a><a href="#fnref:13" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NN/" rel="tag"># NN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/05/10/NN/Activation-functions-introduction/" rel="prev" title="An Introduction to Activation Functions">
+      <i class="fa fa-chevron-left"></i> An Introduction to Activation Functions
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/07/04/RL/DRL/DQN-A-Summary/" rel="next" title="Deep Q-Networks: A Summary">
+      Deep Q-Networks: A Summary <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Vanilla-gradient-descent"><span class="nav-number">1.</span> <span class="nav-text">Vanilla gradient descent</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-set-the-learning-rate"><span class="nav-number">1.1.</span> <span class="nav-text">How to set the learning rate?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Momentum"><span class="nav-number">2.</span> <span class="nav-text">Momentum</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Adaptive-learning-rates"><span class="nav-number">3.</span> <span class="nav-text">Adaptive learning rates</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AdaGrad"><span class="nav-number">3.1.</span> <span class="nav-text">AdaGrad</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RMSProp"><span class="nav-number">3.2.</span> <span class="nav-text">RMSProp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AdaDelta"><span class="nav-number">3.3.</span> <span class="nav-text">AdaDelta</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Adam-ICLR-2015"><span class="nav-number">3.4.</span> <span class="nav-text">Adam (ICLR 2015)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AdamW-ICLR-2018"><span class="nav-number">3.5.</span> <span class="nav-text">AdamW (ICLR 2018)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AMSGrad"><span class="nav-number">3.6.</span> <span class="nav-text">AMSGrad</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AdaBound"><span class="nav-number">3.7.</span> <span class="nav-text">AdaBound</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rectified-Adam-RAdam"><span class="nav-number">3.8.</span> <span class="nav-text">Rectified Adam (RAdam)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problems"><span class="nav-number">3.8.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Previous-solution"><span class="nav-number">3.8.2.</span> <span class="nav-text">Previous solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAdam"><span class="nav-number">3.8.3.</span> <span class="nav-text">RAdam</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lookahead"><span class="nav-number">4.</span> <span class="nav-text">Lookahead</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Lookahead-optimizer"><span class="nav-number">4.1.</span> <span class="nav-text">Lookahead optimizer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ranger"><span class="nav-number">4.2.</span> <span class="nav-text">Ranger</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/05/20/NN/Optimization-methods-introduction/";
+    this.page.identifier = "2019/05/20/NN/Optimization-methods-introduction/";
+    this.page.title = "Optimization Methods in Deep Learning";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>
