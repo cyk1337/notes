@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A note of code pre-trained language models (PLMs).">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Large Language Models for Programming Languages">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="A note of code pre-trained language models (PLMs).">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeXGLUE.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CuBERT-results.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeSearchNet-statistics.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeBERT.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/NL-code-search.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeXGLUE-baseline-models.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GPT-C-example.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GPT-C-training-data.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GPT-C-tokenization.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/TabNine-hash-value-completion.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GPT-C-completion-caching.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MultiGPT-C-results.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Data-flow.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GraphCodeBERT.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GraphCodeBERT-node-alignment.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GraphCodeBERT-results-on-CodeSearchNet.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/GraphCodeBERT-case.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/TransCoder.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/DOBF.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/DOBF-results.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/PLBART.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/PLBART-results.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeT5.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeT5-data.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeT5-task.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CodeT5-code-summ.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Ablation-test.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/UniXCoder.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/InCoder.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/InCoder-data.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/InCoder-results.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/pass-at-k-code.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Codex-pass-rate-vs-model-size.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/AlphaCode-data.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/AlphaCode.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Preprocessing-comp.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/PolyCoder-data.png">
+<meta property="article:published_time" content="2022-05-13T04:56:02.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.830Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="Natural Language Processing, Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/CodeXGLUE.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Large Language Models for Programming Languages | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Large Language Models for Programming Languages
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-05-13 12:56:02" itemprop="dateCreated datePublished" datetime="2022-05-13T12:56:02+08:00">2022-05-13</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/05/13/Large-Language-Models-for-Programming-Languages/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A note of code pre-trained language models (PLMs).<br><span id="more"></span></p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Source</th>
+<th>#params</th>
+<th>L2R LM</th>
+<th>Mask LM</th>
+<th>seq2seq LM</th>
+<th>Code  structure</th>
+<th>Warmup</th>
+<th>tokenizer</th>
+<th>Model</th>
+<th>#PLs</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CuBERT</td>
+<td>ICML’20 (Google)</td>
+<td>345M</td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>python tokenizer</td>
+<td>BERT-large</td>
+<td>1</td>
+<td>7.4M Python files</td>
+</tr>
+<tr>
+<td>CodeBERT</td>
+<td>EMNLP’20 findings (MSRA)</td>
+<td>125M</td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>BBPE</td>
+<td>fine-tuned RoBERTa</td>
+<td>6</td>
+<td>CodeSearchNet (6 PL languages)</td>
+</tr>
+<tr>
+<td>GPT-C</td>
+<td>CSEC/FSE’20 (MS)</td>
+<td>366M</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>BBPE</td>
+<td>GPT-2 variant</td>
+<td>1/multi</td>
+<td>monolingual/multilingual PLs</td>
+</tr>
+<tr>
+<td>CodeGPT</td>
+<td>(MSRA)</td>
+<td>124M</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td></td>
+<td>both</td>
+<td>BBPE</td>
+<td>GPT-2 variant</td>
+<td>1</td>
+<td>from GitHub</td>
+</tr>
+<tr>
+<td>PLBART</td>
+<td>NAACL’21</td>
+<td>406M</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td>-</td>
+<td>SentencePiece</td>
+<td>BART-base</td>
+<td>2</td>
+<td>470M Java, 219M Python, NL 47M.</td>
+</tr>
+<tr>
+<td>CodeT5</td>
+<td>EMNLP’21 (Salesforce/NTU)</td>
+<td>220M (T5 base) 60M (T5 small)</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>identifier</td>
+<td>-</td>
+<td>BBPE</td>
+<td>T5-base</td>
+<td>6+2</td>
+<td>8.35M instances  (CodeSearchNet/Collected)</td>
+</tr>
+<tr>
+<td>UniXcoder</td>
+<td>ACL’22 (MSRA)</td>
+<td>~110M (BERT-base)</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>✔️</td>
+<td>-</td>
+<td>BBPE</td>
+<td>BERT-base</td>
+<td>6</td>
+<td>CodeSearchNet</td>
+</tr>
+<tr>
+<td>DOBF</td>
+<td>NeurIPS’21  (FAIR France)</td>
+<td>base</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>code obfuscation</td>
+<td>both</td>
+<td>BBPE</td>
+<td>CodeBERT init/ from scratch</td>
+<td>2</td>
+<td>Python/Java files in GitHub  repo from Google BigQuery</td>
+</tr>
+<tr>
+<td>GraphCodeBERT</td>
+<td>ICLR’21 (MSRA)</td>
+<td>125M</td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td>data flow</td>
+<td>✔️</td>
+<td>BBPE</td>
+<td>CodeBERT init.</td>
+<td>6</td>
+<td>CodeSearchNet (6 PLs)</td>
+</tr>
+<tr>
+<td>SynCoBERT</td>
+<td>AAAI-22</td>
+<td>125M</td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td>✔️</td>
+<td>✔️</td>
+<td>BBPE</td>
+<td>CodeBERT init.</td>
+<td>6</td>
+<td>CodeSearchNet</td>
+</tr>
+<tr>
+<td>CodeParrot</td>
+<td>huggingface</td>
+<td>1.5B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>GPT-2</td>
+<td>1</td>
+<td>20M files Python files from  Google BigQuery Github database</td>
+</tr>
+<tr>
+<td>GPT-Neo</td>
+<td>EleutherAI</td>
+<td>2.7B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>Transformer Decoder</td>
+<td>-</td>
+<td>Mix</td>
+</tr>
+<tr>
+<td>GPT-NeoX</td>
+<td>EleutherAI</td>
+<td>20B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>GPT-NeoX</td>
+<td>-</td>
+<td>Mix</td>
+</tr>
+<tr>
+<td>GPT-J</td>
+<td>(open source)</td>
+<td>6B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>GPT</td>
+<td>-</td>
+<td>Mix</td>
+</tr>
+<tr>
+<td>PolyCoder</td>
+<td>CMU</td>
+<td>2.7B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>GPT-2</td>
+<td>12</td>
+<td>24M files (12 PLs).</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td>OpenAI</td>
+<td>12B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>✔️</td>
+<td>BBPE</td>
+<td>fine-tuned GPT-3</td>
+<td>1</td>
+<td>159GB python files after filtering.</td>
+</tr>
+<tr>
+<td>AlphaCode</td>
+<td>DeepMind</td>
+<td>41B / 9B</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>-</td>
+<td>-</td>
+<td>SentencePiece</td>
+<td>enc-dec</td>
+<td>12</td>
+<td>715.1 GB after filtering.</td>
+</tr>
+<tr>
+<td>Google’s (Austin 2021)</td>
+<td>Google Resarch</td>
+<td>137B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>SentencePiece</td>
+<td>Decoder</td>
+<td>-</td>
+<td>mixed (2.97B documents)</td>
+</tr>
+<tr>
+<td>InCoder</td>
+<td>Meta AI</td>
+<td>6.7B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>Decoder</td>
+<td>28</td>
+<td>1TB -&gt; 250GB.  GitHub and GitLab via API.</td>
+</tr>
+<tr>
+<td>CodeGen</td>
+<td>Salesforce</td>
+<td>16.1B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BBPE</td>
+<td>Decoder</td>
+<td>Multi</td>
+<td>GitHub</td>
+</tr>
+<tr>
+<td>PaLM-Coder</td>
+<td>Google Research</td>
+<td>540B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>SentencePiece</td>
+<td>Decoder</td>
+<td>Multi</td>
+<td>Mixed</td>
+</tr>
+<tr>
+<td>StarCoder</td>
+<td>BigCode project</td>
+<td>15.5B</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td>BPE</td>
+<td>Decoder</td>
+<td>86</td>
+<td>The Stack (GitHub)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!--<span class="label success">xxx</span>-->
+<h1 id="Evaluation-task"><a href="#Evaluation-task" class="headerlink" title="Evaluation task"></a>Evaluation task</h1><div class="note info">
+            <ul><li>Program understanding: code search, program repair, bug detection and localization,.</li><li>Program generation: code completion, program synthesis, code summarization, source code to pseudo-code mapping, API-sequece prediction, natural language to code mapping, document generation.</li></ul>
+          </div>
+<p><strong>Code token types</strong>: local variables, methods or APIs, arguments, punctuation, language keywords, delimiters.</p>
+<p><img data-src="/notes/images/CodeXGLUE.png" alt=""></p>
+<p>CodeXGLUE<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lu, Shuai, Daya Guo, Shuo Ren, Junjie Huang, Alexey Svyatkovskiy, Ambrosio Blanco, Colin B. Clement, Dawn Drain, Daxin Jiang, Duyu Tang, Ge Li, Lidong Zhou, Linjun Shou, Long Zhou, Michele Tufano, Ming Gong, Ming Zhou, Nan Duan, Neel Sundaresan, Shao Kun Deng, Shengyu Fu and Shujie Liu. “[CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation.](https://arxiv.org/pdf/2102.04664.pdf)” ArXiv abs/2102.04664 (2021).
+">[5]</span></a></sup> includes 14 datasets, consisting of 10 diversified PL understanding and generation tasks.</p>
+<ul>
+<li><strong>code-code</strong>: <ol>
+<li>Clone detection: Measure the semantic similarity between codes. It includes two subtasks: binary classification between a pair of codes and code retrieval, where the goal is to find semantically similar codes. </li>
+<li>Defect detection: The object is to identify whether a body of source code contains defects that may be used to attract software systems, such as resource leaks, use-after-free vulnerabilities, and DoS attack.</li>
+<li>Cloze test: predict the masked token of a code and includes two subtasks: (1) to measure the accuracy of predicting the masked token from the whole vocabulary (2) to test the semantic reasoning ability by distinguishing between “max” and “min”.</li>
+<li>Code completion: Predict following tokens based on a code context. Two subtasks: (1) token-level completion: check whether the next token has been predicted correctly; (2) line-level completion: test the goodness of the generated line.</li>
+<li>Code repair: to refine the code by fixing the bugs automatically.</li>
+<li>Code-to-code translation: translating from one PL to another one.</li>
+</ol>
+</li>
+<li><strong>text-code</strong>: <ol>
+<li>NL code search: It measures the semantic relatedness between texts and codes. Two subtasks: (1) Given an NL query, find the most relevant code in a collection of codes; (2) Given a query-code pair, predict whether the code answers the query or not.</li>
+<li>Text-to-code generation: generate a code via a NL description.</li>
+</ol>
+</li>
+<li><strong>code-text</strong>: <ol>
+<li>Code summarization: generate the NL comment for a code.</li>
+</ol>
+</li>
+<li><strong>text-text</strong>: <ol>
+<li>Documentation translation: translate code documentation from one NL to another one.    </li>
+</ol>
+</li>
+</ul>
+<h1 id="Code-PLMs"><a href="#Code-PLMs" class="headerlink" title="Code PLMs"></a>Code PLMs</h1><h2 id="CuBERT"><a href="#CuBERT" class="headerlink" title="CuBERT"></a>CuBERT</h2><p><span class="label warning">Background</span>: <strong>There is no attempt yet to obtain the high-quality contextual embeddings of source code</strong>, and evaluate it on multiple program-understanding tasks simultaneously. That is the gap that CuBERT aims to mitigate.</p>
+<p>CuBERT<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kanade, Aditya, Petros Maniatis, Gogul Balakrishnan and Kensen Shi. “[Learning and Evaluating Contextual Embedding of Source Code.](http://proceedings.mlr.press/v119/kanade20a/kanade20a.pdf)” ICML (2020).
+">[1]</span></a></sup> (code understanding BERT) presents <span class="label success">the first attempt at code pre-training</span> on (python) source code.</p>
+<h3 id="Data"><a href="#Data" class="headerlink" title="Data"></a>Data</h3><ul>
+<li><strong>Pre-training data</strong>: <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kanade, Aditya, Petros Maniatis, Gogul Balakrishnan and Kensen Shi. “[Learning and Evaluating Contextual Embedding of Source Code.](http://proceedings.mlr.press/v119/kanade20a/kanade20a.pdf)” ICML (2020).
+">[1]</span></a></sup> curated 7.4 million python files with a total of 9.3 billion tokens (1.6 billion unique).</li>
+<li><strong>Tokenization</strong>: first tokenize the python program using the standard Python tokenizer (<em>tokenize</em> package);; then greedily compress them into a subword vocabulary using the <em>SubwordTextEncoder</em> in the Tensor2Tensor project, resulting in ~50k tokens.</li>
+<li><strong>Vocabulary size</strong>: ~50K.</li>
+</ul>
+<h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><ul>
+<li><strong>Model config</strong>: BERT-large models.</li>
+<li>Training details: Linear warm up 10% of examples.</li>
+<li><strong>Pre-training task</strong>: masked language model (MLM); next sentence prediction (NSP).</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/google-research/google-research/tree/master/cubert">Models and datasets</a></li>
+</ul>
+<h3 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h3><p> It shows that CuBERT can use only 33% labeled data with only 2 epoch to match the baselines trained with full data and many more epochs.<br><img data-src="/notes/images/CuBERT-results.png" alt=""></p>
+<h2 id="CodeBERT"><a href="#CodeBERT" class="headerlink" title="CodeBERT"></a>CodeBERT</h2><p>Background: the success of PLMs drive the surge of multi-modal pre-training, which are learned from <strong>bi-modality</strong>.</p>
+<p>CodeBERT<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Feng, Zhangyin, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang and Ming Zhou. “[CodeBERT: A Pre-Trained Model for Programming and Natural Languages.](https://aclanthology.org/2020.findings-emnlp.139.pdf)” Findings of EMNLP (2020).
+">[2]</span></a></sup> is a bimodal PLM for natural language (NL) and programming language (PL).<br>It is <span class="label success">the first large NL-PL PLM</span> for multiple PLs. </p>
+<h3 id="Data-1"><a href="#Data-1" class="headerlink" title="Data"></a>Data</h3><ul>
+<li><strong>Pre-training data</strong>: CodeSearchNet<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Husain, Hamel, Hongqi Wu, Tiferet Gazit, Miltiadis Allamanis and Marc Brockschmidt. “[CodeSearchNet Challenge: Evaluating the State of Semantic Code Search.](https://arxiv.org/pdf/1909.09436.pdf)” *ArXiv* abs/1909.09436 (2019).
+">[3]</span></a></sup> (1) <em>bimodal</em> data of NL-PL pairs: 2.1M datapoints; (2) large amount of <em>unimodal</em> code data without paired documents: 6.4M codes across six PLs (Python, Java, JavaScript, PHP, Ruby, and Go).</li>
+</ul>
+<p><img data-src="/notes/images/CodeSearchNet-statistics.png" width="60%"></p>
+<ul>
+<li>Tokenization: RoBERTa BBPE.</li>
+</ul>
+<h3 id="Model-1"><a href="#Model-1" class="headerlink" title="Model"></a>Model</h3><ul>
+<li>Model config: RoBERTa_base. (125M params)</li>
+<li><strong>Pre-training task</strong>:<br>(1) MLM;<br>(2) Replaced token detection (RTD). Different from ELECTRA, it uses <em>n</em>-gram LMs as PL and NL generator as shown in the figure.<br><img data-src="/notes/images/CodeBERT.png" alt="RTD"></li>
+<li><strong>Finetune settings</strong>: (1) For NL code search, use the CodeBERT for pre-training; (2) For code-to-text generation, it uses an encoder-decoder model, and initializes the encoder with CoderBERT.</li>
+</ul>
+<h3 id="Results-1"><a href="#Results-1" class="headerlink" title="Results"></a>Results</h3><ul>
+<li><strong>NL code search</strong>: “Init=S” vs. “Init=R” $\rightarrow$ RoBERTa warmup confers performance gain. This observation is <strong>different from OpenAI Codex!!</strong><br><img data-src="/notes/images/NL-code-search.png" alt=""></li>
+<li>NL-PL probing (zero-shot): construct dataset to fill in a keyword from {max, maximize, min, minimize, less, greater}.</li>
+<li>Code documentation generation: <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Feng, Zhangyin, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang and Ming Zhou. “[CodeBERT: A Pre-Trained Model for Programming and Natural Languages.](https://aclanthology.org/2020.findings-emnlp.139.pdf)” Findings of EMNLP (2020).
+">[2]</span></a></sup> initializes the encoder of encoder-decoder framework with CoderBERT and evaluates the results by means of the smoothed BLEU score.</li>
+<li>Test on C# that is unseen before. The performance is worse than code2seq which uses the compositional paths of its abstract syntax tree (AST). The AST experiments of CodeBERT fail.</li>
+</ul>
+<h2 id="CodeGPT"><a href="#CodeGPT" class="headerlink" title="CodeGPT"></a>CodeGPT</h2><p>CodeGPT<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lu, Shuai, Daya Guo, Shuo Ren, Junjie Huang, Alexey Svyatkovskiy, Ambrosio Blanco, Colin B. Clement, Dawn Drain, Daxin Jiang, Duyu Tang, Ge Li, Lidong Zhou, Linjun Shou, Long Zhou, Michele Tufano, Ming Gong, Ming Zhou, Nan Duan, Neel Sundaresan, Shao Kun Deng, Shengyu Fu and Shujie Liu. “[CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation.](https://arxiv.org/pdf/2102.04664.pdf)” ArXiv abs/2102.04664 (2021).
+">[5]</span></a></sup> is a variant of GPT-2 (L12/A12/H768). <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lu, Shuai, Daya Guo, Shuo Ren, Junjie Huang, Alexey Svyatkovskiy, Ambrosio Blanco, Colin B. Clement, Dawn Drain, Daxin Jiang, Duyu Tang, Ge Li, Lidong Zhou, Linjun Shou, Long Zhou, Michele Tufano, Ming Gong, Ming Zhou, Nan Duan, Neel Sundaresan, Shao Kun Deng, Shengyu Fu and Shujie Liu. “[CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation.](https://arxiv.org/pdf/2102.04664.pdf)” ArXiv abs/2102.04664 (2021).
+">[5]</span></a></sup> trained both from scratch with newly obtained vocabularies and from GPT-2 initialization with original vocabularies (termed <strong>CodeGPT-adapted</strong>).</p>
+<ul>
+<li>Pre-training data: monolingual data on Python and Java in the CodeSearchNet dataset, including 1.1M Python functions and 1.6M Java methods.</li>
+<li>Huggingface model: <a target="_blank" rel="noopener" href="https://huggingface.co/microsoft/CodeGPT-small-java">CodeGPT-small</a>, <a target="_blank" rel="noopener" href="https://huggingface.co/microsoft/CodeGPT-small-java-adaptedGPT2">CodeGPT-small-java-adapted</a>.</li>
+</ul>
+<p><img data-src="/notes/images/CodeXGLUE-baseline-models.png" alt=""></p>
+<h2 id="GPT-C"><a href="#GPT-C" class="headerlink" title="GPT-C"></a>GPT-C</h2><ul>
+<li>Background: Majority of argument completion in code completion systems only work when the name of the method or API call is already typed in, thus leaving the task of completing the method calls to software developers. </li>
+<li><strong>Cons</strong>: Previously existing code completion tools have focused on specific token types or features, often failing to have a holistic view of the surrounding context.</li>
+<li><strong>Motivating Example</strong>: The example below shows an method completion and an argument completion in C Sharp PL served by the Intellicode extension in Visual Studio IDE, and the whole-line of code completion generated by IntelliCode Compose. </li>
+</ul>
+<p><img data-src="/notes/images/GPT-C-example.png" alt=""></p>
+<p><strong>GPT-C</strong> <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> (<em>i.e.</em>, IntelliCode Compose), a variant of GPT-2, can generate syntactically correct code in multiple PLs, capable of <strong><span class="label success">completing an entire line of code in a couple of key strokes</span></strong>. It is able to learn to infer <strong>types of PL identifiers</strong> and <strong>long-range code semantics</strong> without inputs extracted by means of a static analyzer explicitly passed to the model as features.</p>
+<h3 id="Data-2"><a href="#Data-2" class="headerlink" title="Data"></a>Data</h3><p><sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> collects 52k top-starred (non-fork) project in GitHub, containing over 4.7M source code files, comprising over 1.2 billion lines of source code in Python, C#, JavaScript and TypeScript PLs. </p>
+<ul>
+<li>Data split: It splits the data into 70/30 as dev/test on the repository level. The dev set is then split into 80/20 as training/validation set. The final deployed model is re-trained using the entire dataset.</li>
+</ul>
+<p><img data-src="/notes/images/GPT-C-training-data.png" alt=""></p>
+<p>Tokenization (see below figure example):</p>
+<ol>
+<li>BPE tokenization. It uses <strong>sentencepiece</strong> tokenizer with special tokens for control flow and code structure representations. For control flow tokens &lt;BOF&gt; and &lt;EOF&gt; to mark the beginning and ending of a file in order to disambiguate similar identifier names in different files, and &lt;EOL&gt; to mark the ending of a line. Since python uses white-spaces and indentation to demarcate code scope, <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> introduces &lt;INDENT&gt; and &lt;DEDENT&gt; tokens to represent those scope delimiters. </li>
+<li>Splitting PL identifiers using casing conventions. $\rightarrow$ work for PL, not for NL.</li>
+</ol>
+<p><img data-src="/notes/images/GPT-C-tokenization.png" alt=""></p>
+<p><strong>Exposing sensitive data through code suggestions</strong>.  The figure shows an example completion served by the <a target="_blank" rel="noopener" href="https://www.tabnine.com/blog/deep/"><em>TabNine</em></a> system exposing irrelevant and potentially sensitive data.<br><img data-src="/notes/images/TabNine-hash-value-completion.png" alt=""></p>
+<p>To address this problem, the training should be shielded from  inadvertently gaining access to secrets or personally identifiable data. For this reason, <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> identifies and normalizes numeric literals, string literals and comments, including docstrings, to &lt;NUM_LIT&gt;, &lt;STR_LIT&gt;, and &lt;COMMENT&gt; special tokens, respectively.</p>
+<h3 id="Model-2"><a href="#Model-2" class="headerlink" title="Model"></a>Model</h3><ul>
+<li>Model config: GPT-2. <ul>
+<li>Best monolingual model: L24, H16, #vocab 50k.</li>
+<li>Best multilingual model: L26, H16, #vocab 60k.</li>
+</ul>
+</li>
+<li>Training details: training from scratch; weight tying; </li>
+<li>Decoding: beam search.</li>
+</ul>
+<h3 id="Code-completion-system"><a href="#Code-completion-system" class="headerlink" title="Code completion system"></a>Code completion system</h3><p>For user experience, if a response time under 100ms is necessary to avoid any feeling of delay or lag. To achieve it in a cloud-based model deployment setting, <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> presents caching on the client side. When typing a non-alphanumeric character, suggestions are queried from the server. Those suggestions, each as a list of tokens along with their scores, are stored in a trie placed in the cache. This allows to prune the tree efficiently at a character-level as the user continues typing. <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> simply traverse this tree greedily by always branching to the node with the highest score.</p>
+<p>To preserve accuracy, <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> terminates the completion-tree traversal if none of the child nodes has a score that is equal to or larger than the score of its parent multiplied by a ratio $R$, defined as:</p>
+<script type="math/tex; mode=display">
+R = \frac{\alpha}{1 + e^{-L / \kappa}}</script><p>where $L$ is the position of the root node of the trie, $\alpha$ is the relaxation factor, and $\kappa$ is the curvature factor. $\alpha$ is used to adjust the values of $R$ for very small or very large values of $L$. A lower value of $\alpha$ would relax the policy producing longer completion suggestions, while a value closer to 1.0 would tighten the policy producing shorter suggestions. $\kappa$ controls the rate of increase of the $R$: A smaller $\kappa$ would give a steeper curve for smaller values of $L$, producing shorter suggestions, while a larger value of $\kappa$ would yield a flatter curve resulting in longer completion suggestion. <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> selects $\alpha=0.8$ and $\kappa=10$ to gain a balance between suggestion length and  relevance.</p>
+<p><img data-src="/notes/images/GPT-C-completion-caching.png" alt=""></p>
+<h3 id="Multilingual-model"><a href="#Multilingual-model" class="headerlink" title="Multilingual model"></a>Multilingual model</h3><ul>
+<li>Tokenization: BPE tokenizer.</li>
+<li>Evaluation metric: perplexity, ROUGE-L, Levenshtein similarity. ROUGE-L variant is based on the longest common subsequence (LCS) statistics, which takes into count structure similarity and identifies longest co-occurring <em>n</em>-grams. Levenshtein distance measures how many single-character edits - including insertion, substitution, or deletion - does it take to transform one sequence of tokens to another.</li>
+<li>Online evaluation metric: <strong>surfacing rate (SR)</strong> and <strong>click-through rate (CTR)</strong>.<br>(1) <strong>SR</strong> is the total number of completions displayed divided by the total number of times a completion could potentially be shown, which is after every character typed into a code document. The SR is not only dependent on the accuracy of the model but also on the typing speed of a user and their network reliability.<br>(2) The <strong>CTR</strong> is defined as the fraction of accepted completions over the total number of completions displayed. The low CTR can be partially attributed to the momentum in typing.</li>
+</ul>
+<p>Baseline:</p>
+<ol>
+<li>Language-agnostic baseline.</li>
+<li>Language type-embedding. Add language type embedding with the token and position embedding matrices.</li>
+<li>Language-specific control codes. Insert a sequence of tokens in the beginning of each training sample code: “lang %s remaining token sequence”, where lang $\in$ {Python, C#, JavaScript, TypeScript}.</li>
+<li>Add a PL classification pre-training task to detect programming languages besides language modeling.</li>
+</ol>
+<p><img data-src="/notes/images/MultiGPT-C-results.png" alt=""></p>
+<h2 id="GraphCodeBERT"><a href="#GraphCodeBERT" class="headerlink" title="GraphCodeBERT"></a>GraphCodeBERT</h2><ul>
+<li>Background: Existing code PLMs regard the code snippets as a sequence of tokens, while ignoring the inherent structure of code that contains semantics.</li>
+</ul>
+<p>GraphCodeBERT<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Daya, Shuo Ren, Shuai Lu, Zhangyin Feng, Duyu Tang, Shujie Liu, Long Zhou, Nan Duan, Jian Yin, Daxin Jiang and M. Zhou. “[GraphCodeBERT: Pre-training Code Representations with Data Flow.](https://arxiv.org/pdf/2009.08366)” ICLR (2021).
+">[6]</span></a></sup> is the first code PLM that uses <strong>semantic structure of code</strong> to learn code representation. It presents two structure-aware pre-training tasks: (1) data flow edge prediction (to learn from code structure); (2) variable alignment across source code and data flow (to align source code and code structure).</p>
+<ul>
+<li>Data: CodeSearchNet (6 PLs)</li>
+</ul>
+<p>GraphCodeBERT<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Daya, Shuo Ren, Shuai Lu, Zhangyin Feng, Duyu Tang, Shujie Liu, Long Zhou, Nan Duan, Jian Yin, Daxin Jiang and M. Zhou. “[GraphCodeBERT: Pre-training Code Representations with Data Flow.](https://arxiv.org/pdf/2009.08366)” ICLR (2021).
+">[6]</span></a></sup> incorporates the code structure of data flow into pre-training. <strong>Data flow</strong> is a graph that represents dependency relation between variables, in which nodes represent variables and edges represent where the value of each variable comes from. </p>
+<h3 id="Data-flow"><a href="#Data-flow" class="headerlink" title="Data flow"></a>Data flow</h3><p>Given a source code, <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> firstly parses the code into an abstract syntax tree (AST) which includes syntax structure of code. The terminal nodes (leaves) are used to identify the variable sequence $V$. We take each variable as a node of graph and a direct edge $\epsilon = \langle v_i, v_j \rangle$ from $v_i$ to $v_j$ refers the value of $j$-th variable comes form $i$-th variable. The set of directed edges as $E = { \epsilon_1, \epsilon_2, \cdots, \epsilon_l }$ and graph $\mathcal{G}(C) = (V, E)$ is data flow that represents dependency relation between variables in the source code.</p>
+<p><img data-src="/notes/images/Data-flow.png" alt=""></p>
+<h3 id="Model-3"><a href="#Model-3" class="headerlink" title="Model"></a>Model</h3><p><sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “[IntelliCode compose: code generation using transformer.](https://arxiv.org/pdf/2005.08025.pdf)” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).
+">[4]</span></a></sup> concats the comment, source code, and variables as the sequence input. It uses a graph-guided masked attention that represents the relation between source code tokens and nodes of the data flow. Given $\langle v_i, c_i \rangle / \langle c_j, v_i \rangle \in E’$, if the variable $v_i$ is identified from the source code token $c_j$, it allows the node and code attend to each other if and only if $\langle v_i, c_i \rangle / \langle c_j, v_i \rangle \in E’ $ . </p>
+<p>The graph-guided masked attention matrix $M$ is as follows:</p>
+<script type="math/tex; mode=display">
+M_{ij} = \left\{
+                \begin{array}{ll}
+                  -\infty & \textrm{only mask the data-flow variable matrix } \\
+                  0 & \textrm{otherwise}
+                \end{array}
+    \right.</script><p><img data-src="/notes/images/GraphCodeBERT.png" alt=""></p>
+<h3 id="Pre-training"><a href="#Pre-training" class="headerlink" title="Pre-training"></a>Pre-training</h3><ul>
+<li><strong>Edge prediction</strong>: randomly mask 20% nodes by adding infinite values in the mask, then predict these masked edges. The probability of the edge is the dot-product following a sigmoid function using representations of two nodes.</li>
+<li><strong>Node alignment</strong>: randomly sample 20% nodes, mask edges between code tokens and sampled nodes, then predict masked edges.</li>
+</ul>
+<p><img data-src="/notes/images/GraphCodeBERT-node-alignment.png" alt=""></p>
+<h3 id="Results-2"><a href="#Results-2" class="headerlink" title="Results"></a>Results</h3><p>The table reports the Mean Reciprocal Rank (MRR) on the CodeSearchNet.<br><img data-src="/notes/images/GraphCodeBERT-results-on-CodeSearchNet.png" alt=""></p>
+<ul>
+<li>Case study<br>After a small change, GraphCodeBERT w/ data flow can also makes the correct prediction while that w/o data flow can not.<br><img data-src="/notes/images/GraphCodeBERT-case.png" alt=""></li>
+</ul>
+<h2 id="TransCoder"><a href="#TransCoder" class="headerlink" title="TransCoder"></a>TransCoder</h2><p>TransCoder<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> uses a transformer encoder-decoder model to perform monolingual PL translation, in which the encoder is initialized as XLM, and the decoder is randomly initialized.</p>
+<p><sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> instantiates the pre-training with following settings of unsupervised transcompilation:</p>
+<ol>
+<li><p><strong>Cross PL model pre-training</strong>. Thr cross-lingual nature comes from the significant number of common tokens (anchor points) that exist across languages. In the context of English-French translation, the anchor points consists essentially of digits and city and people names. In PL, these anchor points come form common keyworks (<em>e.g.</em>, for , while, if, try), and also digits, mathematical operators, and English strings that appear in the source code. <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> treats the PL. </p>
+</li>
+<li><p><strong>Cross PL model pre-training</strong>. Thr cross-lingual nature comes from the significant number of common tokens (anchor points) that exist across languages. In the context of English-French translation, the anchor points consists essentially of digits and city and people names. In PL, these anchor points come form common keyworks (<em>e.g.</em>, for , while, if, try), and also digits, mathematical operators, and English strings that appear in the source code. <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> applies the masked language modeling (MLM) pre-training on source code sequences.</p>
+</li>
+<li>Denoising auto-encoding (DAE). <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> predict a sequence of code tokens given a corrupted version of that sequence, that is, randomly mask, remove and shuffle input tokens.</li>
+<li>Back-translation (BT). The translation quality will tend to be low if the model is never trained to do what is expected to do at test time, <em>i.e.,</em> to translate functions from one language to another. <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> applies back-translation, one of the most effective methods to leverage monolingual data in a wearkly-supervised scenario.</li>
+</ol>
+<p><img data-src="/notes/images/TransCoder.png" alt=""></p>
+<h3 id="Data-3"><a href="#Data-3" class="headerlink" title="Data"></a>Data</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://console.cloud.google.com/marketplace/details/github/github-repos">GitHub public dataset on Google BigQuery</a> contains more than 2.8 million open source GitHub repositories.</li>
+<li>Tokenization: <em><a target="_blank" rel="noopener" href="https://github.com/c2nes/javalang">javalang</a></em> tokenizer for java, <a target="_blank" rel="noopener" href="https://docs.python.org/3/library/tokenize.html">tokenizer of the standard library</a> for Python, <em><a target="_blank" rel="noopener" href="https://docs.python.org/3/library/tokenize.html">clang</a></em> for C++. These tokenizers ensure that meaningless modeifications (<em>e.g.</em>, add extra new lines or spaces) in the code do not have any impact on the tokenized sequences. The <sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “[Unsupervised Translation of Programming Languages.](https://arxiv.org/pdf/2006.03511.pdf)” NeurIPS (2020).
+">[11]</span></a></sup> learns BPE codes using <a target="_blank" rel="noopener" href="https://github.com/glample/fastBPE">FastBPE</a> on extracted tokens, and split tokens into subword units.</li>
+<li>TransCoder train the DAE and BT objectives on <strong>functions only</strong>. <strong>Keeping comments in the source code increases the number of achorpoints</strong> across language, which results in a better overall performance.<h3 id="Setup"><a href="#Setup" class="headerlink" title="Setup"></a>Setup</h3></li>
+<li>Evaluation:<br>(1) BLEU.<br>(2) Reference match: the percentage of translations that perfectly match the ground truth reference.<br>(3) Computational accuracy.: whether the hypothesis function generates the same outputs as the reference when given the same inputs.</li>
+<li>Decoding: beam search</li>
+</ul>
+<h2 id="DOBF"><a href="#DOBF" class="headerlink" title="DOBF"></a>DOBF</h2><ul>
+<li>Background: Previous PL pre-training uses masked language model objectives, which was initially designed for NL and does not leverage the particular structure of source code. <strong>PL is more structured than NL</strong>, which makes predicting masked tokens much easier for PLs.</li>
+</ul>
+<p><strong>Deobfuscation (DOBF)</strong> <sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rozière, Baptiste, Marie-Anne Lachaux, Marc Szafraniec and Guillaume Lample. “[DOBF: A Deobfuscation Pre-Training Objective for Programming Languages.](https://proceedings.neurips.cc/paper/2021/file/7d6548bdc0082aacc950ed35e91fcccb-Paper.pdf)” NeurIPS (2021).
+">[10]</span></a></sup> proposes a new objective based on the <strong>deobfuscation of identifier names</strong> in source code. It leverages the particular structure of PLs. Although it does not require any parallel copora of source code aligned to NL, DOBF outperform GraphCodeBERT, CodeBERT and MLM pre-training on multiple downstream tasks.</p>
+<h3 id="Deobfuscation-objective"><a href="#Deobfuscation-objective" class="headerlink" title="Deobfuscation objective"></a>Deobfuscation objective</h3><p>DOBF obfuscates code snippets by replacing class, function and variable names with special tokens, and train a model to recover the original names. When an identifier is selected, all of tis instances in the code are replaced by the same special token. This differs from MLM when the name of a variable can appear multiple times while being masked a single time. As a result, the feaction of meaningful tokens masked by the objective is language independent: for more verbose languages (<em>e.g.,</em> Java), the less informative syntax-related tokens will not be masked out by the DOBF objective.</p>
+<p>Each identifier is replaced with probability <script type="math/tex">p_\textrm{obf} \in [0, 1]</script>. We ensure that the original input is modefied: if no identifier is replaced, we draw a random one to obfuscate. When <script type="math/tex">p_\textrm{obf} = 0</script>, only one random identifier in the input is obfuscated. When <script type="math/tex">p_\textrm{obf}=1</script>, all the identifiers defined in the file will be obfuscated. The model needs to recover a dictionary mapping special tokens to their initial values.</p>
+<p><img data-src="/notes/images/DOBF.png" alt=""></p>
+<h4 id="Pre-training-1"><a href="#Pre-training-1" class="headerlink" title="Pre-training"></a>Pre-training</h4><ul>
+<li>Pre-training data: Python/Java files within GitHub public repos avilable on Google BigQuery.</li>
+<li>Model: Encoder-decoder.</li>
+<li>Tokenizer: BBPE (same as CodeBERT).</li>
+</ul>
+<h3 id="CodeXGLUE-results"><a href="#CodeXGLUE-results" class="headerlink" title="CodeXGLUE results"></a>CodeXGLUE results</h3><ol>
+<li>DOBF beats COdeBERT by a wide margin on NL code search and code summarization, showing that PL data aligned with NL is unnecessary to train an effective model on those tasks.</li>
+<li>Objectives such as MLM and DAE that provide unstructured noise are complementary to DOBF.<br><img data-src="/notes/images/DOBF-results.png" alt=""></li>
+</ol>
+<h2 id="PLBART"><a href="#PLBART" class="headerlink" title="PLBART"></a>PLBART</h2><p>PLBART (Program and Language BART)<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ahmad, Wasi Uddin, Saikat Chakraborty, Baishakhi Ray and Kai-Wei Chang. “[Unified Pre-training for Program Understanding and Generation.](https://aclanthology.org/2021.naacl-main.211.pdf)” NAACL (2021).
+">[7]</span></a></sup> is a bidirectional and autoregressive transformer pre-trained on unlabeled data across PL and NL to learn multilingual representations applicable to a broad spectrum of program and language understanding and generation applications.</p>
+<h3 id="Data-4"><a href="#Data-4" class="headerlink" title="Data"></a>Data</h3><ul>
+<li>Data: Java and Python repo on Google BigQuery; StackOverflow posts (including both questions and answers, excluing code snipeets) by downloading the data dump (7th Sep 2020) from stackexchange.</li>
+<li>Tokenizer: sentencepiece.</li>
+<li>Vocabulary: (newly trained) #50k subwords.</li>
+</ul>
+<p>One key challenge to aggregate data from differnt modalities is that some modalities may have more data, such as we have 14 times more data in PL than NL. Thus, it mixes and up/down samples the data following XLM-R<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Conneau, Alexis, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume Wenzek, Francisco Guzmán, Edouard Grave, Myle Ott, Luke Zettlemoyer and Veselin Stoyanov. “[Unsupervised Cross-lingual Representation Learning at Scale.](https://aclanthology.org/2020.acl-main.747.pdf)” ACL (2020).
+">[9]</span></a></sup> to alleviate the bias towards PL. It samples instances for pre-training according to multinomial distribution with probabilities ($q_1, q_2, \cdots, q_N$):</p>
+<script type="math/tex; mode=display">
+q_i = \frac{1}{p_i} \cdot \frac{p_i^\alpha}{\sum_{j=1}^N p_j^\alpha}</script><p>where <script type="math/tex">p_i = \frac{n_i}{\sum_{j=1}^N n_j}</script>. $N$ is the total number of languages and $n_i$ is the total number of instances in language $i$. The smoothing parameter $\alpha=0.3$.</p>
+<h3 id="Denoising-pre-training"><a href="#Denoising-pre-training" class="headerlink" title="Denoising pre-training"></a>Denoising pre-training</h3><ul>
+<li>Config: BART-base (L6 encoder, L6 decoder, H768, A12) ~140M params.</li>
+<li>Pre-training tasks: mask 35% of the tokens in each instance.<ol>
+<li>token masking.</li>
+<li>token deletion.</li>
+<li>token infilling: sample text spans and replace them with a single mask token.</li>
+</ol>
+</li>
+<li>Input/output format: A language id symbol (e.g., &lt;java&gt;, &lt;python&gt;) is appended / prepended to the encoder/decoder inputs, respectively.<br><img data-src="/notes/images/PLBART.png" alt=""></li>
+</ul>
+<h3 id="Results-3"><a href="#Results-3" class="headerlink" title="Results"></a>Results</h3><ul>
+<li>Evaluation metrics: <ol>
+<li>BLEU for generation, except smoothed BLEU for code summarization;</li>
+<li>CodeBLEU: considers grammatical and logical correctness based on the AST and data-flow structure.</li>
+<li>Exact match (EM): evaluates if generated sequence exactly matches the reference.</li>
+</ol>
+</li>
+</ul>
+<p>It shows that PLBART learns better generic program semantics. It achieves the highest improvement in Ruby, however, PLBART is not pre-trained on Ruby.<br><img data-src="/notes/images/PLBART-results.png" alt=""></p>
+<h2 id="CodeT5"><a href="#CodeT5" class="headerlink" title="CodeT5"></a>CodeT5</h2><ul>
+<li>Background: Previous work reply on the encoder- or decoder- only models, <em>i.e.</em>, BERT or GPT, which is suboptimal for generation and understanding tasks, respectively. Initializing the encoder with CoderBERT and decoder with random initialization cannot benefit from pre-trianing. Also, most works regard the PL as a sequence of tokens like NL, ignoring the rich structural information in the code, which is vital for comprehending the code sementics.</li>
+</ul>
+<p>CodeT5<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Yue, Weishi Wang, Shafiq R. Joty and Steven C. H. Hoi. “[CodeT5: Identifier-aware Unified Pre-trained Encoder-Decoder Models for Code Understanding and Generation.](https://aclanthology.org/2021.emnlp-main.685.pdf)” EMNLP (2021).
+">[8]</span></a></sup> is a unified encoder-decoder model, which considers the token type information in the source code. It proposes an identifier-aware pre-training objective.</p>
+<p><img data-src="/notes/images/CodeT5.png" alt=""></p>
+<h3 id="Data-5"><a href="#Data-5" class="headerlink" title="Data"></a>Data</h3><ul>
+<li>Data: CodeSearchNet, collected C/C# from BigQuery. ~8.35M instances for pre-training (8 PLs).</li>
+<li>Tokenizer: (newly trained) BBPE. It largely reduces the length of tokenized code sequence by 30%-45% on downstream tasks.</li>
+<li>Vocabulary: #32k, plus [PAD], [CLS], [SEP], [MASK0-99].</li>
+</ul>
+<p><img data-src="/notes/images/CodeT5-data.png" alt=""></p>
+<h3 id="Model-4"><a href="#Model-4" class="headerlink" title="Model"></a>Model</h3><ul>
+<li>Config: CodeT5-small (60M); CodeT5-base (220M).</li>
+</ul>
+<h3 id="Pre-training-2"><a href="#Pre-training-2" class="headerlink" title="Pre-training"></a>Pre-training</h3><ul>
+<li>Encoding NL/PL: CodeT5 converts the PL segment into an Abstact Syntac Tree (AST) and extract the node types for each code token. Then, it constructs a sequence of binary labels <script type="math/tex">\mathbf{y} \in \{0,1\}^m</script> for the PL segment, were each <script type="math/tex">y_i \in \{0,1\}</script> represents whether the code token is an identifier or not.</li>
+</ul>
+<ol>
+<li>Masked span prediction: the same corrupted rate (15%) as T5 and average span length to be 3 by uniformly sampling spans from 1 to 5 tokens. It also employ whole word masking as in ERNIE.</li>
+<li><strong>Identifier tagging</strong>: use the CodeT5 encoder to predict whether the token is an identifier or not (binary classification). </li>
+<li><strong>Masked identifier prediction</strong>: mask all identifiers in the PL and use a unique sentinel token for all occurrences of one specific identifier. It is called <strong> <span class="label danger">obfuscation</span> </strong> where changing identifier names does not impact the code semantics. See the (c) subfigure below.</li>
+<li>Bimodal dual generation. Train NL $\rightarrow$ PL and PL $\rightarrow$ NL generation simultaneously, which can be seen as a special case of T5’s (full) span masking.<br><img data-src="/notes/images/CodeT5-task.png" alt=""></li>
+</ol>
+<h3 id="Results-4"><a href="#Results-4" class="headerlink" title="Results"></a>Results</h3><p>In code summarization tasks, CodeT5 outperforms previous SOTA with smaller model parameters (50M vs 140M).<br><img data-src="/notes/images/CodeT5-code-summ.png" alt=""></p>
+<p><strong>Ablation test</strong>:</p>
+<ol>
+<li>Masked span prediction (MSP)</li>
+<li>Identifier tagging (IT)</li>
+<li>Masked identifier prediction (MIP)</li>
+</ol>
+<p>It is observed that removing MSP can largely reduce the generation task performance but instead increase the defect detection performance, indicating that MSP can capture syntactic information for generation tasks.</p>
+<p>Removing MIP would hurt the defect detection task the most, indicating that it might focus more on code semantic understanding.<br><img data-src="/notes/images/Ablation-test.png" alt=""></p>
+<h2 id="UniXCoder"><a href="#UniXCoder" class="headerlink" title="UniXCoder"></a>UniXCoder</h2><ul>
+<li>Background: The cons of previous work:<br>(1) Encoder-only models is inferior to generation tasks, which requires an additional decoder for generation.<br>(2) Decoder-only models underperform in understanding tasks.<br>(3) Encoder-decoder models (PLBART, CodeT5) are sub-optimal for auto-regressive tasks, especially code completion that requires a decoder-only manner for efficient inference.</li>
+</ul>
+<p>UniXCoder<sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Daya, Shuai Lu, Nan Duan, Yanlin Wang, Ming Zhou and Jian Yin. “[UniXcoder: Unified Cross-Modal Pre-training for Code Representation.](https://www.aclanthology.org/2022.acl-long.499.pdf)” ACL (2022).
+">[12]</span></a></sup> uses a UniLM structure for code pre-training. It uses three objectives:</p>
+<ol>
+<li>MLM</li>
+<li>Unidirectional LM</li>
+<li>Denoising objective (similar to T5 for enc-dec mode): first split the input sequence into  <script type="math/tex">\max(\lfloor \rfloor, 1)</script> chunks and then randmly mask a span of from 1 to $2l-1$ tokens for each chunk, $n$ is the length of the input, $r=15%$ is the corruption rate and $l=5$ is the average length of masked spans.</li>
+</ol>
+<p><img data-src="/notes/images/UniXCoder.png" alt=""></p>
+<h2 id="InCoder"><a href="#InCoder" class="headerlink" title="InCoder"></a>InCoder</h2><ul>
+<li>Background: Code is seldom written in a single left-to-right pass and is instead repeatly edited and refined.</li>
+</ul>
+<p>InCoder<sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Fried, Daniel, Armen Aghajanyan, Jessy Lin, Sida I. Wang, Eric Wallace, Freda Shi, Ruiqi Zhong, Wen-tau Yih, Luke Zettlemoyer and Mike Lewis. “[InCoder: A Generative Model for Code Infilling and Synthesis.](https://arxiv.org/pdf/2204.05999.pdf)” ArXiv abs/2204.05999 (2022).
+">[13]</span></a></sup>, a unified generative model that can perform <strong>program synthesis</strong> (via left-to-right generation) as well as <strong>editing</strong> (via infilling), is the first large generative code model (6.7B) that is able to infill arbitrary regions.</p>
+<p>It learns to infill by randomly replacing spans of code with a sentinel token and moving them to the end of the sequence. The model is trained to predict all tokens in the complete sequence in this permuted ordering. During inference, it can edit code by replacing spans with sentinel tokens, prompting the model with the new sequence, and having it generate new tokens to replace the masked spans.</p>
+<p><img data-src="/notes/images/InCoder.png" alt=""></p>
+<h3 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h3><p>It samples the number of spans from a Poisson distribution with a mean of one, truncated to the support [1, 256], so that there are typically a small number of spans. The length of each span is sampled unifromly from the length of the document and the set of sampled spans is rejected and resampled if any spans overlap.</p>
+<p>Once spans are sampled, each span $k$ is replaced with a special masked sentinel token &lt;MASK:k&gt;. The sequence of tokens in the span is then moved to the end of document. Let “Left” be the left context, and “Right” be the right context, “Span” be the sampled span between left and right contexts, then it maximizes the log probability of the masked document: log P([Left; &lt;MASK:0&gt; Right; &lt;MASK:0&gt; Span; &lt;EOM&gt;]).</p>
+<p><sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Fried, Daniel, Armen Aghajanyan, Jessy Lin, Sida I. Wang, Eric Wallace, Freda Shi, Ruiqi Zhong, Wen-tau Yih, Luke Zettlemoyer and Mike Lewis. “[InCoder: A Generative Model for Code Infilling and Synthesis.](https://arxiv.org/pdf/2204.05999.pdf)” ArXiv abs/2204.05999 (2022).
+">[13]</span></a></sup> computes the probability of the sequence auto-regressively and train the model using <strong>cross-entropy loss on all tokens except the mask sentinel tokens &lt;MASK:k&gt;</strong>, so that the model does not generate these tokens during inference.</p>
+<h3 id="Inference"><a href="#Inference" class="headerlink" title="Inference"></a>Inference</h3><p>During inference, <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Fried, Daniel, Armen Aghajanyan, Jessy Lin, Sida I. Wang, Eric Wallace, Freda Shi, Ruiqi Zhong, Wen-tau Yih, Luke Zettlemoyer and Mike Lewis. “[InCoder: A Generative Model for Code Infilling and Synthesis.](https://arxiv.org/pdf/2204.05999.pdf)” ArXiv abs/2204.05999 (2022).
+">[13]</span></a></sup> samples the target spans autoregressively from the distribution: P([Left; &lt;MASK:0&gt; Right; &lt;MASK:0&gt; Span; &lt;EOM&gt;]).</p>
+<h3 id="Training-Data"><a href="#Training-Data" class="headerlink" title="Training Data"></a>Training Data</h3><p>It uses (1) public code with permissive, non-copyleft, open-source licenses and (2) StackOverflow questions, answers, and comments.</p>
+<p><img data-src="/notes/images/InCoder-data.png" alt=""></p>
+<h4 id="Code-data"><a href="#Code-data" class="headerlink" title="Code data"></a>Code data</h4><p><strong>Sources</strong>:<br>(1) Code files and repo metadata from GitHub and GitLab via public APIs. ~670M public non-fork repos, including all code from a list of 28 PLs (determined by file extention).<br>(2) include all other Python and Jupyter files obtainable through the GitHub archive on BigQUery that cannot already obtain from GitHub directly.<br>(3) All text and code (with markdown formatiing removed from text cells) in Jupyter notebooks.</p>
+<p><strong>Deduplication</strong>:<br>(1) Remove code files using exact match on the sequence of alphanumereic tokens in the file.<br>(2) Use regular expressions to replace email address with dummy address “remove@example.com”</p>
+<p><strong>Decontamination</strong>:</p>
+<ul>
+<li>Remove overlap between training data and the evaluation set. Remove any repos contained in the validation and test set of CodeSearchNet.</li>
+</ul>
+<p><strong>Filtering</strong>:<br>Remove that contain </p>
+<ul>
+<li>any line longer than 3000 tokens</li>
+<li>an average line length greater than 100 tokens</li>
+<li>less than 40% of their chars being alphanumetric or underscores</li>
+<li>appear to be automatically generated, using substring match.</li>
+</ul>
+<h4 id="Tokenization"><a href="#Tokenization" class="headerlink" title="Tokenization"></a>Tokenization</h4><p>It trains a new BBPE, allowing tokens to extend across whitespace (excluding newline characters) so that common code idioms (e.g., <em>import numpy as np</em>) are single tokens in the vocabulary. It reduces the total number of tokens required to encode the training corpus by 45% relative to the BBPE tokenizer and vocabulary of GPT-2.</p>
+<h3 id="Results-5"><a href="#Results-5" class="headerlink" title="Results"></a>Results</h3><p>The table compares the generative code models on the HumanEval and MBPP becnmarks, which requires models to condition on NL descriptions (docstrings) to produce Python programs (typically a single function), and evaluates overall functional accuracy (pass rates).</p>
+<p>InCoder achieves comparable performance on the HumanEval metrics to CodeGen-Multi<sup id="fnref:14"><a href="#fn:14" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Nijkamp, Erik, Bo Pang, Hiroaki Hayashi, Lifu Tu, Haiquan Wang, Yingbo Zhou, Silvio Savarese and Caiming Xiong. “[A Conversational Paradigm for Program Synthesis.](https://arxiv.org/pdf/2203.13474.pdf)” ArXiv abs/2203.13474 (2022).
+">[14]</span></a></sup>.<br><img data-src="/notes/images/InCoder-results.png" alt=""></p>
+<h2 id="Codex"><a href="#Codex" class="headerlink" title="Codex"></a>Codex</h2><p>Codex<sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, Mark et al. “[Evaluating Large Language Models Trained on Code.](https://arxiv.org/pdf/2107.03374.pdf)” ArXiv abs/2107.03374 (2021).
+">[15]</span></a></sup>, a finetuned variant of GPT-3 created by OpenAI, has powered the <a target="_blank" rel="noopener" href="https://copilot.github.com/">GitHub Copilot</a> and exceled at a variety of codeing tasks.</p>
+<h3 id="Pre-training-Setup"><a href="#Pre-training-Setup" class="headerlink" title="Pre-training Setup"></a>Pre-training Setup</h3><ul>
+<li>Model: 175B GPT-3 (Transformer decoder).</li>
+</ul>
+<h3 id="Data-6"><a href="#Data-6" class="headerlink" title="Data"></a>Data</h3><p>Collect 179GB unique Python files under 1MB.<br>Filter out files:</p>
+<ul>
+<li>which were likely auto-generated</li>
+<li>had average line length greater than 100</li>
+<li>had maximum line length geater than 1000</li>
+<li>contained small percentage of alphanumeric chacters.</li>
+</ul>
+<p>After filtering, it has 159GB.</p>
+<p><strong>Tokenizer</strong>: GPT-3 tokenizer plus additional set of tokens for whitespace runs of different lengths (<strong>multi-whitespace tokens</strong>), allowing to reducing approximately 30% fewer tokens.</p>
+<h3 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h3><p><strong>Pass@k</strong> metric: First generate n ≥ k samples per task, count the number of correct samples c ≤ n which pass unit tests, and calculate the unbiased estimator.</p>
+<script type="math/tex; mode=display">
+\textrm{pass@k} := \mathbb{E}_\textrm{problems} \bigg[ 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}} \bigg]</script><p>The numpy script for the unbiased estimate of pass@k.</p>
+<p><img data-src="/notes/images/pass-at-k-code.png" width="60%"></p>
+<p>Results</p>
+<p><img data-src="/notes/images/Codex-pass-rate-vs-model-size.png" width="60%"></p>
+<h2 id="AlphaCode"><a href="#AlphaCode" class="headerlink" title="AlphaCode"></a>AlphaCode</h2><p>AlphaCode<sup id="fnref:16"><a href="#fn:16" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Li, Yujia et al. “[Competition-Level Code Generation with AlphaCode.](https://arxiv.org/pdf/2203.07814.pdf)” ArXiv abs/2203.07814 (2022): n. pag.
+">[16]</span></a></sup> is an encoder-decoder transformer model developed by DeepMind, achieving on average top 54.3% with more than 5,000 human participants on Codeforces.</p>
+<h3 id="Pre-training-Setup-1"><a href="#Pre-training-Setup-1" class="headerlink" title="Pre-training Setup"></a>Pre-training Setup</h3><ul>
+<li>Tokenizer: Sentencepiece</li>
+<li>Vocabulary size: 8k, trained on a mix of GitHub and CodeContests data.]</li>
+<li>Data: GitHub repos including several popular languages. It follows Codex to filter out all files larger than 1MB or with lines longer than 1000 characters, to exclude automatically generated code. It also remove duplicates of the same file, ignoring whitespace in comparisons. It has 715.1GB code intotal.</li>
+</ul>
+<p><img data-src="/notes/images/AlphaCode-data.png" width="60%"><br><img data-src="/notes/images/AlphaCode.png" alt=""></p>
+<h2 id="PolyCoder"><a href="#PolyCoder" class="headerlink" title="PolyCoder"></a>PolyCoder</h2><p>PolyCoder<sup id="fnref:17"><a href="#fn:17" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Xu, Frank F., Uri Alon, Graham Neubig and Vincent J. Hellendoorn. “[A Systematic Evaluation of Large Language Models of Code.](https://arxiv.org/pdf/2202.13169.pdf)” DL4C @ ICLR 2022 (2022).
+">[17]</span></a></sup> is a 2.7B code language model trained on 12 different PLs, achieving the new SOTA in C langauge.</p>
+<ul>
+<li>Model: GPT-2.</li>
+<li>Tokenizer: BBPE.</li>
+<li>Data: at least 50 stars of 12 PLs from GitHub (stopping at 15k per language).</li>
+</ul>
+<p><img data-src="/notes/images/Preprocessing-comp.png" alt=""></p>
+<p><img data-src="/notes/images/PolyCoder-data.png" alt=""></p>
+<h2 id="CodeGen"><a href="#CodeGen" class="headerlink" title="CodeGen"></a>CodeGen</h2><p>CodeGen<sup id="fnref:14"><a href="#fn:14" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Nijkamp, Erik, Bo Pang, Hiroaki Hayashi, Lifu Tu, Haiquan Wang, Yingbo Zhou, Silvio Savarese and Caiming Xiong. “[A Conversational Paradigm for Program Synthesis.](https://arxiv.org/pdf/2203.13474.pdf)” ArXiv abs/2203.13474 (2022).
+">[14]</span></a></sup> is a 16.1B causal language model pre-trained on code created by Salesforce, outperforming OpenAI Codex on HumanEval.</p>
+<h2 id="PaLM-Coder"><a href="#PaLM-Coder" class="headerlink" title="PaLM-Coder"></a>PaLM-Coder</h2><p>PaLM-Coder<sup id="fnref:18"><a href="#fn:18" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chowdhery, Aakanksha et al. “[PaLM: Scaling Language Modeling with Pathways.](https://arxiv.org/pdf/2204.02311.pdf)” ArXiv abs/2204.02311 (2022).
+">[18]</span></a></sup> is a fine-tuned 540B PaLM with decoder-only setup, training on GitHub repositories.</p>
+<h2 id="StarCoder"><a href="#StarCoder" class="headerlink" title="StarCoder"></a>StarCoder</h2><p>The BigCode community proposes StarCoder<sup id="fnref:19"><a href="#fn:19" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Li, R., Allal, L.B., Zi, Y., Muennighoff, N., Kocetkov, D., Mou, C., Marone, M., Akiki, C., Li, J., Chim, J., Liu, Q., Zheltonozhskii, E., Zhuo, T.Y., Wang, T., Dehaene, O., Davaadorj, M., Lamy-Poirier, J., Monteiro, J., Shliazhko, O., Gontier, N., Meade, N., Zebaze, A., Yee, M., Umapathi, L.K., Zhu, J., Lipkin, B., Oblokulov, M., Wang, Z., Murthy, R., Stillerman, J., Patel, S.S., Abulkhanov, D., Zocca, M., Dey, M., Zhang, Z., Fahmy, N., Bhattacharyya, U., Yu, W., Singh, S., Luccioni, S., Villegas, P., Kunakov, M., Zhdanov, F., Romero, M., Lee, T., Timor, N., Ding, J., Schlesinger, C., Schoelkopf, H., Ebert, J., Dao, T., Mishra, M., Gu, A., Robinson, J., Anderson, C.J., Dolan-Gavitt, B., Contractor, D., Reddy, S., Fried, D., Bahdanau, D., Jernite, Y., Ferrandis, C.M., Hughes, S.M., Wolf, T., Guha, A., Werra, L.V., & Vries, H.D. (2023). [StarCoder: may the source be with you!](https://arxiv.org/pdf/2305.06161.pdf) ArXiv, abs/2305.06161.">[19]</span></a></sup>, a 15.5B causal LLM with 8k context length, which was trained towards Fill-in-the-Middle (FIM) objective on 1T tokens of 86 programming languages from The Stack, an open-source code corpora from GitHub. It uses multi-query attention (for faster inference) and learned absolute positional embeddings. StarCoder finetuned on Python outperforms OpenAI code-cushman-001 on HumanEval.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kanade, Aditya, Petros Maniatis, Gogul Balakrishnan and Kensen Shi. “<a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v119/kanade20a/kanade20a.pdf">Learning and Evaluating Contextual Embedding of Source Code.</a>” ICML (2020).<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Feng, Zhangyin, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang and Ming Zhou. “<a target="_blank" rel="noopener" href="https://aclanthology.org/2020.findings-emnlp.139.pdf">CodeBERT: A Pre-Trained Model for Programming and Natural Languages.</a>” Findings of EMNLP (2020).<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Husain, Hamel, Hongqi Wu, Tiferet Gazit, Miltiadis Allamanis and Marc Brockschmidt. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1909.09436.pdf">CodeSearchNet Challenge: Evaluating the State of Semantic Code Search.</a>” <em>ArXiv</em> abs/1909.09436 (2019).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Svyatkovskiy, Alexey, Shao Kun Deng, Shengyu Fu and Neel Sundaresan. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2005.08025.pdf">IntelliCode compose: code generation using transformer.</a>” Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (2020).<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lu, Shuai, Daya Guo, Shuo Ren, Junjie Huang, Alexey Svyatkovskiy, Ambrosio Blanco, Colin B. Clement, Dawn Drain, Daxin Jiang, Duyu Tang, Ge Li, Lidong Zhou, Linjun Shou, Long Zhou, Michele Tufano, Ming Gong, Ming Zhou, Nan Duan, Neel Sundaresan, Shao Kun Deng, Shengyu Fu and Shujie Liu. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2102.04664.pdf">CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation.</a>” ArXiv abs/2102.04664 (2021).<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Guo, Daya, Shuo Ren, Shuai Lu, Zhangyin Feng, Duyu Tang, Shujie Liu, Long Zhou, Nan Duan, Jian Yin, Daxin Jiang and M. Zhou. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2009.08366">GraphCodeBERT: Pre-training Code Representations with Data Flow.</a>” ICLR (2021).<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ahmad, Wasi Uddin, Saikat Chakraborty, Baishakhi Ray and Kai-Wei Chang. “<a target="_blank" rel="noopener" href="https://aclanthology.org/2021.naacl-main.211.pdf">Unified Pre-training for Program Understanding and Generation.</a>” NAACL (2021).<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, Yue, Weishi Wang, Shafiq R. Joty and Steven C. H. Hoi. “<a target="_blank" rel="noopener" href="https://aclanthology.org/2021.emnlp-main.685.pdf">CodeT5: Identifier-aware Unified Pre-trained Encoder-Decoder Models for Code Understanding and Generation.</a>” EMNLP (2021).<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Conneau, Alexis, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume Wenzek, Francisco Guzmán, Edouard Grave, Myle Ott, Luke Zettlemoyer and Veselin Stoyanov. “<a target="_blank" rel="noopener" href="https://aclanthology.org/2020.acl-main.747.pdf">Unsupervised Cross-lingual Representation Learning at Scale.</a>” ACL (2020).<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rozière, Baptiste, Marie-Anne Lachaux, Marc Szafraniec and Guillaume Lample. “<a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2021/file/7d6548bdc0082aacc950ed35e91fcccb-Paper.pdf">DOBF: A Deobfuscation Pre-Training Objective for Programming Languages.</a>” NeurIPS (2021).<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lachaux, Marie-Anne, Baptiste Rozière, Lowik Chanussot and Guillaume Lample. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2006.03511.pdf">Unsupervised Translation of Programming Languages.</a>” NeurIPS (2020).<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Guo, Daya, Shuai Lu, Nan Duan, Yanlin Wang, Ming Zhou and Jian Yin. “<a target="_blank" rel="noopener" href="https://www.aclanthology.org/2022.acl-long.499.pdf">UniXcoder: Unified Cross-Modal Pre-training for Code Representation.</a>” ACL (2022).<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Fried, Daniel, Armen Aghajanyan, Jessy Lin, Sida I. Wang, Eric Wallace, Freda Shi, Ruiqi Zhong, Wen-tau Yih, Luke Zettlemoyer and Mike Lewis. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2204.05999.pdf">InCoder: A Generative Model for Code Infilling and Synthesis.</a>” ArXiv abs/2204.05999 (2022).<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Nijkamp, Erik, Bo Pang, Hiroaki Hayashi, Lifu Tu, Haiquan Wang, Yingbo Zhou, Silvio Savarese and Caiming Xiong. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2203.13474.pdf">A Conversational Paradigm for Program Synthesis.</a>” ArXiv abs/2203.13474 (2022).<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, Mark et al. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2107.03374.pdf">Evaluating Large Language Models Trained on Code.</a>” ArXiv abs/2107.03374 (2021).<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Li, Yujia et al. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2203.07814.pdf">Competition-Level Code Generation with AlphaCode.</a>” ArXiv abs/2203.07814 (2022): n. pag.<a href="#fnref:16" rev="footnote"> ↩</a></span></li><li id="fn:17"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">17.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Xu, Frank F., Uri Alon, Graham Neubig and Vincent J. Hellendoorn. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2202.13169.pdf">A Systematic Evaluation of Large Language Models of Code.</a>” DL4C @ ICLR 2022 (2022).<a href="#fnref:17" rev="footnote"> ↩</a></span></li><li id="fn:18"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">18.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chowdhery, Aakanksha et al. “<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2204.02311.pdf">PaLM: Scaling Language Modeling with Pathways.</a>” ArXiv abs/2204.02311 (2022).<a href="#fnref:18" rev="footnote"> ↩</a></span></li><li id="fn:19"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">19.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Li, R., Allal, L.B., Zi, Y., Muennighoff, N., Kocetkov, D., Mou, C., Marone, M., Akiki, C., Li, J., Chim, J., Liu, Q., Zheltonozhskii, E., Zhuo, T.Y., Wang, T., Dehaene, O., Davaadorj, M., Lamy-Poirier, J., Monteiro, J., Shliazhko, O., Gontier, N., Meade, N., Zebaze, A., Yee, M., Umapathi, L.K., Zhu, J., Lipkin, B., Oblokulov, M., Wang, Z., Murthy, R., Stillerman, J., Patel, S.S., Abulkhanov, D., Zocca, M., Dey, M., Zhang, Z., Fahmy, N., Bhattacharyya, U., Yu, W., Singh, S., Luccioni, S., Villegas, P., Kunakov, M., Zhdanov, F., Romero, M., Lee, T., Timor, N., Ding, J., Schlesinger, C., Schoelkopf, H., Ebert, J., Dao, T., Mishra, M., Gu, A., Robinson, J., Anderson, C.J., Dolan-Gavitt, B., Contractor, D., Reddy, S., Fried, D., Bahdanau, D., Jernite, Y., Ferrandis, C.M., Hughes, S.M., Wolf, T., Guha, A., Werra, L.V., &amp; Vries, H.D. (2023). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.06161.pdf">StarCoder: may the source be with you!</a> ArXiv, abs/2305.06161.<a href="#fnref:19" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2022/04/17/Efficient-Large-Scale-Distributed-Training/" rel="prev" title="Efficient Large-Scale Distributed Training">
+      <i class="fa fa-chevron-left"></i> Efficient Large-Scale Distributed Training
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2022/12/12/Diffusion-Models-Math-Guide/" rel="next" title="Diffusion Models: A Mathematical Note from Scratch">
+      Diffusion Models: A Mathematical Note from Scratch <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">1.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Evaluation-task"><span class="nav-number">2.</span> <span class="nav-text">Evaluation task</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Code-PLMs"><span class="nav-number">3.</span> <span class="nav-text">Code PLMs</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CuBERT"><span class="nav-number">3.1.</span> <span class="nav-text">CuBERT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data"><span class="nav-number">3.1.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model"><span class="nav-number">3.1.2.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results"><span class="nav-number">3.1.3.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CodeBERT"><span class="nav-number">3.2.</span> <span class="nav-text">CodeBERT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results-1"><span class="nav-number">3.2.3.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CodeGPT"><span class="nav-number">3.3.</span> <span class="nav-text">CodeGPT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPT-C"><span class="nav-number">3.4.</span> <span class="nav-text">GPT-C</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-2"><span class="nav-number">3.4.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-2"><span class="nav-number">3.4.2.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-completion-system"><span class="nav-number">3.4.3.</span> <span class="nav-text">Code completion system</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multilingual-model"><span class="nav-number">3.4.4.</span> <span class="nav-text">Multilingual model</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GraphCodeBERT"><span class="nav-number">3.5.</span> <span class="nav-text">GraphCodeBERT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-flow"><span class="nav-number">3.5.1.</span> <span class="nav-text">Data flow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-3"><span class="nav-number">3.5.2.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-training"><span class="nav-number">3.5.3.</span> <span class="nav-text">Pre-training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results-2"><span class="nav-number">3.5.4.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransCoder"><span class="nav-number">3.6.</span> <span class="nav-text">TransCoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-3"><span class="nav-number">3.6.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Setup"><span class="nav-number">3.6.2.</span> <span class="nav-text">Setup</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DOBF"><span class="nav-number">3.7.</span> <span class="nav-text">DOBF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Deobfuscation-objective"><span class="nav-number">3.7.1.</span> <span class="nav-text">Deobfuscation objective</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Pre-training-1"><span class="nav-number">3.7.1.1.</span> <span class="nav-text">Pre-training</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CodeXGLUE-results"><span class="nav-number">3.7.2.</span> <span class="nav-text">CodeXGLUE results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PLBART"><span class="nav-number">3.8.</span> <span class="nav-text">PLBART</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-4"><span class="nav-number">3.8.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Denoising-pre-training"><span class="nav-number">3.8.2.</span> <span class="nav-text">Denoising pre-training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results-3"><span class="nav-number">3.8.3.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CodeT5"><span class="nav-number">3.9.</span> <span class="nav-text">CodeT5</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-5"><span class="nav-number">3.9.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-4"><span class="nav-number">3.9.2.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-training-2"><span class="nav-number">3.9.3.</span> <span class="nav-text">Pre-training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results-4"><span class="nav-number">3.9.4.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UniXCoder"><span class="nav-number">3.10.</span> <span class="nav-text">UniXCoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InCoder"><span class="nav-number">3.11.</span> <span class="nav-text">InCoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Training"><span class="nav-number">3.11.1.</span> <span class="nav-text">Training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Inference"><span class="nav-number">3.11.2.</span> <span class="nav-text">Inference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-Data"><span class="nav-number">3.11.3.</span> <span class="nav-text">Training Data</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Code-data"><span class="nav-number">3.11.3.1.</span> <span class="nav-text">Code data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tokenization"><span class="nav-number">3.11.3.2.</span> <span class="nav-text">Tokenization</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results-5"><span class="nav-number">3.11.4.</span> <span class="nav-text">Results</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Codex"><span class="nav-number">3.12.</span> <span class="nav-text">Codex</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-training-Setup"><span class="nav-number">3.12.1.</span> <span class="nav-text">Pre-training Setup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-6"><span class="nav-number">3.12.2.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Evaluation"><span class="nav-number">3.12.3.</span> <span class="nav-text">Evaluation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AlphaCode"><span class="nav-number">3.13.</span> <span class="nav-text">AlphaCode</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-training-Setup-1"><span class="nav-number">3.13.1.</span> <span class="nav-text">Pre-training Setup</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PolyCoder"><span class="nav-number">3.14.</span> <span class="nav-text">PolyCoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CodeGen"><span class="nav-number">3.15.</span> <span class="nav-text">CodeGen</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PaLM-Coder"><span class="nav-number">3.16.</span> <span class="nav-text">PaLM-Coder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StarCoder"><span class="nav-number">3.17.</span> <span class="nav-text">StarCoder</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/";
+    this.page.identifier = "2022/05/13/Large-Language-Models-for-Programming-Languages/";
+    this.page.title = "Large Language Models for Programming Languages";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Flow models are used to learn continuous data.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Likelihood-based Generative Models II: Flow  Models">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/12/22/Generative/Likelihood-based-generative-flow-models/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="Flow models are used to learn continuous data.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/flow-models.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/flow-high-dimension.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RealNVP-mask.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/IAF.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Glow.png">
+<meta property="article:published_time" content="2019-12-22T08:27:00.000Z">
+<meta property="article:modified_time" content="2019-12-22T08:27:00.000Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="Unsupervised learning">
+<meta property="article:tag" content="Likelihood-based models">
+<meta property="article:tag" content="Flow models">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/flow-models.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/12/22/Generative/Likelihood-based-generative-flow-models/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Likelihood-based Generative Models II: Flow  Models | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/12/22/Generative/Likelihood-based-generative-flow-models/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Likelihood-based Generative Models II: Flow  Models
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-12-22 16:27:00" itemprop="dateCreated datePublished" datetime="2019-12-22T16:27:00+08:00">2019-12-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Unsupervised-learning/" itemprop="url" rel="index"><span itemprop="name">Unsupervised learning</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Unsupervised-learning/Likelihood-based-models/" itemprop="url" rel="index"><span itemprop="name">Likelihood-based models</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Unsupervised-learning/Likelihood-based-models/Flow-models/" itemprop="url" rel="index"><span itemprop="name">Flow models</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/12/22/Generative/Likelihood-based-generative-flow-models/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/22/Generative/Likelihood-based-generative-flow-models/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>Flow models are used to learn <strong>continuous data</strong>.<br><span id="more"></span></p>
+<div class="note warning">
+            <p><strong>Discrete autoregressive models</strong> tractably learn the joint distribution by decomposing it into a product of conditionals using the <em>probability chain rule</em> according to a fixed ordering over dimensions.</p><p>The sequential nature limits its computational efficiency:</p><ol><li>its sampling procedure is sequential and non-parallelizable;</li><li>there is no natural latent representation associated with autoregressive models.</li></ol><p>To sum up:</p><ul><li>Pros: <ul><li>fast evaluation of p(x)</li><li>great compression performance</li><li>good samples with carefully designed dependency structure</li></ul></li><li>Cons:<ul><li>slow sampling (without significant engineering)</li><li>discrete data only</li></ul></li></ul>
+          </div>
+<h1 id="Flows-explanation"><a href="#Flows-explanation" class="headerlink" title="Flows explanation"></a><strong>Flows explanation</strong></h1><blockquote>
+<p>Ideas: instead of using a pdf over $\mathbf{x}$, work with a flow from $\mathbf{x}$ to $\mathbf{z}$</p>
+</blockquote>
+<h2 id="Flows-in-1D"><a href="#Flows-in-1D" class="headerlink" title="Flows in 1D"></a><strong>Flows</strong> in 1D</h2><p><b>Flow from $\mathbf{x}$ to $\mathbf{z}$ </b>: an invertible differentiable mapping $f$ from $\mathbf{x}$ (data) to $\mathbf{z}$ (noise): </p>
+<script type="math/tex; mode=display">\mathbf{z}=f_\theta(\mathbf{x})</script><p><strong>Training</strong></p>
+<ul>
+<li>$\mathbf{x}$ to $\mathbf{z}$: transform the data distribution into a <strong>base distribution p(z)</strong><ul>
+<li>common choices: uniform, std Gaussian</li>
+</ul>
+</li>
+<li>Training the CDF is equivalent to the PDF: <script type="math/tex">f_\theta (\mathbf{x}) = \int_{-\infty}^\mathbf{x} p_\theta (t) dt</script></li>
+</ul>
+<p><strong>Ancestral sampling</strong> (a.k.a <em>forward sampling</em>):</p>
+<ul>
+<li>$\mathbf{z}$ to $\mathbf{x}$: mapping $\mathbf{z} \sim p(\mathbf{z})$ through the flow’s inverse will yield the data distribution $\mathbf{x}=f_\theta^{-1}(\mathbf{z})$</li>
+</ul>
+<p><img data-src="/notes/images/flow-models.png" alt=""></p>
+<div class="note warning">
+            <p><em>Change of variables</em>:</p><script type="math/tex; mode=display">\begin{align}z &= f_\theta(x) \\p_\theta(x) dx &= p(z) dz \\p_\theta(x) &= p \big(f_\theta(x)\big) \bigg|\frac{\partial f_\theta(x)}{\partial x}\bigg|\end{align}</script>
+          </div>
+<p><strong>Fitting flows</strong>:</p>
+<ul>
+<li>fit with MLE: <script type="math/tex">\arg\min_\theta \mathbb{E}_x [- \log p_\theta (x)]</script></li>
+<li><script type="math/tex">p_\theta (x)</script> is the density of $x$ under the sampling process and is calculated using <em>Change of variables</em>.</li>
+</ul>
+<script type="math/tex; mode=display">\mathbf{z} \sim p(\mathbf{z}) \quad \mathbf{x} = f^{-1}_\theta (\mathbf{z})</script><p>CDF flows: </p>
+<script type="math/tex; mode=display">
+\begin{align}
+P(\mathbf{x} \in [x_0, x_0+dx]) &=  P(\mathbf{z} \in [f(x_0), f(x_0+dx)]) \\
+p(x)dx &= p(z) f^\prime(x)dx
+\end{align}</script><ul>
+<li>Recover the original objective with CDF flows:<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{z} &=  \text{CDF}_\theta (x) \\
+\log p(x) &= \log p(z) + \log \text{CDF}_\theta^\prime (x) \\
+&= \underbrace{\log p(z)}_\text{predefined pdf} + \log \text{PDF}_\theta (x) 
+\end{align}</script></li>
+<li>Flows can be more general than CDFs.</li>
+</ul>
+<h2 id="Flows-in-high-dimensions"><a href="#Flows-in-high-dimensions" class="headerlink" title="Flows in high dimensions"></a>Flows in high dimensions</h2><p>For high-dimensional data, $x$ and $z$ have the same dimension.</p>
+<p><img data-src="/notes/images/flow-high-dimension.png" alt=""></p>
+<p><em>Change of variables</em>: For $z \sim p(z)$, ancestral sampling process f<sup>-1</sup> linearly transforms a small cube $dz$ to a small parallelepiped $dx$.</p>
+<script type="math/tex; mode=display">p(x) = p(z) \frac{\text{vol}(dz)}{\text{vol}(dx)} = p(z) \bigg| \text{det} \frac{dz}{dx} \bigg|</script><p><strong>Intuition</strong>: $x$ is likely if it maps to a “large” region in $z$ space.</p>
+<h3 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h3><p>Train with MLE:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\textit{change-of-variables formula} & \quad p_\theta(\mathbf{x}) = p\big(f_\theta(\mathbf{x})\big) \bigg| \text{det} \frac{\partial f_\theta(\mathbf{x})}{\partial \mathbf{x}} \bigg| \\
+\text{training objective} & \quad \arg\min_\theta \mathbb{E}_\mathbf{x} [-\log p_\theta (\mathbf{x})] = \mathbb{E}_\mathbf{x} \bigg[ -\log p(f_\theta(\mathbf{x})) - \log \text{det} \bigg| \frac{\partial f_\theta(\mathbf{x})}{\partial \mathbf{x}} \bigg| \bigg]
+\end{align}</script><p>where the Jacobian determinant must be easy to calculate and differentiate!</p>
+<h3 id="Constructing-flows-composition"><a href="#Constructing-flows-composition" class="headerlink" title="Constructing flows: composition"></a>Constructing flows: composition</h3><ul>
+<li>Fows<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rezende, D.J., & Mohamed, S. (2015). [Variational Inference with Normalizing Flows](https://arxiv.org/pdf/1505.05770.pdf). ArXiv, abs/1505.05770.
+">[5]</span></a></sup> can be composed:<script type="math/tex; mode=display">
+\begin{align}
+x &\rightarrow f_1 \rightarrow f_2 \rightarrow \cdots \rightarrow f_k \rightarrow z \\
+z &= f_k \circ \cdots \circ f_1(x) \\
+x &= f_1^{-1} \circ \cdots \circ f_k^{-1}(z) \\
+\log p_\theta(x) &= \log p_\theta(z) + \sum_{i=1}^k \log \bigg| \text{det} \frac{\partial f_i}{\partial f_{i-1}} \bigg|
+\end{align}</script></li>
+</ul>
+<h3 id="Affine-flows-multivariate-Gaussian"><a href="#Affine-flows-multivariate-Gaussian" class="headerlink" title="Affine flows (multivariate Gaussian)"></a>Affine flows (multivariate Gaussian)</h3><p>Affine flows (multivariate Gaussian)</p>
+<ul>
+<li>Parameters: an invertible matrix $A$ and a vector $b$</li>
+<li>$f(x) = A^{-1} (x-b)$</li>
+</ul>
+<p><strong>Sampling</strong>: $x= Az + b$, where $z \sim \mathcal{N}(0,1)$</p>
+<p>Log likelihood is expensive when dimension is large:</p>
+<ul>
+<li>the Jacobian of $f$ is $A^{-1}$</li>
+<li>Log likelihood involves calculating $\text{det}(A)$</li>
+</ul>
+<h3 id="Elementwise-flows"><a href="#Elementwise-flows" class="headerlink" title="Elementwise flows"></a>Elementwise flows</h3><script type="math/tex; mode=display">f_\theta((x_1, \cdots, x_d)) = (f_\theta(x_1), \cdots, f_\theta(x_d))</script><ul>
+<li>flexible: it can use elementwise affine functions or CDF flows</li>
+</ul>
+<p>The Jacobian is diaganal, so the determinant is easy to evaluate:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{\partial \mathbf{z}}{\partial \mathbf{x}} &= \text{diag}(f_\theta^\prime(x_1), \cdots, f^\prime_\theta(x_d)) \\
+\text{det} \frac{\partial \mathbf{z}}{\partial \mathbf{x}} &= \prod_{i=1}^d f^\prime_\theta(x_i)
+\end{align}</script><h3 id="More-flow-types"><a href="#More-flow-types" class="headerlink" title="More flow types"></a>More flow types</h3><p>Coupling layers (NICE<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dinh, L., Krueger, D., & Bengio, Y. (2014). [NICE: Non-linear Independent Components Estimation](https://arxiv.org/pdf/1410.8516.pdf). CoRR, abs/1410.8516.
+">[1]</span></a></sup>/RealNVP<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dinh, L., Sohl-Dickstein, J., & Bengio, S. (2016). [Density estimation using Real NVP](https://arxiv.org/pdf/1605.08803.pdf). ArXiv, abs/1605.08803.
+">[2]</span></a></sup>), directed graphical models, invertible 1x1 convs<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kingma, D.P., & Dhariwal, P. (2018). [Glow: Generative Flow with Invertible 1x1 Convolutions](https://arxiv.org/pdf/1807.03039.pdf). NeurIPS.
+">[9]</span></a></sup>, FFJORD</p>
+<h1 id="NICE"><a href="#NICE" class="headerlink" title="NICE"></a>NICE</h1><div class="note info">
+            <p><em>A good representation is one in which the distribution of the data is easy to model.</em></p>
+          </div>
+<p>Consider the problem of learning a pdf from a parametric family of densities <script type="math/tex">\{p_\theta, \theta \in \Theta \}</script> over finite dataset $\mathcal{D}$ of $N$ samples, of each in a space $\chi$, typically $\chi=\mathbb{R}^D$</p>
+<p><strong>N</strong>on-linear <strong>I</strong>ndependent <strong>C</strong>omponent <strong>E</strong>stimation (NICE)<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dinh, L., Krueger, D., & Bengio, Y. (2014). [NICE: Non-linear Independent Components Estimation](https://arxiv.org/pdf/1410.8516.pdf). CoRR, abs/1410.8516.
+">[1]</span></a></sup> learns a non-linear  deterministic transformation $h=f(\mathbf{x})$ to map the input $\mathbf{x}$ into the latent space with a factorized distribution, i.e. independent latent variables <script type="math/tex">h_d</script>:</p>
+<script type="math/tex; mode=display">
+p_{H}(h) = \prod_d p_{H_d}(h_d)</script><p>Apply the <em>change of variables</em> $h=f(x)$, assuming that $f$ is invertible and differentiable, the dimension of $h$ and $x$ are the same in order to fit the distribution <script type="math/tex">p_H</script>:</p>
+<script type="math/tex; mode=display">p_X(x) = p_H(f(x)) \bigg| \text{det} (\frac{\partial f(x)}{\partial x}) \bigg|</script><p>where <script type="math/tex">\frac{\partial f(x)}{\partial x}</script> is the Jocobian matrix of function $f$ at $x$.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+h &\sim p_H(h) \\
+x &= f^{-1}(h)
+\end{align}</script><p>where <script type="math/tex">p_H(h)</script>, the <em>prior distribution</em>, is a predefined PDF, e.g. isotropic Gaussian. If the prior distribution is factorial (i.e. with independent dimensions), then we have the deterministic transform of a factorial distribution:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\log(p_X(x)) &= \log (p_H(f(x))) + \log (\bigg| \text{det}(\frac{\partial f(x)}{\partial x}) \bigg|)
+& \text{MLE} \\
+\log(p_X(x)) &= \color{red}{\sum_{d=1}^D \log \big(p_{H_d}(f_d(x)) \big)} + \log \big(\bigg| \text{det}(\frac{\partial f(x)}{\partial x}) \bigg|\big) & \text{NICE}
+\end{align}</script><p>where <script type="math/tex">f(x) = (f_d(x))_{d\leq D}</script></p>
+<div class="note info">
+            <p><strong>NICE</strong> can be viewed as an <em>invertible preprocessing transform</em> of the dataset. </p><ul><li>Invertible preprocessings can increase likelihood arbitrarily simply by contracting the data. The factorized prior <script type="math/tex">p_H</script> encourages to discover meaningful structures in the dataset.</li></ul>
+          </div>
+<h2 id="Coupling-layer"><a href="#Coupling-layer" class="headerlink" title="Coupling layer"></a>Coupling layer</h2><p>Given $x \in \chi$, <script type="math/tex">I_1</script>, <script type="math/tex">I_2</script> are partitions of $[1,D]$ such that $d=|I_1|$ and $m$ is a function. Define <script type="math/tex">y = (y_1, y_2)</script> where:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_{I_1} &= x_{I_1} \\
+y_{I_2} &= g(x_{I_2}; \color{red}{m}(x_{I_1}))
+\end{align}</script><p>where g: <script type="math/tex">\mathbb{R}^{D-d} \times m(\mathbb{R}^d) \rightarrow \mathbb{R}^{D-d}</script> is the coupling law. If <script type="math/tex">I_1 = [1,d]</script> and <script type="math/tex">I_2 = [d,D]</script>, the Jacobian is:</p>
+<script type="math/tex; mode=display">
+\frac{\partial y}{\partial x} =
+\begin{bmatrix}
+I_d & 0\\
+\frac{\partial y_{I_2}}{\partial x_{I_1}} & \frac{\partial y_{I_2}}{\partial x_{I_2}}
+\end{bmatrix}</script><p>where<script type="math/tex">I_d</script> is the identity matrix of size $d$, thus <script type="math/tex">\text{det} \frac{\partial y}{\partial x} = \text{det} \frac{\partial y_{I_2}}{\partial x_{I_2}}</script></p>
+<p>The inverted mapping is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_{I_1} &= y_{I_1} \\
+x_{I_2} &= g^{-1}(y_{I_2}; m(y_{I_1}))
+\end{align}</script><h3 id="Additive-coupling-layer"><a href="#Additive-coupling-layer" class="headerlink" title="Additive coupling layer"></a>Additive coupling layer</h3><p>NICE applies <script type="math/tex">g(a;b) = a+b</script> so that taking <script type="math/tex">a=x_{I_2}</script> and <script type="math/tex">b=m(y_{I_1})</script>:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+y_{I_2} &= x_{I_2} + m(x_{I_1}) \\
+x_{I_2} &= y_{I_2} - m(y_{I_1})
+\end{align}</script><h1 id="RealNVP"><a href="#RealNVP" class="headerlink" title="RealNVP"></a>RealNVP</h1><p>Real-valued non-volume preserving (real NVP)</p>
+<h2 id="Affine-coupling-layer"><a href="#Affine-coupling-layer" class="headerlink" title="Affine coupling layer"></a><strong>Affine coupling layer</strong></h2><ul>
+<li>Given a $D$ dimensional input $x$ and $d&lt;D$, the output $y$ of an affine coupling layer follows:<script type="math/tex; mode=display">
+\begin{align}
+y_{1:d} &= x_{1:d} \\
+y_{d+1:D} &= x_{d+1:D} \odot \exp(s(x_{1:d})) + t(x_{1:d})
+\end{align}</script>where $s$ and $t$ represent <em>scale</em> and <em>translation</em> functions from $\mathbb{R}^{d} \rightarrow \mathbb{R}^{D-d}$.</li>
+</ul>
+<p>The Jocobian is:</p>
+<script type="math/tex; mode=display">
+\frac{\partial y}{\partial x} =
+\begin{bmatrix}
+\mathbb{I}_d & 0\\
+\frac{\partial y_{d+1:D}}{\partial x_{1:d}^\top} & \text{diag} (\exp[s(x_{1:d})])
+\end{bmatrix}</script><p>The determinant can be computed as: <script type="math/tex">\exp \big[\sum_j s(x_{1:d})_j \big]</script></p>
+<h2 id="Masked-convolution"><a href="#Masked-convolution" class="headerlink" title="Masked convolution"></a>Masked convolution</h2><p>Partitioning adopts the binary mask $b$:</p>
+<script type="math/tex; mode=display">y = b \odot x + (1-b) \odot \big( x \odot \exp(\color{blue}{s}(b \odot x)) + \color{blue}{t}(b \odot x) \big)</script><p>where $s(\cdot)$ and $t(\cdot)$ are rectified CNNs.</p>
+<p>Two partitioning are applied:</p>
+<ol>
+<li>spatial checkerboard patterns</li>
+<li>channel-wise masking<br><img data-src="/notes/images/RealNVP-mask.png" alt="upload successful"></li>
+</ol>
+<h1 id="Autoregressive-flows"><a href="#Autoregressive-flows" class="headerlink" title="Autoregressive flows"></a>Autoregressive flows</h1><p>Construct flows from directed acyclic graphs.</p>
+<p><strong>Autoregressive flows</strong>:</p>
+<ul>
+<li>The sampling process of a Bayes net is a flow:<ul>
+<li>if autoregressive, called <em>autoregressive flow</em>:<script type="math/tex; mode=display">
+\begin{align}
+  \textbf{encoder} & \quad \textbf{decoder} \\
+z_1 \sim f_\theta(x_1) &\quad x_1 = f_\theta^{-1}(z_1) \\
+z_2 \sim f_\theta(x_2 \vert x_1) & \quad x_2 = f_\theta^{-1}(z_2;x_1) \\
+z_3 \sim f_\theta(x_3 \vert x_1, x_2) & \quad x_3 = f_\theta^{-1}(z_3;x_1, x_2)
+\end{align}</script></li>
+</ul>
+</li>
+<li>Sampling is an <strong>invertible</strong> mapping from $z$ to $x$</li>
+<li>The DAG structure causes the Jacobian to be <em>triangular</em>, when variables are ordered by topological sort.</li>
+</ul>
+<p><em>*How to fit autoregressive flow</em>?</p>
+<ul>
+<li>map $\mathbf{x}$ to $\mathbf{z}$</li>
+<li>fully parallelizable</li>
+</ul>
+<script type="math/tex; mode=display">p_\theta(\mathbf{x}) = p(f_\theta(\mathbf{x})) \bigg| \text{det} \frac{\partial f_\theta(\mathbf{x})}{\partial \mathbf{x}} \bigg|</script><h2 id="Variational-lossy-autoencoder-VLAE"><a href="#Variational-lossy-autoencoder-VLAE" class="headerlink" title="Variational lossy autoencoder (VLAE)"></a>Variational lossy autoencoder (VLAE)</h2><p>Variational Lossy Autoencoder (VLAE)<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, X., Kingma, D.P., Salimans, T., Duan, Y., Dhariwal, P., Schulman, J., Sutskever, I., & Abbeel, P. (2016). [Variational Lossy Autoencoder](https://arxiv.org/pdf/1611.02731.pdf). ArXiv, abs/1611.02731.
+">[6]</span></a></sup> force the global latent code to discard irrelevant information and thus encode the data in a lossy fassion.</p>
+<p>For an <strong>autoregressive flow</strong> $f$, some continuous noise source $\epsilon$ is transformed into latent code $\mathbf{z}$: $\mathbf{z} = f(\epsilon)$. Assuming the density function for noise source is $u(\epsilon)$, then $\log p(\mathbf{z}) = \log u(\epsilon) + \log \text{det}\frac{d \epsilon}{d \mathbf{z}}$</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}(\mathbf{x}; \theta) &= \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z} \vert \mathbf{x}) } [\log (\mathbf{x} \vert \mathbf{z}) + \log p(\mathbf{z}) -\log q(\mathbf{z} \vert \mathbf{x})] \\
+&= \mathbb{E}_{\mathbb{z} \sim q(\mathbb{z} \vert \mathbb{x}), \epsilon= f^{-1}(\mathbb{z})} \bigg[ \log p(\mathbf{x} \vert f(\epsilon)) + \log u(\epsilon) + \log \text{det} \frac{d \epsilon}{d \mathbf{z}} - \log q(\mathbf{\mathbf{z} \vert \mathbf{x}}) \bigg] \\
+&= \mathbb{E}_{\mathbb{z} \sim q(\mathbb{z} \vert \mathbb{x}), \epsilon=f^{-1}(\mathbb{z})} \bigg[ \log p(\mathbf{x} \vert f(\epsilon)) + \log u(\epsilon) + \underbrace{(\log q(\mathbf{z} \vert \mathbf{x}) -\log \text{det}\frac{d \epsilon}{d \mathbf{z}} )}_\text{IAF posterior}  \bigg]
+\end{align}</script><h2 id="Masked-autoregressive-flow-MAF"><a href="#Masked-autoregressive-flow-MAF" class="headerlink" title="Masked autoregressive flow (MAF)"></a>Masked autoregressive flow (MAF)</h2><p>Considering an AR model whose conditionals are parameterized as single Gaussians, i.e., the $i$-th conditional is given by:</p>
+<script type="math/tex; mode=display">p(x_i \vert \mathbf{x}_{1: i-1}) = \mathcal{N}(x_i \vert \mu_i, (\exp \alpha_i)^2)</script><p>where <script type="math/tex">f_{\mu_i}</script> and <script type="math/tex">f_{\alpha_i}</script> are unconstrained scalar functions that compute the mean and log standard deviation of the $i$-th conditional given all previous variables</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mu_i = f_{\mu_i}(\mathbf{x}_{1：i-1}) & \quad\text{mean}\\
+\alpha = f_{\alpha_i} (\mathbf{x}_{1:i-1}) & \quad \log \sigma_i
+\end{align}</script><p>Thus the data can be generated by:</p>
+<script type="math/tex; mode=display">x_i = \mu_i \exp \alpha_i + \mu_i</script><script type="math/tex; mode=display">
+\begin{align}
+\mu_i &= f_{\mu_i}(\mathbf{x}_{1：i-1}) & \quad\text{mean of $i$-th data point}\\
+\alpha &= f_{\alpha_i} (\mathbf{x}_{1:i-1}) & \quad \log \sigma_i \\
+u_i &\sim \mathcal{N}(0,1)
+\end{align}</script><ul>
+<li>The vector of random numbers (with <code>randn()</code>) <script type="math/tex">\mathbf{\mu} = (\mu_1, \mu_2, \cdots, \mu_I)</script> is used to generate data.</li>
+</ul>
+<p>Given data point $\mathbf{x}$, the random number vector $\mathbf{u}$ is:</p>
+<script type="math/tex; mode=display">u_i = (x_i - \mu_i) \exp(- \alpha_i)</script><ul>
+<li>where <script type="math/tex">\mu_i = f_{\mu_i}(\mathbf{x}_{1：i-1})</script> and <script type="math/tex">\alpha = f_{\alpha_i} (\mathbf{x}_{1:i-1})</script>.</li>
+</ul>
+<p>Due to the AR structure, the Jacobian of $f^{-1}$ is triangular by design, hence:</p>
+<script type="math/tex; mode=display">\bigg| \text{det} \bigg( \frac{\partial f^{-1}}{\partial \mathbf{x}} \bigg) = \exp \bigg( -\sum_I \alpha_i \bigg) \bigg|</script><ul>
+<li>where <script type="math/tex">\alpha_i = f_{\alpha_i} (\mathbf{x}_{1:i-1})</script>.</li>
+<li>This can be equivalently interpreted as a normalizing flow.</li>
+</ul>
+<p><strong>Masking</strong></p>
+<ul>
+<li>The functions <script type="math/tex">f_{\mu_i}, f_{\alpha_i}</script> are with masking, like MADE.</li>
+</ul>
+<p>It is derived that MAF and IAF has the theoretical equivalence (See <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Papamakarios, G., Murray, I., & Pavlakou, T. (2017). [Masked Autoregressive Flow for Density Estimation](https://arxiv.org/pdf/1705.07057.pdf). NIPS.
+">[7]</span></a></sup>).</p>
+<h1 id="Inverse-autoregressive-flow-IAF"><a href="#Inverse-autoregressive-flow-IAF" class="headerlink" title="Inverse autoregressive flow (IAF)"></a>Inverse autoregressive flow (IAF)</h1><p>Inverse autoregressive flow (IAF)<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kingma, D.P., Salimans, T., & Welling, M. (2017). [Improved Variational Inference with Inverse Autoregressive Flow](https://arxiv.org/pdf/1606.04934.pdf). ArXiv, abs/1606.04934.
+">[8]</span></a></sup> is the inverse of an AR flow:</p>
+<ul>
+<li>$\mathbf{x} \rightarrow \mathbf{z}$ has the same structure as the <strong>sampling</strong> in an AR model</li>
+<li><script type="math/tex">\mathbf{z} \rightarrow \mathbf{x}</script> has the same structure as <strong>loglikelihood</strong> computation of an AR model. Thus, <strong>IAF sampling is fast</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align}
+    \textbf{encoder} & \quad \textbf{decoder} \\
+    z_1 \sim f_\theta^{-1}(x_1) &\quad x_1 = f_\theta(z_1) \\
+    z_2 \sim f_\theta^{-1}(x_2 \vert z_1) & \quad x_2 = f_\theta(z_2;z_1) \\
+    z_3 \sim f_\theta^{-1}(x_3 \vert z_1, z_2) & \quad x_3 = f_\theta(z_3;z_1, z_2)
+\end{align}</script><p><img data-src="/notes/images/IAF.png" alt="upload successful"></p>
+<p>IAF approximates the posterior $q(\mathbf{z} \vert \mathbf{x})$ with the chain.  At $t$-th step of the flow, IAFapply the AR NN with inputs $\mathbf{z}_{t-1}$ and $\mathbf{h}$, and outputs <script type="math/tex">\mathbf{\mu}_t</script> and <script type="math/tex">\sigma_t</script>. (See the figure)</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{z}_0 &= \mathbf{\mu}_0 \odot \epsilon & \text{initialize at }t=0\\
+\mathbf{z}_t &= \mathbf{\mu}_t + \sigma_t \odot \mathbf{z}_{t-1} & \text{at } t=\{1,\cdots,T\}
+\end{align}</script><p>The density at $T$-th step:</p>
+<script type="math/tex; mode=display">
+\log q(\mathbf{z}_T \vert \mathbf{x}) = -\sum_{i=1}^D \bigg( \frac{1}{2}\epsilon_i^2 + \frac{1}{2}\log(2\pi) + \sum_{t=0}^T \log \sigma_{t,i} \bigg)</script><p>The output of autogressive NN:</p>
+<script type="math/tex; mode=display">[\mathbf{m}, \mathbf{s}] \rightarrow \text{AutoregressiveNN}[t](\mathbf{z,h;\theta})</script><ul>
+<li>where <script type="math/tex; mode=display">
+\begin{align}
+\mathbf{z} &\leftarrow \sigma \odot \mathbf{z} + (1-\sigma) \odot \mathbf{m} \\
+\sigma &\leftarrow \text{sigmoid}(\mathbf{s})
+\end{align}</script></li>
+</ul>
+<h2 id="Pseudocode"><a href="#Pseudocode" class="headerlink" title="Pseudocode"></a>Pseudocode</h2><p>Given:</p>
+<ul>
+<li>$\mathbf{x}$: a datapoint</li>
+<li>$\mathbf{\theta}$: NN parameters</li>
+<li>$\textrm{EncoderNN}(\mathbf{x}; \mathbf{\theta})$: encoder network, with output $\mathbf{h}$</li>
+<li>$\text{AutoregressiveNN}[*](\mathbf{z,h;\theta})$: autoregressive networks, with input $\mathbf{h}$</li>
+<li>let $l$ denote the scalar value of $\log q(\mathbf{z} \vert \mathbf{x})$, evaluated at sample $\mathbf{z}$</li>
+</ul>
+<p><strong>IAF algorithm</strong>:</p>
+<ol>
+<li>$[\mathbf{\mu},\sigma, \mathbf{h}] \leftarrow$ EncoderNN$(\mathbf{x; \theta})$</li>
+<li>$\mathbf{\epsilon} \sim \mathcal{N}(0, I)$</li>
+<li>$\mathbf{z} \leftarrow \sigma \odot \epsilon + \mu$</li>
+<li>$l \leftarrow -\text{ sum}(\log \sigma + \frac{1}{2}\epsilon^2) + \frac{1}{2}\log(2\pi)$</li>
+<li>for $t = {1,\cdots, T}$:<ol>
+<li>$[\mathbf{m}, \mathbf{s}] \rightarrow \text{AutoregressiveNN}[t](\mathbf{z,h;\theta})$</li>
+<li>$\sigma \leftarrow \text{sigmoid}(\mathbf{s})$</li>
+<li>$\mathbf{z} \leftarrow \sigma \odot \mathbf{z} + (1-\sigma) \odot \mathbf{m}$</li>
+<li>$l \leftarrow -\text{sum}(\log \sigma) + l$</li>
+</ol>
+</li>
+</ol>
+<h2 id="AF-vs-IAF"><a href="#AF-vs-IAF" class="headerlink" title="AF vs IAF"></a>AF vs IAF</h2><p><strong>AF</strong>:</p>
+<ul>
+<li>Fast evaluation of $p(x)$ for arbitrary $x$</li>
+<li>Slow sampling</li>
+</ul>
+<p><strong>IAF</strong>:</p>
+<ul>
+<li>Slow evaluation of $p(x)$ for arbitrary $x$, so training directly by MLE is slow</li>
+<li>Fast sampling</li>
+<li>Fast evaluation of $p(x)$ if $x$ is a sample</li>
+</ul>
+<p>Parallel WaveNet, IAF-VAE exploit IAF’s fast sampling.</p>
+<h1 id="Glow"><a href="#Glow" class="headerlink" title="Glow"></a>Glow</h1><p>Glow<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kingma, D.P., & Dhariwal, P. (2018). [Glow: Generative Flow with Invertible 1x1 Convolutions](https://arxiv.org/pdf/1807.03039.pdf). NeurIPS.
+">[9]</span></a></sup></p>
+<ul>
+<li>Activation norm</li>
+<li>Invertible 1x1 convolution</li>
+<li>Affine coupling layers</li>
+</ul>
+<p><img data-src="/notes/images/Glow.png" alt="upload successful"></p>
+<h1 id="Flow"><a href="#Flow" class="headerlink" title="Flow++"></a>Flow++</h1><p>Flow++<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, J., Chen, X., Srinivas, A., Duan, Y., & Abbeel, P. (2019). [Flow++: Improving Flow-Based Generative Models with Variational Dequantization and Architecture Design](https://arxiv.org/pdf/1902.00275.pdf). ICML.
+">[10]</span></a></sup></p>
+<ul>
+<li>Dequantization via VI</li>
+<li>Improved coupling layers<ul>
+<li>Apply CDF for a mixture of $K$ logistics</li>
+<li>stacking conv and multi-head self-attention</li>
+</ul>
+</li>
+</ul>
+<!--
+todo:
+1. 
+-->
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Dinh, L., Krueger, D., &amp; Bengio, Y. (2014). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1410.8516.pdf">NICE: Non-linear Independent Components Estimation</a>. CoRR, abs/1410.8516.<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Dinh, L., Sohl-Dickstein, J., &amp; Bengio, S. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1605.08803.pdf">Density estimation using Real NVP</a>. ArXiv, abs/1605.08803.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://drive.google.com/file/d/1S9reenpExqKzkGz7kZ8JBbAJcJt1E7dP/view">CS294-158 Lecture 2c+3a slides</a><a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://ermongroup.github.io/cs228-notes/inference/sampling/">CS228 notes: sampling methods</a><a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rezende, D.J., &amp; Mohamed, S. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1505.05770.pdf">Variational Inference with Normalizing Flows</a>. ArXiv, abs/1505.05770.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, X., Kingma, D.P., Salimans, T., Duan, Y., Dhariwal, P., Schulman, J., Sutskever, I., &amp; Abbeel, P. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1611.02731.pdf">Variational Lossy Autoencoder</a>. ArXiv, abs/1611.02731.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Papamakarios, G., Murray, I., &amp; Pavlakou, T. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1705.07057.pdf">Masked Autoregressive Flow for Density Estimation</a>. NIPS.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kingma, D.P., Salimans, T., &amp; Welling, M. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1606.04934.pdf">Improved Variational Inference with Inverse Autoregressive Flow</a>. ArXiv, abs/1606.04934.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kingma, D.P., &amp; Dhariwal, P. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1807.03039.pdf">Glow: Generative Flow with Invertible 1x1 Convolutions</a>. NeurIPS.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ho, J., Chen, X., Srinivas, A., Duan, Y., &amp; Abbeel, P. (2019). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1902.00275.pdf">Flow++: Improving Flow-Based Generative Models with Variational Dequantization and Architecture Design</a>. ICML.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Müller, T., McWilliams, B., Rousselle, F., Gross, M., &amp; Novák, J. (2018). <a target="_blank" rel="noopener" href="http://dl.acm.org/citation.cfm?id=3341156">Neural Importance Sampling</a>. ACM Trans. Graph., 38, 145:1-145:19.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Grathwohl, W., Chen, R.T., Bettencourt, J., Sutskever, I., &amp; Duvenaud, D. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1810.01367.pdf">FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models</a>. ArXiv, abs/1810.01367.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Huang, C., Krueger, D., Lacoste, A., &amp; Courville, A.C. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1804.00779.pdf">Neural Autoregressive Flows</a>. ArXiv, abs/1804.00779.<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Oord, A.V., Li, Y., Babuschkin, I., Simonyan, K., Vinyals, O., Kavukcuoglu, K., Driessche, G.V., Lockhart, E., Cobo, L.C., Stimberg, F., Casagrande, N., Grewe, D., Noury, S., Dieleman, S., Elsen, E., Kalchbrenner, N., Zen, H., Graves, A., King, H., Walters, T., Belov, D., &amp; Hassabis, D. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1711.10433.pdf">Parallel WaveNet: Fast High-Fidelity Speech Synthesis</a>. ArXiv, abs/1711.10433.<a href="#fnref:14" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Unsupervised-learning/" rel="tag"># Unsupervised learning</a>
+              <a href="/notes/tags/Likelihood-based-models/" rel="tag"># Likelihood-based models</a>
+              <a href="/notes/tags/Flow-models/" rel="tag"># Flow models</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/12/17/Generative/Likelihood-based-autoregressive-models/" rel="prev" title="Likelihood-based Generative Models I: Autoregressive Models">
+      <i class="fa fa-chevron-left"></i> Likelihood-based Generative Models I: Autoregressive Models
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/12/22/Algorithms/Bloom-filter/" rel="next" title="An Introduction to Bloom Filter">
+      An Introduction to Bloom Filter <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Flows-explanation"><span class="nav-number">1.</span> <span class="nav-text">Flows explanation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Flows-in-1D"><span class="nav-number">1.1.</span> <span class="nav-text">Flows in 1D</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flows-in-high-dimensions"><span class="nav-number">1.2.</span> <span class="nav-text">Flows in high dimensions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Training"><span class="nav-number">1.2.1.</span> <span class="nav-text">Training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Constructing-flows-composition"><span class="nav-number">1.2.2.</span> <span class="nav-text">Constructing flows: composition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Affine-flows-multivariate-Gaussian"><span class="nav-number">1.2.3.</span> <span class="nav-text">Affine flows (multivariate Gaussian)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Elementwise-flows"><span class="nav-number">1.2.4.</span> <span class="nav-text">Elementwise flows</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#More-flow-types"><span class="nav-number">1.2.5.</span> <span class="nav-text">More flow types</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NICE"><span class="nav-number">2.</span> <span class="nav-text">NICE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Coupling-layer"><span class="nav-number">2.1.</span> <span class="nav-text">Coupling layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Additive-coupling-layer"><span class="nav-number">2.1.1.</span> <span class="nav-text">Additive coupling layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RealNVP"><span class="nav-number">3.</span> <span class="nav-text">RealNVP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Affine-coupling-layer"><span class="nav-number">3.1.</span> <span class="nav-text">Affine coupling layer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Masked-convolution"><span class="nav-number">3.2.</span> <span class="nav-text">Masked convolution</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Autoregressive-flows"><span class="nav-number">4.</span> <span class="nav-text">Autoregressive flows</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Variational-lossy-autoencoder-VLAE"><span class="nav-number">4.1.</span> <span class="nav-text">Variational lossy autoencoder (VLAE)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Masked-autoregressive-flow-MAF"><span class="nav-number">4.2.</span> <span class="nav-text">Masked autoregressive flow (MAF)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inverse-autoregressive-flow-IAF"><span class="nav-number">5.</span> <span class="nav-text">Inverse autoregressive flow (IAF)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pseudocode"><span class="nav-number">5.1.</span> <span class="nav-text">Pseudocode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AF-vs-IAF"><span class="nav-number">5.2.</span> <span class="nav-text">AF vs IAF</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Glow"><span class="nav-number">6.</span> <span class="nav-text">Glow</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flow"><span class="nav-number">7.</span> <span class="nav-text">Flow++</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/12/22/Generative/Likelihood-based-generative-flow-models/";
+    this.page.identifier = "2019/12/22/Generative/Likelihood-based-generative-flow-models/";
+    this.page.title = "Likelihood-based Generative Models II: Flow  Models";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

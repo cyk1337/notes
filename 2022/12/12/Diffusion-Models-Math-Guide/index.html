@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A diffusion probabilistic model is a parameterized Markov chain trained to reverse a predefined forward process, closely related to both likelihood-based optimization and score matching. The forward d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Diffusion Models: A Mathematical Note from Scratch">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2022/12/12/Diffusion-Models-Math-Guide/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="A diffusion probabilistic model is a parameterized Markov chain trained to reverse a predefined forward process, closely related to both likelihood-based optimization and score matching. The forward d">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/diffusion_swiss_roll.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Diffusion-process.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/DDpM-training.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/DDPM%20sampling%20process.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/v-objective-diffusion-vis.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/diffusion-v-objective-training-alg.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/classifier-guided-diffusion.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/D3PM.png">
+<meta property="article:published_time" content="2022-12-11T16:44:00.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.829Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="Diffusion Models">
+<meta property="article:tag" content="ML">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/diffusion_swiss_roll.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2022/12/12/Diffusion-Models-Math-Guide/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Diffusion Models: A Mathematical Note from Scratch | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2022/12/12/Diffusion-Models-Math-Guide/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Diffusion Models: A Mathematical Note from Scratch
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-12-12 00:44:00" itemprop="dateCreated datePublished" datetime="2022-12-12T00:44:00+08:00">2022-12-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Diffusion-Models/" itemprop="url" rel="index"><span itemprop="name">Diffusion Models</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/Diffusion-Models/ML/" itemprop="url" rel="index"><span itemprop="name">ML</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2022/12/12/Diffusion-Models-Math-Guide/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2022/12/12/Diffusion-Models-Math-Guide/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A diffusion probabilistic model is a parameterized Markov chain trained to reverse a predefined forward process, closely related to both likelihood-based optimization and score matching. The forward diffusion process is a stochastic process constructed to gradually corrupt the original data into random nose.</p>
+<span id="more"></span>
+<!--## Summary-->
+<h1 id="Gaussian-Diffusion-Continuous"><a href="#Gaussian-Diffusion-Continuous" class="headerlink" title="Gaussian Diffusion (Continuous)"></a>Gaussian Diffusion (Continuous)</h1><p>Diffusion models <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Sohl-Dickstein, Jascha, et al. [Deep Unsupervised Learning Using Nonequilibrium Thermodynamics](https://arxiv.org/abs/1503.03585). ICML 2015">[1]</span></a></sup><sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020">[2]</span></a></sup> are latent variable models inspired by the non-equilibrium statistical physics ( thermodynamics) that gradually destroy structure in data distribution through an iterative forward diffusion process, and then learn a reversal process to recover the original data structure through iterative denoising. </p>
+<div class="note info">
+            <p>Diffusion models can be treated as a Markovian Hierarchical Variational Autoencoder with three restrictions:<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Luo, C. (2022). [Understanding diffusion models: A unified perspective](https://arxiv.org/pdf/2208.11970). arXiv preprint arXiv:2208.11970.">[6]</span></a></sup></p><ol><li>The latent dimension is the same as the original data.</li><li>The encoder is not learned, instead uses a (pre-defined) linear Gaussian model.</li><li>The latent in final timestep $T$ is an isotropic Gaussian.</li></ol>
+          </div>
+<h2 id="Forward-Diffusion-process"><a href="#Forward-Diffusion-process" class="headerlink" title="Forward (Diffusion) process"></a>Forward (Diffusion) process</h2><p>Given a data point sampled from the data distribution $\mathbf{x}_0 \sim q(\mathbf{x})$. The forward diffusion process gradually applied a (<em>fixed</em>) <strong>linear Gaussian model</strong> at each timestep $t$ out of $T$ steps:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N} (\mathbf{x}_t; \sqrt{1-\beta_t} \mathbf{x}_{t-1}, \beta_t \mathbf{I})
+\end{align}</script><p>where the forward diffusion transitions produce a series of gradually noisy samples  $\mathbf{x}_1, \cdots, \mathbf{x}_T$. Each noisy sample has the exactly same dimension as the original data point $\mathbf{x}_0$. </p>
+<p>Under the Markovian assumption, the Gaussian noise is gradually added to examples from previous timestep, with the variance schedule <script type="math/tex">\{\beta_t \in (0, 1) \}_{t=1}^T</script>. Given a large number of $T \rightarrow \infty$, $\mathbf{x}_T$ can ideally be an isotropic Gaussian noise.  </p>
+<p><img data-src="/notes/images/diffusion_swiss_roll.png" alt="1st row: (fixed) forward process; 2nd row: (trained) reverse trajectory; Last row: drift term.&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Sohl-Dickstein, Jascha, et al. [Deep Unsupervised Learning Using Nonequilibrium Thermodynamics](https://arxiv.org/abs/1503.03585). ICML 2015&quot;&gt;[1]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt; "></p>
+<p>Let $\alpha_t = 1 - \beta_t$, the linear Gaussian model in the forward process is rewritten as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N} (\mathbf{x}_t; \sqrt{\alpha_t} \mathbf{x}_{t-1}, (1-\alpha_t) \mathbf{I})
+\end{align}</script><p>Under the reparameterization trick, samples <script type="math/tex">\mathbf{x}_t \sim q (\mathbf{x}_t | \mathbf{x}_{t-1})</script> can be rewritten as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{x}_t = \sqrt{\alpha_t} \mathbf{x}_{t-1} + \sqrt{1-\alpha_t} \pmb{\epsilon} \,\,\,\, \text{with } \,\,\,\, \pmb{\epsilon}\sim \mathcal{N} (\pmb{\epsilon}; \mathbf{0},\mathbf{I})
+\end{align}</script><p>In similar vein, samples $\mathbf{x}_{t-1}$ can be rewritten as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{x}_{t-1} = \sqrt{\alpha_{t-1}} \mathbf{x}_{t-2} + \sqrt{1-\alpha_{t-1}} \pmb{\epsilon} \,\,\,\, \text{with } \,\,\,\, \pmb{\epsilon}\sim \mathcal{N} (\pmb{\epsilon}; \mathbf{0},\mathbf{I})
+\end{align}</script><p>Let <script type="math/tex">\bar{\alpha}_t = \prod_{i=1}^t \alpha_i</script>. Usually, the update step gets larger as the timestep increases, <em>i.e.</em>, $\beta_1 &lt; \beta_2 &lt; \cdots &lt; \beta_T$ and thus $\bar{\alpha}_1 &gt; \bar{\alpha}_2 &gt; \cdots \bar{\alpha}_T$.</p>
+<p>Suppose we have $2T$ random noise variables <script type="math/tex">\{ \pmb{\epsilon}_t, \bar{\pmb{\epsilon}}_t \}_{t=1}^T \overset{\text{i.i.d}}{\sim} \mathcal{N} (\pmb{\epsilon}; \mathbf{0},\mathbf{I})</script>. </p>
+<p>For an arbitrary sample $\mathbf{x}_t \sim q(\mathbf{x}_t | \mathbf{x}_0)$, we have:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{x}_t &{}= \sqrt{\alpha_t} \mathbf{x}_{t-1} + \sqrt{1-\alpha_t} \pmb{\epsilon}_{t-1}  \\
+&{}= \sqrt{\alpha_t} (\sqrt{\alpha_{t-1}} \mathbf{x}_{t-2} + \sqrt{1-\alpha_{t-1}} \pmb{\epsilon}_{t-2}) + \sqrt{1-\alpha_{t}} \pmb{\epsilon}_{t-1} \nonumber \\
+&{}= \sqrt{\alpha_t \alpha_{t-1}} \mathbf{x}_{t-2} + \sqrt{\alpha_t- \alpha_t \alpha_{t-1}} \pmb{\epsilon}_{t-2} + \sqrt{1-\alpha_{t}} \pmb{\epsilon}_{t-1} \nonumber \\
+&{}= \sqrt{\alpha_t \alpha_{t-1}} \mathbf{x}_{t-2} + \sqrt{\sqrt{\alpha_t- \alpha_t \alpha_{t-1}}^2 + \sqrt{1-\alpha_{t}}^2 } \bar{\pmb{\epsilon}}_{t-2})  \nonumber \\
+&{}= \sqrt{\alpha_t \alpha_{t-1}} \mathbf{x}_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \bar{\pmb{\epsilon}}_{t-2})\\
+&{}= \cdots \nonumber \\
+&{}= \sqrt{\prod_{i=1}^t \alpha_i \mathbf{x}_0} + \sqrt{1 - \prod_{i=1}^t \alpha_i \pmb{\epsilon}_0} \\
+&{}= \color{blue}{\sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1-\bar{\alpha}_t} \bar{\pmb{\epsilon}}_0} \label{forward_add_noise} \\
+&{} \sim \mathcal{N} (\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1-\bar{\alpha}_t) \mathbf{I}) \label{noise_process}
+\end{align}</script><p>Therefore, the linear Gaussian form is derived as: <script type="math/tex">q(\mathbf{x}_t | \mathbf{x}_0) \sim \mathcal{N} (\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1-\bar{\alpha}_t) \mathbf{I})</script>.</p>
+<h2 id="Reverse-process"><a href="#Reverse-process" class="headerlink" title="Reverse process"></a>Reverse process</h2><p>The reverse diffusion process, with the form <script type="math/tex">p_\theta(\mathbf{x}_0) := \int p_\theta (\mathbf{x}_{0:T} d \mathbf{x}_{1:T})</script>, learns the reversal of diffusion process by gradually denoising from timestep T to 1. The reverse process is defined as a Markov chain with learned Gaussian transitions starting at $p(\mathbf{x}_T) = \mathcal{N}(\mathbf{x}_T; \mathbf{0}, \mathbf{I})$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+p_\theta (\mathbf{x}_{0:T}) &{}:= p(\mathbf{x}_T) \prod_{t=1}^T  p_\theta (\mathbf{x}_{t-1}\vert \mathbf{x}_t) \\
+p_\theta (\mathbf{x}_{t-1}|\mathbf{x}_{t}) &{} := \mathcal{N} (\mathbf{x}_{t-1}; \pmb{\mu}_\theta (\mathbf{x}_{t},t), \pmb{\Sigma}_\theta (\mathbf{x}_{t}, t))
+\end{align}</script><p><img data-src="/notes/images/Diffusion-process.png" alt="Diffusion process.&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020&quot;&gt;[2]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt;"></p>
+<p>Therefore, we can derive the Gussian form of both <script type="math/tex">q(\mathbf{x}_t | \mathbf{x}_0)</script> and <script type="math/tex">q(\mathbf{x}_{t-1} | \mathbf{x}_0)</script>. Using Bayes rule, we have:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0) &{}= \frac{q(\mathbf{x}_t | \mathbf{x}_{t-1}, \mathbf{x}_0) \cdot q(\mathbf{x}_{t-1} | \mathbf{x}_0)}{q(\mathbf{x}_t | \mathbf{x}_0)} \\
+&{}= \frac{\mathcal{N} (\mathbf{x}_t; \sqrt{\alpha_t} \mathbf{x}_0, (1-\alpha_t) \mathbf{I}) \cdot \mathcal{N} (\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0, (1-\bar{\alpha}_{t-1}) \mathbf{I})}{\mathcal{N} (\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1-\bar{\alpha}_t) \mathbf{I})} \\
+&{}\propto \exp \big\{ -\frac{1}{2} ( \frac{(\mathbf{x}_t - \sqrt{\alpha} \mathbf{x}_{t-1})^2}{1-\alpha_t} + \frac{(\mathbf{x}_{t-1} - \sqrt{\bar{\alpha}_{t-1}}\mathbf{x}_0)^2}{1-\bar{\alpha}_{t-1}} + \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} ) \big\} \\
+&{}= \exp \big\{ -\frac{1}{2} (\frac{-2\sqrt{\alpha_t} \mathbf{x}_t \mathbf{x}_{t-1} + \alpha_t \mathbf{x}_{t-1}^2 }{ 1 - \alpha_t} ) +  \frac{\mathbf{x}_{t-1}^2 - 2 \sqrt{\bar{\alpha}_{t-1}}\mathbf{x}_{t-1}\mathbf{x}_0}{1-\bar{\alpha}_{t-1}}   + C(\mathbf{x}_t, \mathbf{x}_0) \big\} \\
+&{}\propto \exp\Big\{ -\frac{1}{2} \big( (\frac{\alpha_t}{1-\alpha_t} + \frac{1}{1 - \bar{\alpha}_{t-1}}) \mathbf{x}_{t-1}^2 - 2(\frac{\sqrt{\alpha_t}}{1-\alpha_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0) \mathbf{x}_{t-1}   \big) \Big\} \\
+&{}= \exp\Big\{ -\frac{1}{2} (\frac{1}{\frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}})
+  \Big[ \mathbf{x}_{t-1}^2 - 2\frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t)\mathbf{x}_0 }{1-\bar{\alpha}_t} \mathbf{x}_{t-1}\Big] \Big\} \\
+&{}\propto \mathcal{N}\Big(\mathbf{x}_{t-1}; \underbrace{\frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t)\mathbf{x}_0 }{1-\bar{\alpha}_t}}_{\color{blue}{\pmb{\mu}(\mathbf{x}_t, \mathbf{x}_0)}}, \underbrace{\frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}}_{\color{green}{\pmb{\Sigma}_q(t)}} \Big) 
+\label{mu}
+\end{align}</script><p>In each timestep, <script type="math/tex">\mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0)</script> follows the Gaussian distribution. The mean <script type="math/tex">\pmb{\mu}(\mathbf{x}_t, \mathbf{x}_0)</script> is a function of <script type="math/tex">\mathbf{x}_t</script> and <script type="math/tex">\mathbf{x}_0</script>, and <script type="math/tex">\pmb{\Sigma}_q(t)</script> is a function of $\alpha$ coefficient (either as hyperparameter or learned with neural networks). The variance can be formulated as: <script type="math/tex">\pmb{\Sigma}_q (t) = \sigma^2_q (t) \mathbf{I}</script>, where <script type="math/tex">\sigma^2=\frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}</script>.</p>
+<p>Since <script type="math/tex">p_\theta(\mathbf{x}_{t-1} | \mathbf{x}_t)</script> does not condition on <script type="math/tex">\mathbf{x}_0</script>, we thus optimize the KL divergence between the means of two Gaussians:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( q(\mathbf{x}_{t-1}\vert \mathbf{x}_t, \mathbf{x}_0) \Vert p_\theta (\mathbf{x}_{t-1} \Vert \mathbf{x}_t) \Big) \\
+= &{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_q, \pmb{\Sigma}_q(t) \big) \Vert \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_\theta, \pmb{\Sigma}_q(t) \big)
+\Big) \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2} \Big[ \log \frac{|\pmb{\Sigma}_q (t)|}{| \pmb{\Sigma}_q (t)|} -d + \text{tr} (\pmb{\Sigma}_q (t)^{-1} \Sigma_q (t)) + (\pmb{\mu}_\theta - \pmb{\mu}_q)^T \pmb{\Sigma}_q (t)^{-1} (\pmb{\mu}_\theta - \pmb{\mu}_q) \Big] \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2} \Big[ \log 1 -d + d + (\pmb{\mu}_\theta - \pmb{\mu}_q)^T \pmb{\Sigma}_q (t)^{-1} (\pmb{\mu}_\theta - \pmb{\mu}_q) \Big] \\
+= &{}\mathop{\arg\min}_\theta \;\frac{1}{2} \Big[ (\pmb{\mu}_\theta - \pmb{\mu}_q)^T \Sigma_q (t)^{-1} (\pmb{\mu}_\theta - \pmb{\mu}_q) \Big] \\
+= &{}\mathop{\arg\min}_\theta \;\frac{1}{2} \Big[ (\pmb{\mu}_\theta - \pmb{\mu}_q)^T (\sigma_q^2 (t)\mathbf{I})^{-1} (\pmb{\mu}_\theta - \pmb{\mu}_q) \Big] \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2 \sigma_q^2 (t)} \Vert \pmb{\mu}_\theta - \pmb{\mu}_q \Vert_2^2 \label{kl}
+\end{align}</script><p>Given Eq.$\eqref{mu}$, we have:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\pmb{\mu}_q (\mathbf{x}_t, \mathbf{x}_0) &{}= \frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \color{green}{\mathbf{x}_0} }{1-\bar{\alpha}_t} \label{mu_q}  \\
+\pmb{\mu}_\theta (\mathbf{x}_t, t) &{}= \frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \color{blue}{\hat{\mathbf{x}}_\theta (\mathbf{x}_t, t)} }{1-\bar{\alpha}_t}  \label{mu_theta} \\
+\end{align}</script><p>Therefore, Eq.$\eqref{kl}$ can be rewritten as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( q(\mathbf{x}_{t-1}\vert \mathbf{x}_t, \mathbf{x}_0) \Vert p_\theta (\mathbf{x}_{t-1} \Vert \mathbf{x}_t) \Big) \\
+= &{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_q, \pmb{\Sigma}_q(t) \big) \Vert \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_\theta, \pmb{\Sigma}_q(t) \big)
+\Big) \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2\sigma_q^2 (t)} \big\Vert \frac{\sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \hat{\mathbf{x}}_\theta (\mathbf{x}_t, t) }{1-\bar{\alpha}_t} - \frac{\sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \mathbf{x}_0 }{1-\bar{\alpha}_t}    \big\Vert_2^2 \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2\sigma_q^2 (t)} \big\Vert \frac{\sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) }{1-\bar{\alpha}_t} (\hat{\mathbf{x}}_\theta (\mathbf{x}_t, t) - \mathbf{x}_0)  \big\Vert_2^2 \\
+= &{}\mathop{\arg\min}_\theta \; \frac{1}{2\sigma_q^2 (t)}  \frac{\bar{\alpha}_{t-1}(1-\alpha_t)^2 }{(1-\bar{\alpha}_t)^2} \big\Vert (\hat{\mathbf{x}}_\theta (\mathbf{x}_t, t) - \mathbf{x}_0)  \big\Vert_2^2  \label{loss_mu}
+\end{align}</script><div class="note info">
+            <p>Intuitive understanding towards the diffusion process<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Sohl-Dickstein, Jascha, et al. [Deep Unsupervised Learning Using Nonequilibrium Thermodynamics](https://arxiv.org/abs/1503.03585). ICML 2015">[1]</span></a></sup><sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Luo, C. (2022). [Understanding diffusion models: A unified perspective](https://arxiv.org/pdf/2208.11970). arXiv preprint arXiv:2208.11970.">[6]</span></a></sup>.</p><script type="math/tex; mode=display">\begin{align}\log p(\mathbf{x}) &{}=  \log \int p(\mathbf{x}_{0:T}) d \mathbf{x}_{1:T} \\&{}= \log \int \frac{ p(\mathbf{x}_{0:T}) q(\mathbf{x}_{1:T} | \mathbf{x}_0)}{q(\mathbf{x}_{1:T} | \mathbf{x}_0)} d \mathbf{x}_{1:T} \\&{}= \log \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \frac{p(\mathbf{x}_{0:T}) }{q(\mathbf{x}_{1:T}|\mathbf{x}_0)} \Big] \\&{} \geq \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{p(\mathbf{x}_{0:T}) }{q(\mathbf{x}_{1:T}|\mathbf{x}_0)} \Big] \\&{} =\mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{p(\mathbf{x}_{T}) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1}|\mathbf{x}_t) }{\prod_{t=1}^T q(\mathbf{x}_t |\mathbf{x}_{t-1})} \Big] \\&{} = \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{p(\mathbf{x}_{T}) p_\theta( \mathbf{x}_0 | \mathbf{x}_1) \prod_{t=2}^T p_\theta(\mathbf{x}_{t-1}|\mathbf{x}_t) }{q(\mathbf{x}_T |\mathbf{x}_{T-1}) \prod_{t=1}^{T-1} q(\mathbf{x}_t |\mathbf{x}_{t-1})} \Big] \\&{} = \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{p(\mathbf{x}_{T}) p_\theta ( \mathbf{x}_0 | \mathbf{x}_1) \prod_{t=1}^{T-1} p_\theta(\mathbf{x}_{t}|\mathbf{x}_{t+1}) }{q(\mathbf{x}_T |\mathbf{x}_{T-1}) \prod_{t=1}^{T-1} q(\mathbf{x}_t |\mathbf{x}_{t-1})} \Big] \\&{} = \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log p_\theta( \mathbf{x}_0 | \mathbf{x}_1) \Big] + \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{\log p(\mathbf{x}_T)}{q(\mathbf{x}_T |\mathbf{x}_{T-1})} \Big] + \nonumber \\ &{} \qquad\qquad\qquad \quad\quad    \sum_{t=1}^{T-1} \mathbb{E}_{q(\mathbf{x}_{1:T}|\mathbf{x}_0) }\Big[ \log \frac{p_\theta (\mathbf{x}_t \vert \mathbf{x}_{t+1}) }{ q (\mathbf{x}_t \vert \mathbf{x}_{t-1}) } \Big]\\&{} = \mathbb{E}_{q(\mathbf{x}_{1}|\mathbf{x}_0) }\Big[ \log p_\theta( \mathbf{x}_0 | \mathbf{x}_1) \Big] + \mathbb{E}_{q(\mathbf{x}_{T-1}, \mathbf{x}_{T}|\mathbf{x}_0) }\Big[ \log \frac{\log p(\mathbf{x}_T)}{q(\mathbf{x}_T |\mathbf{x}_{T-1})} \Big] + \nonumber \\ &{} \qquad\qquad\qquad \quad\quad    \sum_{t=1}^{T-1} \mathbb{E}_{q(\mathbf{x}_{t-1}, \mathbf{x}_{t}, \mathbf{x}_{t+1}|\mathbf{x}_0) }\Big[ \log \frac{p_\theta (\mathbf{x}_t \vert \mathbf{x}_{t+1}) }{ q (\mathbf{x}_t \vert \mathbf{x}_{t-1}) } \Big] \\&{} = \underbrace{\mathbb{E}_{q(\mathbf{x}_{1}|\mathbf{x}_0) }\Big[ \log p_\theta( \mathbf{x}_0 | \mathbf{x}_1) \Big]}_{\text{reconstruction}} + \underbrace{\mathbb{E}_{q(\mathbf{x}_{T-1} |\mathbf{x}_0) } \Big[ \mathbb{KL}(q(\mathbf{x}_T |\mathbf{x}_{T-1}) \vert \log p(\mathbf{x}_T)) \Big]}_{\text{prior matching} \rightarrow 0} + \nonumber \\ &{} \qquad\qquad\qquad \quad\quad    \underbrace{\sum_{t=1}^{T-1} \mathbb{E}_{q(\mathbf{x}_{t-1}, \mathbf{x}_{t}, \mathbf{x}_{t+1}|\mathbf{x}_0) }\Big[ \log \frac{p_\theta (\mathbf{x}_t \vert \mathbf{x}_{t+1}) }{ q (\mathbf{x}_t \vert \mathbf{x}_{t-1}) } \Big]}_{\text{consistency}}\end{align}</script><ol><li>The reconstruction term corresponds to the first-step optimization.</li><li>The prior matching term does not contain trainable parameters, requiring no optimization.</li><li>The consistency term makes the denoising process at timestep $t$ match the corresponding diffusion step from a cleaner input.</li></ol><p>The ELBO objective is thus approximated across all noise levels over the expection of all timesteps.</p>
+          </div>
+<h2 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h2><p>The ELBO objective can be derived as <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Weng, Lilian. (Jul 2021). What are diffusion models? Lil’Log. [https://lilianweng.github.io/posts/2021-07-11-diffusion-models/](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/).">[7]</span></a></sup></p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_\text{VLB}  &{}= - \log p_\theta(\mathbf{x}_0) \\
+&\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) \\
+&= -\log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
+&= -\log p_\theta(\mathbf{x}_0) + \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
+&= \mathbb{E}_q \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= \mathbb{E}_q \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{q(\mathbf{x}_1 \vert \mathbf{x}_0)} + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]\\
+&= \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \Big] \\
+&= \mathbb{E}_q [\underbrace{D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))}_{L_T} + \sum_{t=2}^T \underbrace{D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))}_{L_{t-1}} \underbrace{- \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)}_{L_0} ]
+\end{align}</script><div class="note info">
+            <p>The training of diffusion process can be implemented by learning a neural network to predict either of following three formats (given a arbitrary noised version <script type="math/tex">\mathbf{x}_t</script>):</p><ol><li>The original natural input <script type="math/tex">\mathbf{x}_0</script>. See Eq.$\eqref{loss_mu}$.<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Luo, C. (2022). [Understanding diffusion models: A unified perspective](https://arxiv.org/pdf/2208.11970). arXiv preprint arXiv:2208.11970.">[6]</span></a></sup> empirically finds it leads to worse sampling quality early.</li><li>The source noise $\pmb{\epsilon}_0$ ($\pmb{\epsilon}$-prediction parameterization). <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020">[2]</span></a></sup></li><li>The score of input at an arbitrary noise level <script type="math/tex">\nabla \log p(\mathbf{x}_t)</script>. <sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang Song & Stefano Ermon. [Generative modeling by estimating gradients of the data distribution](https://proceedings.neurips.cc/paper/2019/file/3001ef257407d5a371a96dcd947c7d93-Paper.pdf). NeurIPS 2019.">[8]</span></a></sup></li><li>The velocity of diffusion latents <script type="math/tex">\mathbf{x}_t</script>.  <sup id="fnref:19"><a href="#fn:19" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Salimans, Tim and Jonathan Ho. [Progressive Distillation for Fast Sampling of Diffusion Models](https://arxiv.org/pdf/2202.00512.pdf). ICLR 2022.">[19]</span></a></sup></li></ol>
+          </div>
+<h3 id="pmb-epsilon-prediction-parameterization"><a href="#pmb-epsilon-prediction-parameterization" class="headerlink" title="$\pmb{\epsilon}$-prediction parameterization"></a>$\pmb{\epsilon}$-prediction parameterization</h3><p>We arrange the Eq.$\eqref{noise_process}$ as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{x}_0 = \frac{\mathbf{x}_t - \sqrt{1-\bar{\alpha}_t}\pmb{\epsilon}_t}{\sqrt{\bar{\alpha}_t}} \label{denoise}
+\end{align}</script><p>Plugging Eq.$\eqref{denoise}$ into the denoising transition mean in Eq.$\eqref{mu_q}$, we have:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\pmb{\mu}_q (\mathbf{x}_t, \mathbf{x}_0) &{}= \frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \color{green}{\mathbf{x}_0} }{1-\bar{\alpha}_t} \\
+&{}= \frac{\sqrt{\alpha_t} (1-\bar{\alpha}_{t-1})\mathbf{x}_t + \sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t) \color{grey}{\frac{\mathbf{x}_t - \sqrt{1-\bar{\alpha}_t}\pmb{\epsilon}_t}{\sqrt{\bar{\alpha}_t}}} }{1-\bar{\alpha}_t} \\
+&{}= \frac{1}{\sqrt{\alpha_t}} \mathbf{x}_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\pmb{\epsilon}_t \label{eps_q}
+\end{align}</script><p>Similarly, the approximate denoising transition mean <script type="math/tex">\hat{\pmb{\epsilon}}_\theta (\mathbf{x}_t, t)</script> is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\pmb{\mu}_\theta (\mathbf{x}_t, t) 
+&{}= \frac{1}{\sqrt{\alpha_t}} \mathbf{x}_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\hat{\pmb{\epsilon}}_t(\mathbf{x}_t, t) \label{eps_theta}
+\end{align}</script><p>Plugging the Eq.$\eqref{eps_q}$ and $\eqref{eps_theta}$ into Eq.$\eqref{kl}$, we can write:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( q(\mathbf{x}_{t-1}\vert \mathbf{x}_t, \mathbf{x}_0) \Vert p_\theta (\mathbf{x}_{t-1} \Vert \mathbf{x}_t) \Big) \\
+= &{}\mathop{\arg\min}_\theta \; \mathbb{KL} \Big( \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_q, \pmb{\Sigma}_q(t) \big) \Vert \mathcal{N} \big( \mathbf{x}_{t-1}; \pmb{\mu}_\theta, \pmb{\Sigma}_q(t) \big)
+\Big) \\
+=&{}\mathop{\arg\min}_\theta \; \frac{1}{2 \sigma_q^2 (t)} \Vert \pmb{\mu}_\theta - \pmb{\mu}_q \Vert_2^2 \\
+=&{}\mathop{\arg\min}_\theta \;  \frac{1}{2 \sigma_q^2 (t)} \Vert \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\pmb{\epsilon}_t  -  \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\hat{\pmb{\epsilon}}_t(\mathbf{x}_t, t)  \Vert_2^2 \\
+=&{}\mathop{\arg\min}_\theta \;  \frac{1}{2 \sigma_q^2 (t)}  \frac{(1-\alpha_t)^2}{(1-\bar{\alpha}_t)\alpha_t} \Vert \pmb{\epsilon}_t  -  \hat{\pmb{\epsilon}}_t(\mathbf{x}_t, t) \Vert_2^2 \\
+=&{}\mathop{\arg\min}_\theta \;  \frac{1}{2 \sigma_q^2 (t)}  \frac{(1-\alpha_t)^2}{(1-\bar{\alpha}_t)\alpha_t} \Vert \pmb{\epsilon}_t  -  \pmb{\epsilon}_\theta ( \underbrace{\sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1-\bar{\alpha}_t} \pmb{\epsilon}_t}_{\text{Plugging Eq.\eqref{forward_add_noise}}} , t) \Vert_2^2 \label{loss_noise}
+\end{align}</script><p><strong>Simplified objective</strong>: <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020">[2]</span></a></sup> empirically find it better to remove the weighting term in Eq.$\eqref{loss_noise}$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\color{blue}{\mathcal{L}_\text{simple}} &{}=  \Vert \pmb{\epsilon}_t  -  \hat{\pmb{\epsilon}}_t(\mathbf{x}_t, t) \Vert_2^2 \\
+&{}= \Vert \pmb{\epsilon}_t  -  \pmb{\epsilon}_\theta ( \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1-\bar{\alpha}_t} \pmb{\epsilon}_t , t) \Vert_2^2
+\end{align}</script><p>The training objective resembles denoising score matching over multiple noise scales indexed by $t$. It can be treated as using variational inference to fit the finite-time marginal of a sampling chain resembling Langevin dynamics.</p>
+<p>The overall DDPM training algorithm is:</p>
+<p><img data-src="/notes/images/DDpM-training.png" alt="DDPM training process.&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020&quot;&gt;[2]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt;"></p>
+<p>The sampling process resembles Langevin dynamics with $\pmb{\epsilon}_\theta$ as a learned gradient of the data density.  </p>
+<p><img data-src="/notes/images/DDPM sampling process.png" alt="DDPM sampling process.&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Ho, Jonathan, et al. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). arXiv:2006.11239, arXiv, 16 Dec. 2020&quot;&gt;[2]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt;"></p>
+<h3 id="Velocity-prediction"><a href="#Velocity-prediction" class="headerlink" title="Velocity prediction"></a>Velocity prediction</h3><p><sup id="fnref:19"><a href="#fn:19" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Salimans, Tim and Jonathan Ho. [Progressive Distillation for Fast Sampling of Diffusion Models](https://arxiv.org/pdf/2202.00512.pdf). ICLR 2022.">[19]</span></a></sup> propose to parameterize the diffusion velocity by predicting the velocity of diffusion latents, by predicting <script type="math/tex">\mathbf{v} \equiv \alpha_t \epsilon - \sigma_t \mathbf{x}</script>, which gives <script type="math/tex">\hat{\mathbf{x}} = \alpha_t \mathbf{z}_t - \sigma_t \hat{\mathbf{x}}_\theta (\mathbf{z}_t)</script>.</p>
+<p>Let <script type="math/tex">\phi_t = \arctan (\sigma_t / \alpha_t)</script>, assumming a variance preserving diffusion process, we have <script type="math/tex">\alpha_\phi = \cos (\phi), \sigma_\phi = \sin (\phi)</script>, and hence <script type="math/tex">\mathbf{z}_\phi = \cos (\phi) \mathbf{x} + \sin (\phi) \epsilon</script>.</p>
+<p><sup id="fnref:19"><a href="#fn:19" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Salimans, Tim and Jonathan Ho. [Progressive Distillation for Fast Sampling of Diffusion Models](https://arxiv.org/pdf/2202.00512.pdf). ICLR 2022.">[19]</span></a></sup> thus define the velocity of <script type="math/tex">\mathbf{z}_\phi</script> as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{v}_\phi &{}\equiv \frac{d \mathbf{z}_\phi}{d \phi} \\
+&{}= \frac{d \cos (\phi)}{d \phi} \mathbf{x} + \frac{d \sin (\phi)}{d \phi} \epsilon \\
+&{}= \cos (\phi) \epsilon - \sin (\phi) \mathbf{x}
+\end{align}</script><p>By rearranging the $\epsilon$, $\mathbf{x}$, $\mathbf{v}$, we then get:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\sin (\phi) \mathbf{x} &{}= \cos(\phi) \epsilon - \mathbf{v}_\phi \\
+&{}= \frac{\cos(\phi)}{\sin(\phi)} (\mathbf{z} - \cos(\phi) \mathbf{x}) - \mathbf{v}_\phi \\
+\sin^2(\phi) \mathbf{x} &{}= \cos(\phi) \mathbf{z} - \cos^2(\phi)\mathbf{x} - \sin (\phi) \mathbf{v}_\phi \\
+(\sin^2(\phi) + \cos^2(\phi))\mathbf{x} &{}= \mathbf{x} = \cos(\phi) \mathbf{z} - \sin (\phi) \mathbf{v}_\phi
+\end{align}</script><p>We also get <script type="math/tex">\epsilon = \sin (\phi) \mathbf{z}_\phi + \cos (\phi)\mathbf{v}_\phi</script>.</p>
+<p>The predicted velocity is defined as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\hat{v}_\theta (\mathbf{z}_\phi) \equiv \cos(\phi) \hat{\epsilon}_\theta (\mathbf{z}_\phi) - \sin (\phi) \hat{\mathbf{x}}_\theta (\mathbf{z}_\phi) 
+\end{align}</script><p>where <script type="math/tex">\hat{\epsilon}_\theta (\mathbf{z}_\phi) = (\mathbf{z}_\phi - \cos(\phi)\hat{\mathbf{x}}_\theta (\mathbf{z}_\phi) ) / \sin(\phi)</script>.</p>
+<p><img data-src="/notes/images/v-objective-diffusion-vis.png" alt="The visualization of reparameterization in terms of $\phi$ and $\mathbf{v}_\phi$"></p>
+<p>Following algorithm illustrates the complete training process:</p>
+<p><img data-src="/notes/images/diffusion-v-objective-training-alg.png" alt="Training algorithm in &lt;sup id=&quot;fnref:19&quot;&gt;&lt;a href=&quot;#fn:19&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Salimans, Tim and Jonathan Ho. [Progressive Distillation for Fast Sampling of Diffusion Models](https://arxiv.org/pdf/2202.00512.pdf). ICLR 2022.&quot;&gt;[19]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt;"></p>
+<h2 id="Conditional-Generation"><a href="#Conditional-Generation" class="headerlink" title="Conditional Generation"></a>Conditional Generation</h2><p>For conditional generation, it includes classifier-guided or classifier-free methods. The  distinct difference is the existence of an extra classifier for condition guidance.</p>
+<h3 id="Classifier-Guidance"><a href="#Classifier-Guidance" class="headerlink" title="Classifier Guidance"></a>Classifier Guidance</h3><p><sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dhariwal, Prafulla, and Alex Nichol. [Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233). arXiv:2105.05233, arXiv, 1 June 2021">[4]</span></a></sup> utilized a trained classifier <script type="math/tex">f_\phi (y \vert \mathbf{x}_t,t)</script> on noisy image <script type="math/tex">\mathbf{x}_t</script> to obtain the gradients towards input <script type="math/tex">\nabla_\mathbf{x} \log f_\phi (y \vert \mathbf{x}_t)</script> to guide the sampling process using the condition $y$, such as the target class label. </p>
+<div class="note info">
+            <p>Given a Gaussian <script type="math/tex">\mathbf{x} \sim \mathcal{N}(\pmb{\mu}, \pmb{\sigma}^2\mathbf{I})</script>, the log derivative of the density function<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang Song & Stefano Ermon. [Generative modeling by estimating gradients of the data distribution](https://proceedings.neurips.cc/paper/2019/file/3001ef257407d5a371a96dcd947c7d93-Paper.pdf). NeurIPS 2019.">[8]</span></a></sup> is:</p><script type="math/tex; mode=display">\begin{align}\nabla_\mathbf{x} \log p(\mathbf{x}) &{}= \nabla_\mathbf{x} \Big( - \frac{1}{s\sigma^2} (\mathbf{x} - \pmb{\mu})^2 \Big) \\&{}= -\frac{\mathbf{x} - \pmb{\mu}}{\pmb{\sigma}^2} \\&{}= -\frac{\pmb{\epsilon}}{\pmb{\sigma}} \qquad \qquad\qquad \text{with}\qquad\pmb{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{1})\end{align}</script><p>Given Eq.$\eqref{noise_process}$, we have:</p><script type="math/tex; mode=display">\begin{align}\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) &{}= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ \nabla_{\mathbf{x}_t}  q(\mathbf{x}_t \vert \mathbf{x}_0) \Big] \\&{}= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ -\frac{\pmb{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1-\bar{\alpha}_t}} \Big] \\&{}= -\frac{\pmb{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1-\bar{\alpha}_t}}\end{align}</script>
+          </div>
+<p>The score function for the joint distribution <script type="math/tex">q (\mathbf{x}_t, y)</script> is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_{\mathbf{x}_t} \log q (\mathbf{x}_t, y) &{}= \nabla_{\mathbf{x}_t} \log q (\mathbf{x}_t) + \nabla_{\mathbf{x}_t} \log q (y \vert \mathbf{x}_t) \\
+&{}\approx - \frac{1}{\sqrt{1-\bar{\alpha}_t}} \pmb{\epsilon} (\mathbf{x}_t, t) + \nabla_{\mathbf{x}_t} \log f_\phi (y \vert \mathbf{x}_t) \\
+&{}= - \frac{1}{\sqrt{1-\bar{\alpha}_t}} \big( \pmb{\epsilon}_\theta (\mathbf{x}_t, t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi (y \vert \mathbf{x}_t) \big)
+\end{align}</script><p>The classifier-guided predictor <script type="math/tex">\bar{\pmb{\epsilon}}_\theta</script> thus obtains a truncation-like effect by sampling in the direction of the gradient of image classifier to perform conditional generation:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\bar{\pmb{\epsilon}}_\theta (\mathbf{x}_t, t) = \pmb{\epsilon}_\theta (\mathbf{x}_t, t) - \sqrt{1-\bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi (y \vert \mathbf{x}_t)
+\end{align}</script><p>Classifier guided prediction <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Dhariwal, Prafulla, and Alex Nichol. [Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233). arXiv:2105.05233, arXiv, 1 June 2021">[4]</span></a></sup> uses a weight factor $w$ to contrail the shifted gradient:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\bar{\pmb{\epsilon}}_\theta (\mathbf{x}_t, t) = \pmb{\epsilon}_\theta (\mathbf{x}_t, t) - \sqrt{1-\bar{\alpha}_t} \nabla_{\mathbf{x}_t} {\color{red} w}  \log f_\phi (y \vert \mathbf{x}_t) \label{classifier_guidance}
+\end{align}</script><p><img data-src="/notes/images/classifier-guided-diffusion.png" alt="Conditional generation with DDPM and DDIM&lt;sup id=&quot;fnref:4&quot;&gt;&lt;a href=&quot;#fn:4&quot; rel=&quot;footnote&quot;&gt;&lt;span class=&quot;hint--top hint--error hint--medium hint--rounded hint--bounce&quot; aria-label=&quot;Dhariwal, Prafulla, and Alex Nichol. [Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233). arXiv:2105.05233, arXiv, 1 June 2021&quot;&gt;[4]&lt;/span&gt;&lt;/a&gt;&lt;/sup&gt;"></p>
+<h3 id="Classifier-Free-Guidance"><a href="#Classifier-Free-Guidance" class="headerlink" title="Classifier-Free Guidance"></a>Classifier-Free Guidance</h3><p>Classifier guidiance introduces an auxiliary classifier and thus complicates the training process. It is naturally to think about the approach of conditional generation without any explicit classifier <script type="math/tex">f_\phi</script> entirely. Instead of sampling in the direction of the gradient of image classifier, <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, Jonathan, and Tim Salimans. [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598). 2021. openreview.net">[5]</span></a></sup> proposes to combine the score estimates of a conditional diffusion model <script type="math/tex">p_\theta (\mathbf{x}|y)</script> and a jointly trained unconditional model <script type="math/tex">p_\theta (\mathbf{x})</script> via a single model. </p>
+<p>Specifically, when training conditional diffusion <script type="math/tex">p_\theta (\mathbf{x}|y)</script> parameterized by the score estimator <script type="math/tex">\pmb{\epsilon}_\theta (\mathbf{x}_t, t, y)</script>, <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ho, Jonathan, and Tim Salimans. [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598). 2021. openreview.net">[5]</span></a></sup> randomly gets rid of the conditions by setting $y=\emptyset$, that is <script type="math/tex">\pmb{\epsilon}_\theta (\mathbf{x}_t, t) = \pmb{\epsilon}_\theta (\mathbf{x}_t, t, \emptyset)</script></p>
+<p>The gradient of an implicit classifier can be formulated with the difference between conditional and unconditional classifiers:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_{\mathbf{x}_t} \log f_\phi (y \vert \mathbf{x}_t) &{} = \nabla_{\mathbf{x}_t} \log p (\mathbf{x}_t \vert y) - \nabla_{\mathbf{x}_t} \log p (\mathbf{x}_t) \\
+&{}= - \frac{1}{\sqrt{1-\bar{\alpha}_t}} \big( \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y) - \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y=\emptyset) \big)
+\end{align}</script><p>Plugging into the Eq.$\eqref{classifier_guidance}$, the score estimator will be:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\bar{\pmb{\epsilon}}_\theta (\mathbf{x}_t, t) &{} = \pmb{\epsilon}_\theta (\mathbf{x}_t, t) - \sqrt{1-\bar{\alpha}_t} \nabla_{\mathbf{x}_t} w  \log f_\phi (y \vert \mathbf{x}_t) \\
+&{}= \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y) -  w \Big( \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y) - \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y=\emptyset) \Big)\\
+&{}= (w+1) \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y) - w \cdot \pmb{\epsilon}_\theta (\mathbf{x}_t, t, y=\emptyset)
+\end{align}</script><hr>
+<h1 id="Categorical-Diffusion-Discrete"><a href="#Categorical-Diffusion-Discrete" class="headerlink" title="Categorical Diffusion (Discrete)"></a>Categorical Diffusion (Discrete)</h1><p>Gaussian diffusion process focuses on continuous state space, such as real-valued image and waveform data. There has been research trials by applying the Gaussian diffusion into categorical data, which requires relaxing or embedding discrete data into continuous spaces. A more natural way is to use categorical diffusion that corrupts the categorical data such as language in discrete state spaces.</p>
+<p><sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Sohl-Dickstein, Jascha, et al. [Deep Unsupervised Learning Using Nonequilibrium Thermodynamics](https://arxiv.org/abs/1503.03585). ICML 2015">[1]</span></a></sup> firstly introduces the diffusion models with discrete state spaces over <em>binary</em> random variables. <sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hoogeboom, E., Nielsen, D., Jaini, P., Forré, P. and Welling, M. [Argmax flows and multinomial diffusion: Learning categorical distributions](https://proceedings.neurips.cc/paper/2021/file/67d96d458abdef21792e6d8e590244e7-Paper.pdf). NeurIPS 2021.">[9]</span></a></sup> extended the model class to <em>categorical</em> random variables with transition matrices characterized by uniform transition probabilities. <sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Austin, J., Johnson, D.D., Ho, J., Tarlow, D. and van den Berg, R., 2021. [Structured denoising diffusion models in discrete state-spaces](https://proceedings.neurips.cc/paper/2021/file/958c530554f78bcd8e97125b70e6973d-Paper.pdf). NeurIPS 2021.">[10]</span></a></sup> introduces discrete denoising diffusion probabilistic models (D3PM) by more generally extending the state corruption process.</p>
+<p><img data-src="/notes/images/D3PM.png" alt="Quantizedd swiss roll. Each dot represents a 2D categorical variable. &lt;br&gt;Top: Diffused samples from the uniform, discretized Gaussian, and absorbing state, with transition matrices $\mathbf{Q}$. &lt;br&gt; Bottom: Learned discretized Gaussian reverse process."></p>
+<h2 id="Discrete-Diffusion-D3PM"><a href="#Discrete-Diffusion-D3PM" class="headerlink" title="Discrete Diffusion (D3PM)"></a>Discrete Diffusion (D3PM)</h2><p>For scalar discrete random variables with $K$ categories <script type="math/tex">x_t, x_{t-1} \in 1,\cdots, K</script>, the forward transition probability can be represented by matrices: <script type="math/tex">[\mathbf{Q}_t]_{ij} = q (x_t = j \vert x_{t-1}=i)</script>. </p>
+<p>Denoting the one hot version of $x$ with the <u>row vector</u> <script type="math/tex">\mathbf{x}</script> , a categorical distribution $\text{Cat} (\mathbf{x}, \mathbf{p})$ over the one-hot row vector $\mathbf{x}$ with probabilities given by the row vector $\mathbf{p}$, we can write:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \text{Cat} (\mathbf{x}_t; \mathbf{p}=\mathbf{x}_{t-1}\mathbf{Q}_t)
+\end{align}</script><p>The term <script type="math/tex">\mathbf{x}_{t-1}\mathbf{Q}_t</script> can be understood as a row vector-matrix product. $\mathbf{Q}$ is assumed to apply to each image pixel or sequence token independently. $q$ factorizes over the higher dimensions. Thus we write <script type="math/tex">q(\mathbf{x}_t \vert \mathbf{x}_{t-1})</script> w.r.t a single element. </p>
+<h2 id="Discrete-state-spaces"><a href="#Discrete-state-spaces" class="headerlink" title="Discrete state spaces"></a>Discrete state spaces</h2><p>Starting from <script type="math/tex">\mathbf{x}_0</script>, the $t$-step marginal at time $t-1$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_t \vert \mathbf{x}_0) = \text{Cat} (\mathbf{x}_t; \mathbf{p}=\mathbf{x}_0 \mathbf{\overline{Q}}_t) \quad \quad \text{with} \quad\quad \mathbf{\overline{Q}}_t= \prod_{i=1}^t\mathbf{Q}_i
+\end{align}</script><p>The posterior is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) &{}= \frac{q(\mathbf{x}_t \vert \mathbf{x}_{t-1}, \mathbf{x}_0) q(\mathbf{x}_{t-1}\vert \mathbf{x}_0)}{q(\mathbf{x}_{t}\vert \mathbf{x}_0)} \qquad\qquad\qquad \text{Markov property}\\
+&{}= \frac{q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) q(\mathbf{x}_{t-1}\vert \mathbf{x}_0)}{q(\mathbf{x}_{t}\vert \mathbf{x}_0)} \\
+&{}=\text{Cat} (\mathbf{x}_t; \mathbf{p}= \frac{\mathbf{x}_t \mathbf{Q}_t^\top \odot \mathbf{x}_0 \mathbf{\overline{Q}}_{t-1}}{\mathbf{x}_0 \mathbf{\overline{Q}}_{t} \mathbf{x}_t^\top} )
+\end{align}</script><p>Assuming that the reverse process <script type="math/tex">p_\theta (\mathbf{x}_t \vert \mathbf{x}_{t-1})</script> is factorized as conditionally independent over all the elements, the KL divergence between $q$ and $p_\theta$ is summing over all values of each random variable.</p>
+<h3 id="Forward-Markov-transition-matrices"><a href="#Forward-Markov-transition-matrices" class="headerlink" title="Forward Markov transition matrices"></a>Forward Markov transition matrices</h3><ol>
+<li>Uniform<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hoogeboom, E., Nielsen, D., Jaini, P., Forré, P. and Welling, M. [Argmax flows and multinomial diffusion: Learning categorical distributions](https://proceedings.neurips.cc/paper/2021/file/67d96d458abdef21792e6d8e590244e7-Paper.pdf). NeurIPS 2021.">[9]</span></a></sup>. Given $\beta_t \in [0,1]$, the transition matrix <script type="math/tex">\mathbf{Q}_t = (1-\beta_t)\mathbf{I} + \frac{\beta_t}{K} \mathbb{1}\mathbb{1}^\top</script>.</li>
+<li>Absorbing state. Define transition matrix with an absorbing state (called [MASK]), such that each token either stays the same or transitions to [MASK] with some probability $\beta_t$. This is motivated by BERT. For images, it reuses the grey pixels as the [MASK] absorbing token.</li>
+<li>Discretized Gaussian. <sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hoogeboom, E., Nielsen, D., Jaini, P., Forré, P. and Welling, M. [Argmax flows and multinomial diffusion: Learning categorical distributions](https://proceedings.neurips.cc/paper/2021/file/67d96d458abdef21792e6d8e590244e7-Paper.pdf). NeurIPS 2021.">[9]</span></a></sup> uses a discretized, truncated Gaussian distribution for ordinal data such as images.</li>
+<li>Token embedding distance. <sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hoogeboom, E., Nielsen, D., Jaini, P., Forré, P. and Welling, M. [Argmax flows and multinomial diffusion: Learning categorical distributions](https://proceedings.neurips.cc/paper/2021/file/67d96d458abdef21792e6d8e590244e7-Paper.pdf). NeurIPS 2021.">[9]</span></a></sup>  uses similarity in an embedding space to guide the forward process, so that the transitions become more frequently between tokens that have simialr embeddings, , while maintaining a uniform stationary distribution.</li>
+</ol>
+<h3 id="Training-1"><a href="#Training-1" class="headerlink" title="Training"></a>Training</h3><script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_\lambda = \mathcal{L}_{\text{vlb}} + \lambda \mathbb{E}_{q(\mathbf{x}_0}\mathbb{E}_{q(\mathbf{x}_t \vert \mathbf{x}_0)} [- \log \tilde{p}_\theta (\mathbf{x}_0 \vert \mathbf{x}_t)]
+\end{align}</script><div class="note info">
+            <p><strong>BERT is a one-step diffusion model</strong>. For a one-step diffusion process in which <script type="math/tex">q(\mathbf{x}_1 \vert \mathbf{x}_0)</script> replaces 10% of tokens with [MASK] and 5% uniformly at random. We have:</p><script type="math/tex; mode=display">\begin{align}\mathcal{L}_\text{vlb} - \mathcal{L}_\text{T} &{}= - \mathbb{E}_{q(\mathbf{x}_1 \vert \mathbf{x}_0)} [\log p_\theta (\mathbf{x}_0 \vert \mathbf{x}_1)] \\&{}= \mathcal{L}_\text{BERT}\end{align}</script><hr><p><strong>Autoregressive models are (discrete) diffusion models</strong>. Consider a diffusion process taht deterministically masks tokens one-by-one in a sequence of length $T$: </p><script type="math/tex; mode=display">\begin{align}q([\textbf{x}_t]_i | \textbf{x}_0) =\left\{                \begin{array}{ll}                  [\textbf{x}_0]_i \qquad \text{if}\quad i<T-t\\                  \text{[MASK]} \quad\text{otherwise}                \end{array}    \right.\end{align}</script><p>For the position $i \neq T-t$, the KL divergence </p><script type="math/tex; mode=display">\begin{align}\mathbb{KL}(q([\mathbf{x}_{t-1}]_i \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta([\mathbf{x}_{t-1}]_i \vert\mathbf{x}_t)) \rightarrow 0\end{align}</script><p>Therefore, the KL divergence is computed over the tokens at position $i$, which is exactly the standard cross entropy loss for an autoregressive model.</p><script type="math/tex; mode=display">\begin{align}\mathbb{KL}(q([\mathbf{x}_{t-1}]_i \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta([\mathbf{x}_{t-1}]_i \vert\mathbf{x}_t)) &= q([\mathbf{x}_{t-1}]_i \vert \mathbf{x}_t, \mathbf{x}_0) \cdot \log \frac{q([\mathbf{x}_{t-1}]_i \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta([\mathbf{x}_{t-1}]_i \vert\mathbf{x}_t)} \\&=-p_\theta([\mathbf{x}_0]_i \vert\mathbf{x}_t) \\&= -p_\theta(x_{t-1}\vert x_{>t})\end{align}</script><hr><p><strong>(Generative) Maskde Language-Models are diffusion models</strong>. Generated MLMs<sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Marjan Ghazvininejad, Omer Levy, Yinhan Liu, and Luke Zettlemoyer. Mask-Predict: Parallel decoding of conditional masked language models. arXiv preprint arXiv:1904.09324, April 2019.">[15]</span></a></sup><sup id="fnref:16"><a href="#fn:16" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Alex Wang and Kyunghyun Cho. BERT has a mouth, and it must speak: BERT as a markov random field language model. arXiv preprint arXiv:1902.04094, February 2019.">[16]</span></a></sup> are generative models that generate text from a sequence of [MASK] tokens.</p>
+          </div>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Sohl-Dickstein, Jascha, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1503.03585">Deep Unsupervised Learning Using Nonequilibrium Thermodynamics</a>. ICML 2015<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ho, Jonathan, et al. <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2006.11239">Denoising Diffusion Probabilistic Models</a>. arXiv:2006.11239, arXiv, 16 Dec. 2020<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Nichol, Alex, and Prafulla Dhariwal. <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2102.09672">Improved Denoising Diffusion Probabilistic Models</a>. arXiv:2102.09672, arXiv, 18 Feb. 2021<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Dhariwal, Prafulla, and Alex Nichol. <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2105.05233">Diffusion Models Beat GANs on Image Synthesis</a>. arXiv:2105.05233, arXiv, 1 June 2021<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ho, Jonathan, and Tim Salimans. <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2207.12598">Classifier-Free Diffusion Guidance</a>. 2021. openreview.net<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Luo, C. (2022). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2208.11970">Understanding diffusion models: A unified perspective</a>. arXiv preprint arXiv:2208.11970.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Weng, Lilian. (Jul 2021). What are diffusion models? Lil’Log. <a target="_blank" rel="noopener" href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">https://lilianweng.github.io/posts/2021-07-11-diffusion-models/</a>.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yang Song &amp; Stefano Ermon. <a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2019/file/3001ef257407d5a371a96dcd947c7d93-Paper.pdf">Generative modeling by estimating gradients of the data distribution</a>. NeurIPS 2019.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Hoogeboom, E., Nielsen, D., Jaini, P., Forré, P. and Welling, M. <a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2021/file/67d96d458abdef21792e6d8e590244e7-Paper.pdf">Argmax flows and multinomial diffusion: Learning categorical distributions</a>. NeurIPS 2021.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Austin, J., Johnson, D.D., Ho, J., Tarlow, D. and van den Berg, R., 2021. <a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2021/file/958c530554f78bcd8e97125b70e6973d-Paper.pdf">Structured denoising diffusion models in discrete state-spaces</a>. NeurIPS 2021.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Li, X.L., Thickstun, J., Gulrajani, I., Liang, P. and Hashimoto, T.B., 2022. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2205.14217">Diffusion-LM Improves Controllable Text Generation</a>. arXiv preprint arXiv:2205.14217.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Gong, S., Li, M., Feng, J., Wu, Z. and Kong, L., 2022. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2210.08933">Diffuseq: Sequence to sequence text generation with diffusion models</a>. arXiv preprint arXiv:2210.08933.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lin, Z., Gong, Y., Shen, Y., Wu, T., Fan, Z., Lin, C., Chen, W. and Duan, N., 2022. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2212.11685">GENIE: Large Scale Pre-training for Text Generation with Diffusion Model</a>. arXiv preprint arXiv:2212.11685.<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">He, Z., Sun, T., Wang, K., Huang, X. and Qiu, X., 2022. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2211.15029">DiffusionBERT: Improving Generative Masked Language Models with Diffusion Models</a>. arXiv preprint arXiv:2211.15029.<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Marjan Ghazvininejad, Omer Levy, Yinhan Liu, and Luke Zettlemoyer. Mask-Predict: Parallel decoding of conditional masked language models. arXiv preprint arXiv:1904.09324, April 2019.<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Alex Wang and Kyunghyun Cho. BERT has a mouth, and it must speak: BERT as a markov random field language model. arXiv preprint arXiv:1902.04094, February 2019.<a href="#fnref:16" rev="footnote"> ↩</a></span></li><li id="fn:17"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">17.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Sergios Karagiannakos,Nikolas Adaloglou. <a target="_blank" rel="noopener" href="https://theaisummer.com/diffusion-models/">How diffusion models work: the math from scratch</a>. AI Summer. September 2022.<a href="#fnref:17" rev="footnote"> ↩</a></span></li><li id="fn:18"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">18.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://huggingface.co/blog/annotated-diffusion">The Annotated Diffusion Model</a>. Huggingface Blog.  June 2022.<a href="#fnref:18" rev="footnote"> ↩</a></span></li><li id="fn:19"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">19.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Salimans, Tim and Jonathan Ho. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2202.00512.pdf">Progressive Distillation for Fast Sampling of Diffusion Models</a>. ICLR 2022.<a href="#fnref:19" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Diffusion-Models/" rel="tag"># Diffusion Models</a>
+              <a href="/notes/tags/ML/" rel="tag"># ML</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2022/05/13/Large-Language-Models-for-Programming-Languages/" rel="prev" title="Large Language Models for Programming Languages">
+      <i class="fa fa-chevron-left"></i> Large Language Models for Programming Languages
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2023/01/26/Position-Encoding-in-Transformers/" rel="next" title="Inductive Positions in Transformers">
+      Inductive Positions in Transformers <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Gaussian-Diffusion-Continuous"><span class="nav-number">1.</span> <span class="nav-text">Gaussian Diffusion (Continuous)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Forward-Diffusion-process"><span class="nav-number">1.1.</span> <span class="nav-text">Forward (Diffusion) process</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reverse-process"><span class="nav-number">1.2.</span> <span class="nav-text">Reverse process</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training"><span class="nav-number">1.3.</span> <span class="nav-text">Training</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pmb-epsilon-prediction-parameterization"><span class="nav-number">1.3.1.</span> <span class="nav-text">$\pmb{\epsilon}$-prediction parameterization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Velocity-prediction"><span class="nav-number">1.3.2.</span> <span class="nav-text">Velocity prediction</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conditional-Generation"><span class="nav-number">1.4.</span> <span class="nav-text">Conditional Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Classifier-Guidance"><span class="nav-number">1.4.1.</span> <span class="nav-text">Classifier Guidance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Classifier-Free-Guidance"><span class="nav-number">1.4.2.</span> <span class="nav-text">Classifier-Free Guidance</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Categorical-Diffusion-Discrete"><span class="nav-number">2.</span> <span class="nav-text">Categorical Diffusion (Discrete)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Discrete-Diffusion-D3PM"><span class="nav-number">2.1.</span> <span class="nav-text">Discrete Diffusion (D3PM)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discrete-state-spaces"><span class="nav-number">2.2.</span> <span class="nav-text">Discrete state spaces</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Forward-Markov-transition-matrices"><span class="nav-number">2.2.1.</span> <span class="nav-text">Forward Markov transition matrices</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2022/12/12/Diffusion-Models-Math-Guide/";
+    this.page.identifier = "2022/12/12/Diffusion-Models-Math-Guide/";
+    this.page.title = "Diffusion Models: A Mathematical Note from Scratch";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

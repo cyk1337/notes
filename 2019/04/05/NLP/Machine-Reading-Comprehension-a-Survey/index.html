@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Machine reading comprehension aims to answer questions given a passage or document.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Machine Reading Comprehension: a Survey!">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/index.html">
+<meta property="og:site_name" content="Yekun&#39;s Note">
+<meta property="og:description" content="Machine reading comprehension aims to answer questions given a passage or document.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/deep-lstm-reader.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/atten-reader.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/impatient-reader.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-Attn-sum-Reader.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Pointer-nets.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC_EpiReader.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-BIDAF.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-match-LSTM.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-gated-self-matching-net.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-attn-over-attn.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/R-Net.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-ReasoNet.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-ReasoNet-algorithm.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-cross-passage-verification.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MRC-QANet.png">
+<meta property="article:published_time" content="2019-04-05T13:00:00.000Z">
+<meta property="article:modified_time" content="2019-04-05T13:00:00.000Z">
+<meta property="article:author" content="Yekun Chai">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/deep-lstm-reader.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Machine Reading Comprehension: a Survey! | Yekun's Note</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yekun's Note</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Machine learning notes and writeup.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="Yekun Chai">
+      <meta itemprop="description" content="Language is not just words.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yekun's Note">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Machine Reading Comprehension: a Survey!
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-04-05 21:00:00" itemprop="dateCreated datePublished" datetime="2019-04-05T21:00:00+08:00">2019-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/Machine-Reading-Comprehension/" itemprop="url" rel="index"><span itemprop="name">Machine Reading Comprehension</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>Machine reading comprehension aims to answer questions given a passage or document.<br><span id="more"></span></p>
+<h1 id="Symbol-matching-models"><a href="#Symbol-matching-models" class="headerlink" title="Symbol matching models"></a>Symbol matching models</h1><h2 id="Frame-Semantic-parsing"><a href="#Frame-Semantic-parsing" class="headerlink" title="Frame-Semantic parsing"></a>Frame-Semantic parsing</h2><p>Frame-semantic parsing identifies predicates and their arguments, i.e. “who did what to whom”.</p>
+<h2 id="Word-Distance"><a href="#Word-Distance" class="headerlink" title="Word Distance"></a>Word Distance</h2><p>Sum the distances of every word in $q$ to their nearest aligned word in $d$</p>
+<h1 id="Teaching-Machines-to-Read-and-Comprehend"><a href="#Teaching-Machines-to-Read-and-Comprehend" class="headerlink" title="Teaching Machines to Read and Comprehend"></a>Teaching Machines to Read and Comprehend</h1><h2 id="Deep-LSTM-Reader"><a href="#Deep-LSTM-Reader" class="headerlink" title="Deep LSTM Reader"></a>Deep LSTM Reader</h2><p>In NMT, deep LSTMs have shown a remarkable ability to embed long sequences into a vector representation, which contains enough information to generate a full translation in another language.<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hermann, K.M., Kociský, T., Grefenstette, E., Espeholt, L., Kay, W., Suleyman, M., & Blunsom, P. (2015). [Teaching Machines to Read and Comprehend](https://papers.nips.cc/paper/5945-teaching-machines-to-read-and-comprehend.pdf). NIPS.
+">[2]</span></a></sup> </p>
+<p><img data-src="/notes/images/deep-lstm-reader.png" alt="upload successful"></p>
+<p>Deep LSTMs feed out documents one word at a time into a <strong>Deep LSTM encoder</strong>, after a delimiter, followed by a query ($d \oplus |||  \oplus q$,  or $q \oplus |||  \oplus d$  ). The network predicts which token in the document answers the query.</p>
+<h2 id="Attentive-Reader"><a href="#Attentive-Reader" class="headerlink" title="Attentive Reader"></a>Attentive Reader</h2><div class="note danger">
+            <p><strong>Limitations of the Deep LSTM Reader</strong>:</p><ul><li>fixed width hidden vector</li></ul>
+          </div>
+<ul>
+<li><strong>Solution</strong>: the Attentive Reader employs a finer grained token level attention mechanism, where the tokens are embedded given their entire future and past context in the input documents.</li>
+</ul>
+<p>Attentive Reader encodes the document $d$ and the query $q$ with two separate 1-layer bi-LSTMs.<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hermann, K.M., Kociský, T., Grefenstette, E., Espeholt, L., Kay, W., Suleyman, M., & Blunsom, P. (2015). [Teaching Machines to Read and Comprehend](https://papers.nips.cc/paper/5945-teaching-machines-to-read-and-comprehend.pdf). NIPS.
+">[2]</span></a></sup></p>
+<p><img data-src="/notes/images/atten-reader.png" alt="upload successful"></p>
+<p>When encoding the query $q$, the encoding $u$ of a query with length $|q|$ is the concatenation of the final forward and backward outputs:</p>
+<script type="math/tex; mode=display">u = \overrightarrow{y_q}(|q|) || \overleftarrow{y_q}(1)</script><p>When encoding the document $d$, each token at position $t$ is:</p>
+<script type="math/tex; mode=display">y_d(t) = \overrightarrow{y_d}(t) || \overleftarrow{y_d}(t)</script><p>The representation $r$ of $d$ is a weighted sum of these output vectors. The weights can be interpreted as the degree to which the network attends to a particular token in the document $d$ when answering the query:</p>
+<script type="math/tex; mode=display">m(t) = tanh(W_{ym} y_d(t)) + W_{um}u</script><script type="math/tex; mode=display">s(t) \approx exp(w^T_{ms} m(t))</script><script type="math/tex; mode=display">r = y_d s</script><p>Finally, the joint document and query embedding is:</p>
+<script type="math/tex; mode=display">g^{AR}(d,q) = \text{tanh}(W_{rg}r + W_{ug}u)</script><h2 id="Impatient-Reader"><a href="#Impatient-Reader" class="headerlink" title="Impatient Reader"></a>Impatient Reader</h2><p>The Attentive Reader focuses on the passage of a context document that are most likely to inform the answer to the query.</p>
+<p><strong>Impatient Reader</strong> can <code>reread</code> from the document as each query token is read.<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Hermann, K.M., Kociský, T., Grefenstette, E., Espeholt, L., Kay, W., Suleyman, M., & Blunsom, P. (2015). [Teaching Machines to Read and Comprehend](https://papers.nips.cc/paper/5945-teaching-machines-to-read-and-comprehend.pdf). NIPS.
+">[2]</span></a></sup></p>
+<p><img data-src="/notes/images/impatient-reader.png" alt="upload successful"></p>
+<p>At each token $i$ of the query $q$, the model computes the document representation vector $r(i)$ with the bidirectional embedding <script type="math/tex">y_q(i) = \overrightarrow{y_q}(i) || \overleftarrow{y_q}(i)</script>:</p>
+<script type="math/tex; mode=display">m(i, t) = \text{tanh}(W_{dm}y_d(t) + W_{rm} r(i-1) + W_{qm} y_q(i)), \quad 1 \leq i \leq |q|</script><script type="math/tex; mode=display">s(i,t) \propto \text{exp}(W_{ms}^T m(i,t))</script><script type="math/tex; mode=display">r(0)= \pmb{r_0}, \quad r(i) = y_d^T s(i) + \pmb{\text{tanh}(W_{rr}r(i-1))} \quad 1 \leq i \leq |q|</script><p>The attention mechanism allows the model to recurrently accumulate information from the document as it sees each query token, ultimately outputting a final joint document query representation for the answer prediction</p>
+<script type="math/tex; mode=display">g^{IR}(d,q) = \text{tanh}(W_{rg}r(|q|) + W_{qg} u)</script><h1 id="Attention-Sum-Reader"><a href="#Attention-Sum-Reader" class="headerlink" title="Attention Sum Reader"></a>Attention Sum Reader</h1><ul>
+<li>For <code>cloze-style</code> QA. <sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kadlec, R., Schmid, M., Bajgar, O., & Kleindienst, J. (2016). [Text Understanding with the Attention Sum Reader Network](https://www.aclweb.org/anthology/P16-1086). CoRR, abs/1603.01547.
+">[6]</span></a></sup></li>
+</ul>
+<p><img data-src="/notes/images/MRC-Attn-sum-Reader.png" alt="upload successful"></p>
+<ol>
+<li>Compute the vector embedding for the query.<script type="math/tex; mode=display">g(\pmb{q}) = \overrightarrow{g_{|\pmb{q}|}}(\pmb{q}) || \overleftarrow{g_1}(\pmb{q})</script></li>
+<li>Compute the vector embedding of each individual word in the context of the whole document. The word embedding is a look-up table $V$.<script type="math/tex; mode=display">f_i(\pmb{d}) = \overrightarrow{f_i} (\pmb{d}) || \overleftarrow{f_i}(\pmb{d})</script></li>
+<li>Dot product between the question embedding and the contextual embedding. Select the most likely answer.</li>
+</ol>
+<h1 id="EpiReader"><a href="#EpiReader" class="headerlink" title="EpiReader"></a>EpiReader</h1><h2 id="Pointer-Nets"><a href="#Pointer-Nets" class="headerlink" title="Pointer Nets"></a>Pointer Nets</h2><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li>Conventional seq2seq architecture can only applies softmax distribution over a <strong>fixed-sized</strong> output dictionary. It cannot handle problems where the size of the output dictionary is equal to the <strong>length of the input sequence</strong>.<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Vinyals, O., Fortunato, M., & Jaitly, N. (2015). [Pointer Networks](http://papers.nips.cc/paper/5866-pointer-networks.pdf). NIPS.">[8]</span></a></sup></li></ul><script type="math/tex; mode=display">p(\mathcal{C} \vert \mathcal{P}; \theta) = \prod_{i=1}^{m(\mathcal{P})} p(C_i \vert C_1, \cdots, c_{i-1}, \mathcal{P}; \theta)</script><p>where <script type="math/tex">\mathcal{P}=\{ P_1, \cdots, P_n \}</script> is a sequence of $n$ vectors and <script type="math/tex">\mathcal{C}^{\mathcal{P}} = \{ C_1, \cdots, C_{m(\mathcal{P})} \}</script> is a sequence of $m(\mathcal{P})$ indices.</p><p>The parameters are learnt by maximizing the conditional probabilities of the training set:</p><script type="math/tex; mode=display">\theta^* = \arg\max_\theta \sum_{\mathcal{P}, \mathcal{C}^{\mathcal{P}}} \log p(\mathcal{C}^{\mathcal{P}} \vert \mathcal{P}; \theta)</script>
+          </div>
+<p><img data-src="/notes/images/Pointer-nets.png" alt="upload successful"></p>
+<p>Solution: <code>Pointer Net</code>.</p>
+<ul>
+<li><p>Applies the attention mechanism:</p>
+<script type="math/tex; mode=display">u_j^i = v^T \tanh (W_1 e_j + W_2 d_i) \quad j \in (1,\cdots,n)</script><script type="math/tex; mode=display">p(C_i \vert C_1, \cdots, C_{i-1}, \mathcal{P}) = \text{softmax}(u^i)</script><p>  where softmax normalizes the vector $u^i$ (of length $n$) to be an output distribution over the dictionary of inputs. And $v$,<script type="math/tex">W_1</script>, <script type="math/tex">W_2</script> are learnable parameters of the output model.</p>
+<p>  Here, we do not blend the encoder state <script type="math/tex">e_j</script> to propagate extra information to the decoder. Instead, we use <script type="math/tex">u_j^i</script> as <code>pointers to the input elements</code>. </p>
+</li>
+</ul>
+<div class="note info">
+            <ul><li><code>Ptr Nets</code> can be seen as an application of <strong><code>content-based attention mechanisms</code></strong>.</li></ul>
+          </div>
+<h2 id="EpiReader-1"><a href="#EpiReader-1" class="headerlink" title="EpiReader"></a>EpiReader</h2><p><img data-src="/notes/images/MRC_EpiReader.png" alt="upload successful"></p>
+<h3 id="Extractor-Pointer-Nets"><a href="#Extractor-Pointer-Nets" class="headerlink" title="Extractor: Pointer Nets"></a>Extractor: Pointer Nets</h3><ol>
+<li>Use bi-RNNs to encode passage <script type="math/tex">f(\theta_T, \pmb{T})</script> and question <script type="math/tex">g(\theta_Q, \pmb{Q})</script>, where <script type="math/tex">\theta_T</script> and <script type="math/tex">\theta_Q</script> represents the parameters of the text and question encoders, <script type="math/tex">\pmb{T} \in \mathbb{R}^{D \times N}</script> and <script type="math/tex">\pmb{Q} \in \mathbb{R}^{D \times N_Q}</script> are matrix representations of the texts and questions (comprising $N$ words and <script type="math/tex">N_Q</script> words separately) . Concatenate the last hidden states of forward and backward GRU, denoted <script type="math/tex">g(\pmb{Q}) \in \mathbb{R}^{2d}</script></li>
+<li><p>Take the inner product of text and question representations, followed by a softmax. The probability that the $i$-th word in text $\tau$ answers <script type="math/tex">\mathcal{Q}</script>:</p>
+<script type="math/tex; mode=display">s_i \propto \exp (f(\pmb{t}_i) \cdot g(\pmb{Q}))</script></li>
+<li><p>Compute the total probability that word $w$ is the correct answer:</p>
+<script type="math/tex; mode=display">P(w \vert \tau, \mathcal{Q}) = \sum_{i: t_i=w} s_i</script></li>
+<li>The extractor take the $K$ highest word probabilities with the corresponding $K$ most probable answer words <script type="math/tex">\{\hat{a}_1,\cdots,\hat{a}_K \}</script></li>
+</ol>
+<h3 id="Reasoner"><a href="#Reasoner" class="headerlink" title="Reasoner"></a>Reasoner</h3><ol>
+<li>Insert the answer candidates into the question sequence $\mathcal{Q}$ at the placeholder location, which forms $K$ hypotheses ${ \mathcal{H}_1, \cdots, \mathcal{H}_K }$</li>
+<li>For each hypothesis and each sentence of the text: <script type="math/tex">\pmb{S}_i \in \mathbb{R}^{D \times |\mathcal{S}_i|}</script> whose columns are embedding vectors for each word of sentence <script type="math/tex">\mathcal{S}_i</script>, <script type="math/tex">\pmb{H}_k \in \mathbb{R}^{D \times |\mathcal{H}_k|}</script> whose columns are the embedding vectors for each word in the hypothesis <script type="math/tex">\mathcal{H}_k</script></li>
+<li>Augment <script type="math/tex">\pmb{S}_i</script> with <code>word-matching features</code> <script type="math/tex">\pmb{M} \in \mathbb{R}^{2 \times |\mathcal{S}_i|}</script>. The first row is the <strong>inner product</strong> of each word embedding in the sentence with the candidate answer embedding; the second row is the <strong>maximum inner product</strong> of each sentence word embedding with any word embedding in the question.</li>
+<li>Then the augmented <script type="math/tex">\pmb{S}_i</script> and <script type="math/tex">\pmb{H}_k</script> are fed into two different ConvNets, with filters <script type="math/tex">\pmb{F}^S \in \mathbb{R}^{(D+2) \times m}</script> and <script type="math/tex">\pmb{F}^H \in \mathbb{R}^{D \times m}</script>, where $m$ is the filter width. After ReLU and maxpooling op, we can obtain the representations of the text sentence and the hypothesis: <script type="math/tex">\pmb{r}_{\mathcal{S}_i} \in \mathbb{R}^{N_F}</script>, <script type="math/tex">\pmb{r}_{\mathcal{H}_k} \in \mathbb{R}^{N_F}</script>, where <script type="math/tex">N_F</script> is the number of filters.</li>
+<li><p>Then compute a scalar similarity score representations using bilinear form:</p>
+<script type="math/tex; mode=display">\zeta = r_{\mathcal{S}_i}^T \pmb{R} \pmb{r}_{\mathcal{H}_k}</script><p>where <script type="math/tex">\pmb{R} \in \mathbb{R}^{N_F \times N_F}</script> is a trainable parameter.</p>
+</li>
+<li><p>Concat the similarity score with the sentence and hypothesis representations to get: <script type="math/tex">\pmb{x}_{ik} = [\zeta; \pmb{r}_{\mathcal{S}_i}; \pmb{r}_{\mathcal{H}_k}]^T</script></p>
+</li>
+<li>Pass <script type="math/tex">\pmb{x}_{ik}</script> to a GRU, and the final hidden state is given to an FC layer, followed by a softmax op.</li>
+</ol>
+<p>Finally, combine the output of the Reasoner and the Extractor at the same time when minimizing the loss function. (See the original paper<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Trischler, A., Ye, Z., Yuan, X., Bachman, P., Sordoni, A., & Suleman, K. (2016). [Natural Language Comprehension with the EpiReader](https://arxiv.org/pdf/1606.02270.pdf). EMNLP.
+">[9]</span></a></sup> for details)</p>
+<h1 id="Bi-Directional-Attention-Flow-BiDAF"><a href="#Bi-Directional-Attention-Flow-BiDAF" class="headerlink" title="Bi-Directional Attention Flow (BiDAF)"></a>Bi-Directional Attention Flow (BiDAF)</h1><h2 id="Highway-Networks"><a href="#Highway-Networks" class="headerlink" title="Highway Networks"></a>Highway Networks</h2><ul>
+<li>A plain feedforward NN consists of $L$ layers where the $l^{th}$ layer $(l \in { 1,2,\cdots,L})$ applies a non-linear transformation $H$ (with parameter <script type="math/tex">\pmb{H,l}</script>) on its input $\pmb{x}$ to the output $\pmb{y}$.<script type="math/tex; mode=display">y = H(\pmb{x}, \pmb{W_H})</script></li>
+</ul>
+<p>$H$ is usually a affine transformation followed by a non-linear activation function.</p>
+<ul>
+<li><p><strong>Highway Network</strong>:</p>
+<ul>
+<li>Additionally define $T$ as the <code>transform gate</code>, $C$ as the <code>carry gate</code>. Intuitionally, these gates express how much of the output is produced by transforming the input and carrying it.<script type="math/tex; mode=display">\pmb{y} = \underbrace{H(\pmb{x}, \pmb{W_H})}_\text{FFNN output} \cdot \underbrace{T(\pmb{x}, \pmb{W_T})}_\text{transform gate} + \pmb{x} \cdot  \underbrace{C(\pmb{x}, \pmb{W_C})}_\text{carry gate}</script></li>
+<li><p>For simplicity we set $C = 1 - T$, giving</p>
+<script type="math/tex; mode=display">\pmb{y} =  H(\pmb{x}, \pmb{W_H}) \cdot T(\pmb{x}, \pmb{W_T}) + \pmb{x} \cdot ( 1 - T(\pmb{x}, \pmb{W_T}) )</script></li>
+<li><p>In particular,</p>
+<script type="math/tex; mode=display">\pmb{y}=\left\{
+          \begin{array}{ll}
+            \pmb{x} \quad \text{if } T(\pmb{x}, \pmb{W_T}) = \pmb{0}, \\
+           H(\pmb{x}, \pmb{W_H}) \quad \text{if } T(\pmb{x}, \pmb{W_T}) = \pmb{1}
+          \end{array}
+        \right.</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="BiDAF"><a href="#BiDAF" class="headerlink" title="BiDAF"></a>BiDAF</h2><p>Problems:</p>
+<ul>
+<li><p>Previous models summarized the context paragraph into a fixed-size vector, which could lead to the information loss.</p>
+</li>
+<li><p>Solution: the attention is computed at each time step, and the attended vector at each time step, along with the representations from previous  layers, is allowed to <em>flow</em> through to the subsequent modeling layer.</p>
+</li>
+</ul>
+<p><img data-src="/notes/images/MRC-BIDAF.png" alt="upload successful"></p>
+<h3 id="Char-embedding-layer"><a href="#Char-embedding-layer" class="headerlink" title="Char embedding layer"></a>Char embedding layer</h3><p>Let <script type="math/tex">\pmb{x}_1, \cdots, \pmb{x}_T</script> and <script type="math/tex">\pmb{q}_1, \cdots, \pmb{q}_J</script> represent the words in the input context paragraph and query. Use TextCNNs to encode the char-level inputs, followed by a max-pooling over the entire width to obtain a fixed-size vector for each word.</p>
+<h3 id="Word-embedding-layer"><a href="#Word-embedding-layer" class="headerlink" title="Word embedding layer"></a>Word embedding layer</h3><p>Applied pretrained word embeddings, GloVe.</p>
+<p>Then concatenate the char and word embedding vectors, feed them into a 2-layer Highway Network. The outputs are $\pmb{X} \in \mathbb{R}^{2d \times T}$ for the context, and $\pmb{Q} \in \mathbb{R}^{d \times J}$ for the query.</p>
+<h3 id="Contextual-embedding-layer"><a href="#Contextual-embedding-layer" class="headerlink" title="Contextual embedding layer"></a>Contextual embedding layer</h3><p>Use bi-LSTMs to encode the context and query representations, by concatenating the last hidden states of each direction. We obtain $\pmb{H} \in \mathbb{R}^{2d \times T}$ from the context word vectors $\pmb{X}$, $\pmb{U} \in \mathbb{R}^{2d \times J}$ from query word vectors $\pmb{Q}$</p>
+<div class="note info">
+            <p>The first three layers are used to <strong><code>extract features form the query and context at different levels of granularity</code></strong>, akin to mlti-stage feature computation of CNNs in computer vision field.</p>
+          </div>
+<h3 id="Attention-flow-layer"><a href="#Attention-flow-layer" class="headerlink" title="Attention flow layer"></a>Attention flow layer</h3><ul>
+<li>Inputs: the context $\pmb{H}$ and the query $\pmb{U}$.</li>
+<li>Outputs: query-aware vector representation of context words, $\pmb{G}$, along with previous contextual embedding</li>
+<li>Similarity matrix <script type="math/tex">\pmb{S} \in \mathbb{R}^{T \times J}</script> between the contextual embeddings of the context($\pmb{H}$) and the query ($\pmb{U}$), where $\pmb{S}_{tj}$ indicates the similarity between the $t$-th context word and $j$-th query word:<script type="math/tex; mode=display">\pmb{S}_{tj} = \alpha(\pmb{H}_{:t}, \pmb{U}_{:j}) \in \mathbb{R}</script><script type="math/tex; mode=display">\alpha(\pmb{h},\pmb{u}) = \pmb{w}_{(\pmb{S})}^T [\pmb{h};\pmb{u};\pmb{h} \odot \pmb{u}]</script>where $\alpha$ is a trainable scalar function that encodes the similarity between its input vectors, <script type="math/tex">\pmb{H}_{:t}</script> is $t$-th column vector of $\pmb{H}$ and <script type="math/tex">\pmb{U}_{:j}</script> is $j$-th column vector of $\pmb{U}$.</li>
+</ul>
+<p>Then use $\pmb{S}$ to obtain the attentions and the attended vectors in both directions.</p>
+<ul>
+<li><strong>Context-to-query Attention</strong>: context-to-query(C2Q) attention signifies which query words are most relevant to each context word. Let <script type="math/tex">\pmb{a}_t \in \mathbb{R}^J</script> represent the attention weights on the query words by $t$-th context word, <script type="math/tex">\sum_j \pmb{a}_{tj} = 1</script> for each $t$. The attention weight:<script type="math/tex; mode=display">\pmb{a}_t = \text{softmax}(\pmb{S}_{t:}) \in \mathbb{R}^J</script>  Each attended query vector:<script type="math/tex; mode=display">\tilde{\pmb{U}}_{:t} = \sum_j \pmb{a}_{tj} \pmb{U}_{:j}</script>  Here $\tilde{\pmb{U}}$ is a 2$d$-by-$T matrix.</li>
+<li><strong>Query-to-context Attention</strong>: query-to-context(Q2C) attention signifies which context words have the closest similarity to one query word and hence crucial for answering. The attention weights on the context words:<script type="math/tex; mode=display">\pmb{b} = \text{softmax}(\max_{col} (\pmb{S})) \in \mathbb{R}^T</script>  where the maximum function (<script type="math/tex">\max_{col}</script>) is performed across the column.<br>  The attended context vector is <script type="math/tex">\tilde{\pmb{h}} = \sum_t \pmb{b}_t \pmb{H}_{:t} \in \mathbb{R}^{2d}</script></li>
+</ul>
+<p>Finally, concatenate the contextual embeddings and attention vectors:</p>
+<script type="math/tex; mode=display">\pmb{G}_{:t} = \beta(\pmb{H}_{:t}, \tilde{U}_{:t}, \tilde{H}_{:t}) \in \mathbb{R}^{d_{G}}</script><p>where <script type="math/tex">\pmb{G}_{:t}</script> is the $t$-th column vector, $\beta$ is a trainable vector function that fuses three input vectors. In the experiments, <script type="math/tex">\\pmb{\beta(h, \tilde{u}, \tilde{h}) = [h; \tilde{u}; h \odot \tilde{u}; h \odot \tilde{h} ] } \in \mathbb{R}^{D_G \times T}</script></p>
+<h3 id="Modeling-layer"><a href="#Modeling-layer" class="headerlink" title="Modeling layer"></a>Modeling layer</h3><ul>
+<li>Use bi-LSTMs to encode, obtaining a matrix <script type="math/tex">\pmb{M} \in \mathbb{R}^{2d \times T}</script></li>
+</ul>
+<h3 id="Output-layer"><a href="#Output-layer" class="headerlink" title="Output layer"></a>Output layer</h3><ul>
+<li>Application-specific</li>
+<li><p>For QA-tasks, find the sub-phrase of the paragraph to answer the query. We obtain the start index over the entire paragraph by:</p>
+<script type="math/tex; mode=display">\pmb{p}^1 = \text{softmax}(\pmb{w}^T_{(p^1)} [\pmb{G};\pmb{M}] )</script><p>  For the end index of the answer phrase, we pass $\pmb{M}$ into another bi-LSTM and obtain $\pmb{M}^2 \in \mathbb{R}^{2d \times T}$</p>
+<script type="math/tex; mode=display">\pmb{p}^2 = \text{softmax}(\pmb{w}^T_{(p^2)} [\pmb{G};\pmb{M}^2] )</script></li>
+<li><p><strong>Training</strong>: minimize the sum of the negative log probabilities of the true start and end indices by the predicted distributions, averaged over all examples:</p>
+<script type="math/tex; mode=display">L(\theta) = -\frac{1}{N} \sum_i^N \log(\pmb{i}_{y_i^1}^1) + \log(\pmb{p}_{y_i^w}^2)</script></li>
+</ul>
+<h1 id="Match-LSTM-and-Answer-pointer"><a href="#Match-LSTM-and-Answer-pointer" class="headerlink" title="Match-LSTM and Answer pointer"></a>Match-LSTM and Answer pointer</h1><h2 id="Match-LSTM"><a href="#Match-LSTM" class="headerlink" title="Match-LSTM"></a>Match-LSTM</h2><ul>
+<li>It is used for textual entailment (RTE). In RTE, given two sentences, one <em>premise</em> and another <em>hypothesis</em>, predict where the premise entails the hypothesis. </li>
+<li>Match-LSTMs go through the hypothesis sequentially. At each position of the hypothesis, apply attention mechanism to obtain a weighted vector representation of the premise. This weighted vector is combined with current token representation of the hypothesis, then fed to an LSTM.</li>
+<li>Match-LSTMs sequentially aggregates the matching of the attention-weighted premise to each token of the hypothesis.</li>
+</ul>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><ul>
+<li>Given the matrix of passage $\pmb{P} \in \mathbb{R}^{d \times P}$, question $\pmb{Q} \in \mathbb{R}^{d \times Q}$, where the $P$ and $Q$ os the length (# of tokens) of the passage and question, $d$ is the dimension of word embeddings. </li>
+<li>The answer is a sequence of inteegers <script type="math/tex">\pmb{a} = (a_1,a_2,\cdots)</script>, where each <script type="math/tex">a_i</script> is an integer between 1 and $P$, indicating the certain region in the passage. Or select only the start and end index from input passages, represented as <script type="math/tex">\pmb{a} = (a_s, a_e)</script>, where <script type="math/tex">a_s</script> and <script type="math/tex">a_e</script> are integers between 1 and $P$.</li>
+<li>Overall, given <script type="math/tex">\{ \pmb{P}_n, \pmb{Q}_n, \pmb{a}_n \}_{n=1}^N</script>.</li>
+<li>Goal: identify a subsequence from the passage as the answer to the question.</li>
+</ul>
+<p><img data-src="/notes/images/MRC-match-LSTM.png" alt="upload successful"></p>
+<h3 id="LSTM-Preprocessing-layer"><a href="#LSTM-Preprocessing-layer" class="headerlink" title="LSTM Preprocessing layer"></a>LSTM Preprocessing layer</h3><ul>
+<li>In order to incorporate contextual information to the representation of each token, apply one-dimensional LSTM to process the passage and the question separately.<script type="math/tex; mode=display">\pmb{H}^p = \overleftarrow{\text{LSTM}}(\pmb{P})</script><script type="math/tex; mode=display">\pmb{H}^q = \overrightarrow{\text{LSTM}}(\pmb{Q})</script>  The output <script type="math/tex">\pmb{H}^p \in \mathbb{R}^{l \times P}</script> and <script type="math/tex">\pmb{H}^q \in \mathbb{R}^{l \times Q}</script> are hidden representations of the passage and the question, where $l$ is the hidden dimension.</li>
+</ul>
+<h3 id="Match-LSTM-layer"><a href="#Match-LSTM-layer" class="headerlink" title="Match-LSTM layer"></a>Match-LSTM layer</h3><ul>
+<li>Apply match-LSTM model by sequentially goes through the <strong>passage</strong>, obtaining the weighted representation of question.</li>
+<li><p>At position $i$ of the passage, it first uses the standard word-by-word attention mechanism to obtain attention weight <script type="math/tex">\overrightarrow{\alpha}_i \in \mathbb{R}^{Q}</script>:</p>
+<script type="math/tex; mode=display">\overrightarrow{\pmb{G}}_i = \tanh \big(\pmb{W}^q \pmb{H}^q + (\pmb{W}^p \pmb{h}_i^p + \pmb{W}^r \overrightarrow{\pmb{h}_{i-1}^r} + \pmb{b}^p ) \otimes \pmb{e}_Q \big)</script><script type="math/tex; mode=display">\overrightarrow{\alpha}_i = \text{softmax} (\pmb{w}^T \overrightarrow{\pmb{G}}_i + b \otimes \pmb{e}_Q)</script><p>  where <script type="math/tex">\pmb{W}^q</script>, <script type="math/tex">\pmb{W}^p</script>, <script type="math/tex">\pmb{W}^r \in \mathbb{R}^{l \times l}</script>, $\pmb{b}^p, \pmb{w} \in \mathbb{R}$ are learnable,  <script type="math/tex">\overrightarrow{\pmb{h}_{i-1}^r} \in \mathbb{R}^l</script> is the hidden vector of the one-directional match-LSTM at previous position. The outer product (<script type="math/tex">\cdot \otimes \pmb{e}_Q</script>) generates a matrix or row vector by repeating the vector or scalar on the left for $Q$ times.</p>
+</li>
+<li><p>Then combine the weighted vector with original representations:</p>
+<script type="math/tex; mode=display">\overrightarrow{\pmb{z}}_i =  \begin{bmatrix} \pmb{h}_i^p  \\ \pmb{h}^q \overrightarrow{\alpha}_i^T \end{bmatrix}</script></li>
+</ul>
+<p>The vector <script type="math/tex">\overrightarrow{\pmb{z}}_i</script> is fed to a one-directional LSTM, so-called <code>match-LSTM</code>:</p>
+<script type="math/tex; mode=display">\overrightarrow{\pmb{h}}_i^r = \overrightarrow{\text{LSTM}}(\overrightarrow{\pmb{z}}_i, \overrightarrow{\pmb{h}}_{i-1}^r)</script><p>where <script type="math/tex">\overrightarrow{\pmb{h}}_i^r \in \mathbb{R}^l</script></p>
+<ul>
+<li><p>Further apply a match-LSTM in the reverse direction.</p>
+<script type="math/tex; mode=display">\overleftarrow{\pmb{G}}_i = \tanh \big(\pmb{W}^q \pmb{H}^q + (\pmb{W}^p \pmb{h}_i^p + \pmb{W}^r \overleftarrow{\pmb{h}_{i-1}^r} + \pmb{b}^p ) \otimes \pmb{e}_Q \big)</script><script type="math/tex; mode=display">\overleftarrow{\alpha}_i = \text{softmax} (\pmb{w}^T \overleftarrow{\pmb{G}}_i + b \otimes \pmb{e}_Q)</script></li>
+<li><p>Let <script type="math/tex">\overrightarrow{\pmb{H}^r} \in \mathbb{R}^{l \times P}</script> represent the hidden states <script type="math/tex">[\overrightarrow{\pmb{h}^r_1}, \overrightarrow{\pmb{h}^r_2, \cdots, \overrightarrow{\pmb{h}^r_P}}]</script> and <script type="math/tex">\overleftarrow{\pmb{H}^r} \in \mathbb{R}^{l \times P}</script> represent <script type="math/tex">[\overleftarrow{\pmb{h}^r_1}, \overleftarrow{\pmb{h}^r_2}, \cdots, \overleftarrow{\pmb{h}^r_P}]</script>.</p>
+</li>
+<li><p>Define <script type="math/tex">\pmb{H}^r \in \mathbb{R}^{2l \times P}</script> as the concatenation:</p>
+<script type="math/tex; mode=display">\pmb{H}^r = \begin{bmatrix}
+ \overrightarrow{\pmb{H}^r} \\
+  \overleftarrow{\pmb{H}^r}
+\end{bmatrix}</script></li>
+</ul>
+<h3 id="Answer-pointer-layer"><a href="#Answer-pointer-layer" class="headerlink" title="Answer pointer layer"></a>Answer pointer layer</h3><h3 id="The-sequence-model"><a href="#The-sequence-model" class="headerlink" title="The sequence model"></a>The sequence model</h3><ul>
+<li>Compute the attention weight vector <script type="math/tex">\beta_k \in \mathbb{R}^{(P+1)}</script>:<script type="math/tex; mode=display">\pmb{F}_k = \tanh (\pmb{V} \tilde{H}^r + (\pmb{W}^a \pmb{h}_{k-1}^a + \pmb{b}^a) \otimes \pmb{e}_{(P+1)})</script><script type="math/tex; mode=display">\beta_k = \text{softmax}(\pmb{v}^T \pmb{F}_k + \pmb{c} \otimes \pmb{e}_{(P+1)})</script>where <script type="math/tex">\tilde{H}^r \in \mathbb{R}^{2l \times (P+1)}</script> is the concatenation of $\pmb{H}^r$ with a zero vector, defined as <script type="math/tex">\tilde{H}^r = [\pmb{H}^r; \pmb{0}]</script></li>
+</ul>
+<script type="math/tex; mode=display">\pmb{h}_k^a = \overrightarrow{\text{LSTM}} (\tilde{\pmb{H}}^r \beta_k^T, \pmb{h}_{k-1}^a)</script><p>Then model the probability of generating the answer sequence as:</p>
+<script type="math/tex; mode=display">p(\pmb{a} \vert \pmb{H}^r) = \prod_k p(a_k \vert a_1, a_2, \cdots, a_{k-1}, \pmb{H}^r)</script><script type="math/tex; mode=display">p(a_k = j \vert a_1, a_2, \cdots, a_{k-1}, \pmb{H}^r) = \beta_{k,j}</script><ul>
+<li>Minimize the loss:<script type="math/tex; mode=display">J(\theta) = -\sum_{n=1}^N \log p(\pmb{a}_n \vert \pmb{P}_n, \pmb{Q}_n)</script></li>
+</ul>
+<h3 id="The-boundary-model"><a href="#The-boundary-model" class="headerlink" title="The boundary model"></a>The boundary model</h3><ul>
+<li>Predict the start and end index from input sequences. The probability is modeled as:<script type="math/tex; mode=display">p(\pmb{a} \vert \pmb{H}^r) = p(a_s \vert \pmb{H}^r) p(a_e \vert a_s, \pmb{H}^r)</script></li>
+</ul>
+<h1 id="Gated-self-matching-networks"><a href="#Gated-self-matching-networks" class="headerlink" title="Gated self-matching networks"></a>Gated self-matching networks</h1><ul>
+<li>Firstly, apply bi-RNNs to process the question and passage separately; then match the question and passage with gated attention-based RNNs, obtaining question-aware representation for the passage. On top of that, apply self-matching attention to aggregate evidence from the whole passage and refine the passage representation, which is then fed to the output layer to predict the boundary of the answer span.</li>
+</ul>
+<h2 id="Question-and-passage-encoder"><a href="#Question-and-passage-encoder" class="headerlink" title="Question and passage encoder"></a>Question and passage encoder</h2><ul>
+<li>Given question <script type="math/tex">\mathcal{Q} = \{ w_t^Q\}_{t=1}^m</script> and passage <script type="math/tex">\mathcal{P} = \{ w_t^P\}_{t=1}^n</script>.</li>
+<li>Concatenate the respective word-level embeddings (<script type="math/tex">\{ e_t^Q\}_{t=1}^m</script> and <script type="math/tex">\{ e_t^P\}_{t=1}^n</script>) and char-level embeddings (<script type="math/tex">\{ c_t^Q\}_{t=1}^m</script> and <script type="math/tex">\{ c_t^P\}_{t=1}^n</script>). The char-level embedding is generated by concatenating the final hidden state of bi-directional RNNs, which is helpful to handel OOV words.</li>
+<li>Then use a bi-RNN to produce the new representation of all words in the question and passage respectively:<script type="math/tex; mode=display">u_t^Q = \text{BiRNN}_Q (u_{t-1}^Q, [e_t^Q, c_t^Q])</script><script type="math/tex; mode=display">u_t^P = \text{BiRNN}_P (u_{t-1}^P, [e_t^P, c_t^P])</script></li>
+</ul>
+<p><img data-src="/notes/images/MRC-gated-self-matching-net.png" alt="upload successful"></p>
+<h2 id="Gated-attention-based-RNNs"><a href="#Gated-attention-based-RNNs" class="headerlink" title="Gated attention-based RNNs"></a>Gated attention-based RNNs</h2><ul>
+<li>Incorporate an additional gate to determine the importance of information in the passage regarding a question. </li>
+<li><p>Rocktäschel et al.(2015)<sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rocktäschel, T., Grefenstette, E., Hermann, K.M., Kociský, T., & Blunsom, P. (2016). Reasoning about Entailment with Neural Attention. CoRR, abs/1509.06664.
+">[15]</span></a></sup> proposed generating sentence-pair representation <script type="math/tex">\{ v_t^P \}_{t=1}^n</script> via soft-alignment of words in the question and passage:</p>
+<script type="math/tex; mode=display">v_t^P = \text{RNN}(v_{t-1}^P, c_t)</script><p>where <script type="math/tex">c_t = \text{att}(u^Q, [u_t^P, v_{t-1}^P])</script> is an attention-pooling vector of the whole question $u^Q$:</p>
+<script type="math/tex; mode=display">s_j^t = v^T \tanh (w_u^Q u_j^Q + W_u^P u_t^P + W_v^P v_{t-1}^P)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp (s_i^t)}{\sum_{j=1}^m \exp(s_j^t)}</script><script type="math/tex; mode=display">c_t = \sum_{i=1}^m a_i^t u_i^Q</script></li>
+<li><p>Match-LSTM(Wang and Jiang, 2016) takes <script type="math/tex">u_t^P</script> as an additional input into the recurrent network:</p>
+<script type="math/tex; mode=display">v_t^P = \text{RNN}(v_{t-1}^P, [u_t^P, c_t])</script></li>
+<li><p>To determine the importance of passage parts and attend to the ones relevant to the question, add another gate to the input <script type="math/tex">[u_t^p, c_t]</script> of RNNs:</p>
+<script type="math/tex; mode=display">g_t = \text{sigmoid} (W_g [u_t^P, c_t])</script><script type="math/tex; mode=display">[u_t^P, c_t]^* = g_t \odot [u_t^P, c_t]</script></li>
+</ul>
+<h2 id="Self-matching-attention"><a href="#Self-matching-attention" class="headerlink" title="Self-matching attention"></a>Self-matching attention</h2><ul>
+<li><p>Match the question-aware passage representation against itself.</p>
+<script type="math/tex; mode=display">h_t^P = \text{BiRNN}(h_{t-1}^P, [v_t^P, c_t])</script><p>where <script type="math/tex">c_t=\text{att}(v^P, v_t^P)</script> is an attention pooling vector of the whole passage $v^P$:</p>
+<script type="math/tex; mode=display">s_j^t = v^T \tanh(W_v^P v_j^P + W_v^{\tilde{P}}v_t^P)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp(s_i^t)}{\sum_{j=1}^n \exp(s_j^t)}</script><script type="math/tex; mode=display">c_t = \sum_{i=1}^n a_i^t v_i^P</script></li>
+<li><p>An additional gate as in gated attention-based RNNs is applied to <script type="math/tex">[v_t^P, c_t]</script> to adaptively control the input of RNNs.</p>
+</li>
+</ul>
+<h2 id="Output-layer-1"><a href="#Output-layer-1" class="headerlink" title="Output layer"></a>Output layer</h2><ul>
+<li>Use pointer net to select the start position ($p^1$) and end position ($p^2$) from the passage:<script type="math/tex; mode=display">s_j^t = v^T \tanh (W_h^P h_j^P + W_h^a h_{t-1}^a)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp(s_i^t)}{\sum_{j=1}^n \exp(s_j^t)}</script><script type="math/tex; mode=display">p^t = \arg \max (a_1^t, \cdots, a_n^t)</script></li>
+<li>Utilize the question vector $r^Q$ as the initial state of the answer RNNs: <script type="math/tex">r^Q \text{att}(u^Q, v_r^Q)</script></li>
+</ul>
+<h1 id="Attention-over-Attention-Reader"><a href="#Attention-over-Attention-Reader" class="headerlink" title="Attention-over-Attention Reader"></a>Attention-over-Attention Reader</h1><ul>
+<li><p><strong>Contextual embedding</strong> for document $\mathcal{D}$ and query $\mathcal{Q}$ using bi-GRUs: <script type="math/tex">h_{doc} \in \mathbb{R}^{|\mathcal{D}|*2d}</script>, <script type="math/tex">h_{query} \in \mathbb{R}^{|\mathcal{Q}|*2d}</script></p>
+<script type="math/tex; mode=display">e(x) = W_e \cdot x, \text{where } x \in \mathcal{D}, \mathcal{Q}</script><script type="math/tex; mode=display">\overrightarrow{h_s(x)} = \overrightarrow{\text{GRU}}(e(x))</script><script type="math/tex; mode=display">\overleftarrow{h_s(x)} = \overleftarrow{\text{GRU}}(e(x))</script><script type="math/tex; mode=display">h_s(x) = [\overrightarrow{h_s(x)}; \overleftarrow{h_s(x)} ]</script></li>
+<li><p><strong>Pair-wise matching score</strong>:<br>  Given $i$-th word of the document and $j$-th word of query, we compute a matching score by dot product, forming a matrix $M \in \mathbb{R}^{\mathcal{D}*\mathcal{Q}} $, where the value of $i$-th row and $j$-th column is filled by $M(i,j)$:</p>
+<script type="math/tex; mode=display">M(i,j) = h_{\text{doc}}(i)^T \cdot h_{\text{query}}(j)</script></li>
+<li><p><strong>Individual document-level attentions</strong><br>  Apply a <code>column-wise softmax</code> function to get distribution of each column, where each column is an individual <strong>document-level attention</strong> considering a single query word (one element in rows). Let $\alpha(t) \in \mathbb{R}^{|\mathcal{D}|}$ is a <code>query-to-document attention</code> at time $t$:</p>
+<script type="math/tex; mode=display">\alpha(t) = \text{softmax} (M(1,t), \cdots, M(|\mathcal{D}|,t))</script><script type="math/tex; mode=display">\alpha = [\alpha(1), \alpha(2), \cdots, \alpha(\mathcal{Q})]</script></li>
+</ul>
+<p><img data-src="/notes/images/MRC-attn-over-attn.png" alt="upload successful"></p>
+<ul>
+<li><p><strong>Attention-over-Attention</strong> <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Cui, Y., Chen, Z., Wei, S., Wang, S., & Liu, T. (2017). [Attention-over-Attention Neural Networks for Reading Comprehension](https://aclweb.org/anthology/P17-1055). ACL.
+">[7]</span></a></sup></p>
+<ol>
+<li>First, for each document word at time $t$, compute the “importance” distribution on the query, indicating which query words are most important given a single document word.</li>
+<li>Apply <code>row-wise softmax</code> function to the pair-wise matching matrix $M$ to get query-level attentions. The document-to-query attention $\beta(t) \in \mathbb{R}^{|\mathcal{Q}|}$ is；<script type="math/tex; mode=display">\beta(t) = \text{softmax}\big(M(t,1), \cdots, M(t_m, |\mathcal{Q}|)\big)</script></li>
+<li>We average the attention for each query word:<script type="math/tex; mode=display">\beta = \frac{1}{n} \sum_{t=1}^{|\mathcal{D}|} \beta(t)</script></li>
+<li>Calculate the dot product of $\alpha$ and $\beta$ to get the <code>attended document-level attention</code>:<script type="math/tex; mode=display">s = \alpha^T \beta</script></li>
+</ol>
+</li>
+<li><p>Predictions<br>  The final output is mapped to the vocabulary space $V$, rather than document-level attention $|\mathcal{D}|$:</p>
+<script type="math/tex; mode=display">p(W \vert \mathcal{D}, \mathcal{Q}) = \sum_{i \in I(w, \mathcal{D})}  s_i, w \in V</script><p>  where $I(w, \mathcal{D})$ indicate the positions that word $w$ appears in the document $\mathcal{D}$. </p>
+<p>  The training objective is to maximize the log-likelihood of the correct answer:</p>
+<script type="math/tex; mode=display">\mathcal{L} = \sum_i \log{(p(x))}, x \in \mathcal{A}</script></li>
+</ul>
+<h1 id="R-Net"><a href="#R-Net" class="headerlink" title="R-Net"></a>R-Net</h1><p><strong>Overview</strong>:</p>
+<ol>
+<li>First, the question $Q$ and passage $P$ are processed by a bi-RNNs separately.</li>
+<li>Then, match the $Q$ and $P$ with gated attention-based RNNs, obtaining question-aware representation for the passage $P$</li>
+<li>Apply self-matching attention to aggregate evidence from the whole passage and refine the passage representation.</li>
+<li>Feed into the output layer to predict the boundary of the answer span.</li>
+</ol>
+<p><img data-src="/notes/images/R-Net.png" alt="upload successful"></p>
+<h2 id="Question-and-passage-encoder-1"><a href="#Question-and-passage-encoder-1" class="headerlink" title="Question and passage encoder"></a>Question and passage encoder</h2><p>Consider a question <script type="math/tex">Q = \{ w_t^Q \}_{t=1}^m</script> and a passage <script type="math/tex">P=\{ w_t^P \}^n_{t=1}</script>. </p>
+<ul>
+<li>First convert words to word-level embeddings <script type="math/tex">\{ e_t^Q\}_{t=1}^m</script> and <script type="math/tex">\{ e_t^P \}_{t=1}^n</script> and char-level embeddings <script type="math/tex">\{ c_t^Q\}_{t=1}^m</script> and <script type="math/tex">\{ c_t^P \}_{t=1}^n</script> (generated by the final hidden states of bi-RNNs, which benefits for OOV tokens)</li>
+<li>Then use a bi-RNN to encode the question and passage respectively:<script type="math/tex; mode=display">u_t^Q = \text{bi-RNN}_Q (u_{t-1}^Q, [e_t^Q, c_t^Q])</script><script type="math/tex; mode=display">u_t^P = \text{bi-RNN}_P (u_{t-1}^P, [e_t^P, c_t^P])</script></li>
+</ul>
+<h2 id="Gated-attention-based-RNNs-1"><a href="#Gated-attention-based-RNNs-1" class="headerlink" title="Gated attention-based RNNs"></a>Gated attention-based RNNs</h2><p>Given question representation <script type="math/tex">\{u_t^Q\}_{t=1}^m</script> and passage representation <script type="math/tex">\{ u_t^P \}_{t=1}^n</script>.</p>
+<ul>
+<li>Generate sentence-pair representation <script type="math/tex">\{v_t^P\}_{t=1}^n</script> with soft-alignment of words in the question and passage:<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rocktäschel, T., Grefenstette, E., Hermann, K.M., Kociský, T., & Blunsom, P. (2016). [Reasoning about Entailment with Neural Attention](https://arxiv.org/pdf/1509.06664.pdf). CoRR, abs/1509.06664.
+">[4]</span></a></sup><script type="math/tex; mode=display">\pmb{v_t^P} = \text{RNN} (v_{t-1}^P, c_t)</script>where <script type="math/tex">c_t = \text{att}(u^Q, [u_t^P, v_{t-1}^P])</script> is an attention-pooling vector of the whole question $(u^Q)$:<script type="math/tex; mode=display">s_j^t = v^T \text{tanh}(W_u^Q u_j^Q + W_u^P u_t^P + W_V^P v_{t-1}^P)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp(s_i^t)}{\sum_{j=1}^m \exp{(s_j^t)} }</script><script type="math/tex; mode=display">c_t = \sum_{i=1}^m a_i^t u_i^Q</script></li>
+</ul>
+<p>Each passage representation <script type="math/tex">v_t^P</script> dynamically incorporates aggregated matching information from the whole question.</p>
+<p>or</p>
+<ul>
+<li><strong>match-LSTM</strong><sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, S., & Jiang, J. (2016). [Learning Natural Language Inference with LSTM](https://arxiv.org/pdf/1512.08849.pdf). HLT-NAACL.
+">[5]</span></a></sup>. Take <script type="math/tex">u_t^P</script> as an additional input into the RNNs:<script type="math/tex; mode=display">\pmb{v_t^P} = \text{RNN}(v_{t-1}^P, [u_t^P, c_t])</script>To determine the importance of passage parts and attend to the ones relevant to the question, add another gate <script type="math/tex">g_t</script> to the input <script type="math/tex">([u_t^P, c_t])</script> of RNN:<script type="math/tex; mode=display">g_t = \text{sigmoid}(W_g [u_t^P, c_t])</script><script type="math/tex; mode=display">[u_t^P, c_t]^* = g_t \odot [u_t^P, c_t]</script></li>
+</ul>
+<h2 id="Self-matching-attention-1"><a href="#Self-matching-attention-1" class="headerlink" title="Self-matching attention"></a>Self-matching attention</h2><p>Given question-aware passage representation <script type="math/tex">\{ v_t^P \}_{t=1}^n</script>. One problem is that, it has very limited knowledge of context,</p>
+<p><strong>Solution</strong>: match the question-aware passage representation against itself.</p>
+<script type="math/tex; mode=display">\pmb{h_t^P} = \text{bi-RNN}(h_{t-1}^P, [v_t^P, c_t])</script><p>where <script type="math/tex">c_t = \text{att}(v^P, v_t^P)</script> is an attention-pooling vector of the whole passage $(v^P)$:</p>
+<script type="math/tex; mode=display">s_j^t = v^T \text{tanh}(W_u^P v_j^P + W_v^{\tilde{P}} v_t^P)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp{(s_i^t)}}{\sum_{j=1}^n \exp{(s_j^t)}}</script><script type="math/tex; mode=display">c_t = \sum_{i=1}^n a_i^t v_i^P</script><p>An additional gate as in gated attention-based RNNs is applied to <script type="math/tex">[v_t^P, c_t]</script> to adaptively control the input of RNNs.</p>
+<h2 id="Output-layer-2"><a href="#Output-layer-2" class="headerlink" title="Output layer"></a>Output layer</h2><p>Given the passage representation <script type="math/tex">\{ h_t^P \}_{t=1}^n</script></p>
+<ul>
+<li><p>Use pointer networks to predict the start and the end position of the answer.</p>
+</li>
+<li><p>Attention mechanism is utilized as the pointer to select the start position $(p^1)$ and end position $(p^2)$:</p>
+<script type="math/tex; mode=display">s_j^t = v^T \text{tanh}(W_h^P h_j^P + W_h^a h_{t-1}^a)</script><script type="math/tex; mode=display">a_i^t = \frac{\exp{(s_i^t)}}{\sum_{j=1}^n \exp{(s_j^t)}}</script><script type="math/tex; mode=display">o^t = \arg\max{a_1^t, \cdots, a_n^t}</script><p>here <script type="math/tex">h_{t-1}^a</script> represents the last hidden state of the answer RNNs(pointer net).</p>
+</li>
+</ul>
+<p>The input of the answer RNN is the attention-pooling vector:</p>
+<script type="math/tex; mode=display">c_t= \sum_{i=1}^n a_i^t h_i^P</script><script type="math/tex; mode=display">h_t^a = \text{RNN}(h_{t-1}^a, c_t)</script><p>When predicting the <strong>start position</strong>, <script type="math/tex">h_{t-1}^a</script> represents the initial hidden state of the answer RNN. We use the question vector $r^Q$ as the initial state of the answer RNN. <script type="math/tex">r^Q = \text{att}(u^Q, V_r^Q)</script> is an attention-pooling vector of the question based on the parameter <script type="math/tex">V_r^Q</script>:</p>
+<script type="math/tex; mode=display">s_j v^T \text{tanh}(W_u^Q u_j^Q + W_v^Q V_r^Q)</script><script type="math/tex; mode=display">a_i = \frac{\exp{(s_i)}}{\sum_{j=1}^m \exp{(s_j)}}</script><script type="math/tex; mode=display">r^Q = \sum_{i=1}^m a_i u_i^Q</script><ul>
+<li><strong>Loss</strong>: the sum of negative log probabilities of the label start and end position by the predicted distributions.</li>
+</ul>
+<h1 id="Reasoning-Network-ReasoNet"><a href="#Reasoning-Network-ReasoNet" class="headerlink" title="Reasoning Network (ReasoNet)"></a>Reasoning Network (ReasoNet)</h1><ul>
+<li>ReasoNet mimics the inference process of human readers by introducing a termination state in the inference with reinforcement learning. The state can decide whether to continue the inference to the next turn after digesting intermediate information, or to terminate the whole inference when it concludes that existing information is sufficient to yield an answer.</li>
+</ul>
+<p><img data-src="/notes/images/MRC-ReasoNet.png" alt="upload successful"></p>
+<ul>
+<li>The stochastic inference process can be seen as a POMDP. The state sequence <script type="math/tex">s_{1:T}</script> is controlled by an RNN sequence model. The ReasoNet performs an answer action <script type="math/tex">a_T</script> at $T$-th step, which implies that the termination gate variables <script type="math/tex">t_{1:T} = (t_1=0, t_2=0, \cdots, t_{t-1}=0, t_T=1)</script>. </li>
+<li>The ReasoNet learns a stochastic policy <script type="math/tex">\pi((t_t, a_t) \vert s_t; \theta)</script> with parameters $\theta$ to get a distribution of termination actions if the model decides to stop at the current step.</li>
+</ul>
+<p><img data-src="/notes/images/MRC-ReasoNet-algorithm.png" alt="upload successful"></p>
+<ul>
+<li><p>The expected reward for an instance is:</p>
+<script type="math/tex; mode=display">J(\theta) = \mathbb{E}_{\pi(t_{1:T}, a_T, \theta)} \big[ \sum_{t=1}^T r_t \big]</script><ul>
+<li><p>The reward can only be received at the final termination step when an asnwer action <script type="math/tex">a_T</script> is performed.</p>
+<script type="math/tex; mode=display">r_T=\left\{
+          \begin{array}{ll}
+            \begin{align}
+            1 & \text{ if } t_T=1 \text{ and the answer is correct}\\
+            0 & \text{ otherwise}
+            \end{align}
+          \end{array}
+        \right.</script><ul>
+<li><p>$J$ can be maximized by directly applying gradient based optimization methods:</p>
+<script type="math/tex; mode=display">\nabla_\theta J(\theta) =\mathbb{E}_{\pi(t_{1:T}, a_T; \theta)} \big[ \nabla_\theta \log \pi(t_{1:T}, a_T; \theta) r_t \big]</script></li>
+<li><p>Motivated by REINFORCE algorithm, we compute <script type="math/tex">\nabla_\theta J(\theta)</script>:</p>
+<script type="math/tex; mode=display">\mathbb{E}_\pi(t_{1:T, a_T; \theta}) \big[ \nabla_\theta \log \pi(t_{1:T}, a_T; \theta) r_t \big] = \sum_{(t_{1:T}, a_T) \in \mathbb{A}} \pi(t_{1:T}, a_T; \theta) \big[ \nabla_\theta \log \pi(t_{1:T}, a_T; \theta) (r_T - b_T) \big]</script><p>where <script type="math/tex">b_T = \mathbb{E}[r_T]</script> and can be updated via online moving average approach: <script type="math/tex">b_T = \lambda b_T + (1- \lambda) b_t</script></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="Cross-passage-answer-verification"><a href="#Cross-passage-answer-verification" class="headerlink" title="Cross-passage answer verification"></a>Cross-passage answer verification</h1><ol>
+<li>Compute the question-aware representation for each passage. Employ a Pointer network    to predict the start and end position of the answer in the module of <strong>answer boundary prediction</strong>.</li>
+<li>Meanwhile, with the <strong>answer content module</strong>, we estimate whether each word should be included in the answer.</li>
+<li>In the <strong>answer verification module</strong>, each answer candidate can attend to the other answer candidates to collect supportive information and compute one score for each candidate to indicate whether it is correct or not according to the verification.</li>
+</ol>
+<p><img data-src="/notes/images/MRC-cross-passage-verification.png" alt="upload successful"></p>
+<h2 id="Question-and-passage-modeling"><a href="#Question-and-passage-modeling" class="headerlink" title="Question and passage modeling"></a>Question and passage modeling</h2><ul>
+<li><p><strong>Encoding</strong>: map each word into the vector space by concatenating the word embedding and sum of its char-embeddings. Then employ bi-LSTM to encode the question $\pmb{Q}$ and passages <script type="math/tex">\{ \pmb{P}_i\}</script>:</p>
+<script type="math/tex; mode=display">\pmb{u}_t^Q = \text{biLSTM}_Q(\pmb{u}_{t-1}^Q, [\pmb{e}_t^Q, \pmb{c}_t^Q])</script><script type="math/tex; mode=display">\pmb{u}_t^{P_i} = \text{biLSTM}_P(\pmb{u}_{t-1}^{P_i}, [\pmb{e}_t^{P_i}, \pmb{c}_t^{P_i}])</script><p>where <script type="math/tex">\pmb{e}_t^Q</script>, <script type="math/tex">\pmb{c}_t^Q</script> are word-level and char-level embeddings of the $t$-th word.</p>
+</li>
+<li><p><strong>Q-P Matching</strong>: use the attention flow layer to conduct Q-P matching in two directions. The similarity between the $t$-th word in the question and $k$-th word in passage $i$ is:</p>
+<script type="math/tex; mode=display">\pmb{S}_{t,k} = \pmb{u}_t^{QT} \cdot \pmb{u}_k^{P_i}</script></li>
+</ul>
+<p>Then the context-to-question attention and question-to-context attention is applied as aforementioned BiDAF to obtain the question-aware passage representation <script type="math/tex">\{ \pmb{\tilde{u}}_t^{P_i}\}</script>.</p>
+<p>The match output:</p>
+<script type="math/tex; mode=display">\pmb{v}_t^{P_i} = \text{BiLSTM}_M (\pmb{v}_{t-1}^{P_i}, \pmb{\tilde{u}}_t^{P_i})</script><h2 id="Answer-boundary-prediction"><a href="#Answer-boundary-prediction" class="headerlink" title="Answer boundary prediction"></a>Answer boundary prediction</h2><ul>
+<li><p>Employ Pointer net to compute the probability of each word to be the start or end position of the span:</p>
+<script type="math/tex; mode=display">g_k^t = {\pmb{w}_1^{\alpha}}^T \tanh(\pmb{W}_2^\alpha [\pmb{v}_k^P, \pmb{h}_{t-1}^a])</script><script type="math/tex; mode=display">\alpha_k^t = \frac{ \exp (g_k^t)}{\sum_{j=1}^{\pmb{|P|}} \exp(g_j^t)}</script><script type="math/tex; mode=display">\pmb{c}_t = \sum_{k=1}^{|\pmb{P}|} \alpha_k^t \pmb{v}_k^P</script><script type="math/tex; mode=display">\pmb{h}_t^a = \text{LSTM}(\pmb{h}_{t-1}^a, \pmb{c}_t)</script></li>
+<li><p>The probability of $k$-th word in the passage to be the start and end position of the answer is obtained as <script type="math/tex">\alpha_k^1</script> and <script type="math/tex">\alpha_k^2</script></p>
+</li>
+<li>Minimize the negative log probabilities of the true start and end indices:<script type="math/tex; mode=display">\mathcal{L}_{\text{boundaries}} = -\frac{1}{N} \sum_{i=1}^N (\log \alpha_{Y_i^1}^1 + \log \alpha_{y_i^2}^2)</script>where $N$ is the # of samples in the dataset and <script type="math/tex">y_i^1</script>, <script type="math/tex">y_i^2</script> are the gold start and end positions.</li>
+</ul>
+<h2 id="Answer-content-modeling"><a href="#Answer-content-modeling" class="headerlink" title="Answer content modeling"></a>Answer content modeling</h2><ul>
+<li><p>We predict whether each word should be included in the context of the answer. The content probability of the $k$-th word is computed as:</p>
+<script type="math/tex; mode=display">p_k^c = \text{sigmoid}({\pmb{w}_1^c}^T \text{ReLU}(\pmb{W}_2^c \pmb{v}_k ^{P_i}))</script></li>
+<li><p>Words within the answer span are labeled as 1 and the other 0. The loss is averaged cross entropy:</p>
+<script type="math/tex; mode=display">\mathcal{L}_{\text{content}} = -\frac{1}{N} \frac{1}{|P|} \sum_{i=1}^N \sum_{j=1}^{|P|} [y_k^c \log p_k^c + (1-y_k^c)\log(1-p_k^c)]</script></li>
+<li><p>The content probabilities provide another view to measure the quality of the answer in addition to the boundary. Moreover, with these probabilities, we can represent the answer from passage $i$ as a weighted sum of all word embeddings:</p>
+<script type="math/tex; mode=display">\pmb{r}^{A_i} = \frac{1}{|\pmb{P}_i|} \sum_{k=1}^{|\pmb{P}_i|} p_k^c [\pmb{e}_k^{P_i}, \pmb{c}_k^{P_i}]</script></li>
+</ul>
+<h2 id="Cross-passage-answer-verification-1"><a href="#Cross-passage-answer-verification-1" class="headerlink" title="Cross-passage answer verification"></a>Cross-passage answer verification</h2><ul>
+<li>The boundary and content model focus on modeling within <strong>a single passage</strong>, with little consideration of the cross-passage information.</li>
+<li>Given the representation of the answer candidates from all passages <script type="math/tex">\{ \pmb{r}^{A_i}\}</script>, each answer candidate then attends to other candidates to collect supportive information via attention mechanism:<script type="math/tex; mode=display">s_{i,j} = \left\{ 
+  \begin{array}{ll}
+  0 & \text{ if } i=j \\
+  {\pmb{r}^{A_i}}^T \cdot \pmb{r}^{A_j} & otherwise
+     \end{array}
+  \right.</script></li>
+</ul>
+<script type="math/tex; mode=display">\alpha_{i,j} = \frac{\exp(s_{i,j})}{\sum_{k=1}^n \exp(s_{i,k})}</script><script type="math/tex; mode=display">\tilde{\pmb{r}}^{A_i} =\sum_{j=1}^n \alpha_{i,j} \pmb{r}^{A_j}</script><p>Here <script type="math/tex">\tilde{\pmb{r}}^{A_i}</script> is the collected verification information from other passages with attention weights. Then we pass it together with the original <script type="math/tex">\pmb{r}^{A_i}</script> to a FC layer:</p>
+<script type="math/tex; mode=display">g_i^v = {\pmb{w}^v}^T [\pmb{r}^{A_i}, \tilde{\pmb{r}}^{A_i}, \pmb{r}^{A_i} \odot \tilde{\pmb{r}}^{A_i} ]</script><p>Then normalize the score:</p>
+<script type="math/tex; mode=display">p_i^v = \frac{\exp(g_i^v)}{\sum_{j=1}^n \exp(g_j^v)}</script><p>The loss function:</p>
+<script type="math/tex; mode=display">\mathcal{L}_{\text{verify}} = -\frac{1}{N} \sum_{i=1}^N \log p_{y_i^v}^v</script><p>where <script type="math/tex">y_i^v</script> is the index of the correct answer in all the answer candidates of the $i$-th instance.</p>
+<h2 id="Joint-training"><a href="#Joint-training" class="headerlink" title="Joint training"></a>Joint training</h2><p>The joint objective function:</p>
+<script type="math/tex; mode=display">\mathcal{L} = \mathcal{L}_{boundary} + \mathcal{L}_{content} + \mathcal{L}_{verify}</script><h1 id="QANet"><a href="#QANet" class="headerlink" title="QANet"></a>QANet</h1><p>Previous models relied on Recurrent neural nets, slowing down the training and inference speed. QANet<sup id="fnref:17"><a href="#fn:17" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, A.W., Dohan, D., Luong, M., Zhao, R., Chen, K., Norouzi, M., & Le, Q.V. (2018). [QANet: Combining Local Convolution with Global Self-Attention for Reading Comprehension](https://arxiv.org/abs/1804.09541). CoRR, abs/1804.09541.">[17]</span></a></sup> applied exclusively convolutions and self-attentions to speed up the training process.</p>
+<h2 id="QANet-architecture"><a href="#QANet-architecture" class="headerlink" title="QANet architecture"></a>QANet architecture</h2><h3 id="Input-embedding-layer"><a href="#Input-embedding-layer" class="headerlink" title="Input embedding layer"></a>Input embedding layer</h3><ul>
+<li>Concatenate the pretrained word embedding <script type="math/tex">x_w</script> and char embedding <script type="math/tex">x_c</script>: <script type="math/tex">[x_w; x_c] \in \pmb{R}^{p_1+p_2}</script>. Also adopt a two-layer high-way network on top of the representation.</li>
+</ul>
+<h3 id="Embedding-encoder-layer"><a href="#Embedding-encoder-layer" class="headerlink" title="Embedding encoder layer"></a>Embedding encoder layer</h3><p><img data-src="/notes/images/MRC-QANet.png" alt="upload successful"></p>
+<ul>
+<li>A stack of the building block: [convolution-layer $\times$ # + self-attention layer + feed-forword layer]</li>
+</ul>
+<h3 id="Context-query-attention-layer"><a href="#Context-query-attention-layer" class="headerlink" title="Context-query attention layer"></a>Context-query attention layer</h3><ul>
+<li><p>Firstly compute the similarity matrix $S$ between each word pair of context $C$ and query $Q$, i.e. $S \in \pmb{R}^{n \times m}$. We then normalize each row of $S$ by applying the softmax function, getting a matrix $\bar{S}$. Then the context to query attention is computed as: $A = \bar{S} \cdot Q^T \in \pmb{R}^{n \times d}$.</p>
+</li>
+<li><p>The similarity function is the trilinear function:</p>
+<script type="math/tex; mode=display">f(q,c) = W_0 [q,c, q \odot c]</script><p>where $\odot$ is the element-wise multiplication and <script type="math/tex">W_0</script> is a trainable variable.</p>
+</li>
+</ul>
+<p>The query-to-context attention is:</p>
+<script type="math/tex; mode=display">B = \bar{S} \odot {\overline{\overline{S}}}^T \odot C^T</script><p>where $\overline{\overline{S}}$ is normalized matrix of $S$ along column with softmax function.</p>
+<h3 id="Model-encoder-layer"><a href="#Model-encoder-layer" class="headerlink" title="Model encoder layer"></a>Model encoder layer</h3><p>The input at each position is $[c,a, c \odot a, c \odot b]$, where $a$ and $b$ are respectively a row of attention matrix $A$ and $B$.</p>
+<h3 id="Output-layer-3"><a href="#Output-layer-3" class="headerlink" title="Output layer"></a>Output layer</h3><ul>
+<li><p>Predict the probability of each position in the context being the start and end of an answer span</p>
+<script type="math/tex; mode=display">p^1 = \text{softmax}(W_1[M_0;M_1])</script><script type="math/tex; mode=display">p^2 = \text{softmax}(W_2[M_0;M_2])</script><p>where <script type="math/tex">W_1</script>, <script type="math/tex">W_2</script> are two trainable variables and <script type="math/tex">M_0</script>, <script type="math/tex">M_1</script>, <script type="math/tex">M_2</script> are the outputs of the three model encoders, from bottom to top.</p>
+</li>
+<li><p>Loss function</p>
+<script type="math/tex; mode=display">\mathcal{L}(\theta) = -\frac{1}{N}\sum_{i}^{N} [\log (p_{y_i^1}) + \log (p^2_{y_i^2})]</script></li>
+</ul>
+<h2 id="Tricks"><a href="#Tricks" class="headerlink" title="Tricks"></a>Tricks</h2><ul>
+<li>Data augmentation with back-translation</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Jason Weston, Sumit Chopra, and Antoine Bordes (2014). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1410.3916">Memory networks</a>. arXiv preprint arXiv:1410.3916.<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Hermann, K.M., Kociský, T., Grefenstette, E., Espeholt, L., Kay, W., Suleyman, M., &amp; Blunsom, P. (2015). <a target="_blank" rel="noopener" href="https://papers.nips.cc/paper/5945-teaching-machines-to-read-and-comprehend.pdf">Teaching Machines to Read and Comprehend</a>. NIPS.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kadlec, R., Schmid, M., Bajgar, O., &amp; Kleindienst, J. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1603.01547">Text understanding with the attention sum reader network</a>. CoRR, abs/1603.01547.<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rocktäschel, T., Grefenstette, E., Hermann, K.M., Kociský, T., &amp; Blunsom, P. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1509.06664.pdf">Reasoning about Entailment with Neural Attention</a>. CoRR, abs/1509.06664.<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, S., &amp; Jiang, J. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1512.08849.pdf">Learning Natural Language Inference with LSTM</a>. HLT-NAACL.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kadlec, R., Schmid, M., Bajgar, O., &amp; Kleindienst, J. (2016). <a target="_blank" rel="noopener" href="https://www.aclweb.org/anthology/P16-1086">Text Understanding with the Attention Sum Reader Network</a>. CoRR, abs/1603.01547.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Cui, Y., Chen, Z., Wei, S., Wang, S., &amp; Liu, T. (2017). <a target="_blank" rel="noopener" href="https://aclweb.org/anthology/P17-1055">Attention-over-Attention Neural Networks for Reading Comprehension</a>. ACL.<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Vinyals, O., Fortunato, M., &amp; Jaitly, N. (2015). <a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/5866-pointer-networks.pdf">Pointer Networks</a>. NIPS.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Trischler, A., Ye, Z., Yuan, X., Bachman, P., Sordoni, A., &amp; Suleman, K. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1606.02270.pdf">Natural Language Comprehension with the EpiReader</a>. EMNLP.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Seo, M.J., Kembhavi, A., Farhadi, A., &amp; Hajishirzi, H. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1611.01603.pdf">Bidirectional Attention Flow for Machine Comprehension</a>. CoRR, abs/1611.01603.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, S., &amp; Jiang, J. (2017). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1608.07905.pdf">Machine Comprehension Using Match-LSTM and Answer Pointer</a>. CoRR, abs/1608.07905.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, W., Yang, N., Wei, F., Chang, B., &amp; Zhou, M. (2017). <a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/research/wp-content/uploads/2017/05/r-net.pdf">R-NET: Machine reading comprehension with self-matching networks</a>. Natural Lang. Comput. Group, Microsoft Res. Asia, Beijing, China, Tech. Rep, 5.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Shen, Y., Huang, P., Gao, J., &amp; Chen, W. (2016). <a target="_blank" rel="noopener" href="http://dl.acm.org/citation.cfm?id=3098177">ReasoNet: Learning to Stop Reading in Machine Comprehension</a>. CoCo@NIPS.<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, W., Yang, N., Wei, F., Chang, B., &amp; Zhou, M. (2017). <a target="_blank" rel="noopener" href="https://pdfs.semanticscholar.org/b798/cfd967e1a9ca5e7bc995d33a907bf65d1c7f.pdf?_ga=2.85729691.304907061.1555921866-1863904407.1553653768">Gated Self-Matching Networks for Reading Comprehension and Question Answering</a>. ACL.<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rocktäschel, T., Grefenstette, E., Hermann, K.M., Kociský, T., &amp; Blunsom, P. (2016). Reasoning about Entailment with Neural Attention. CoRR, abs/1509.06664.<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, Y., Liu, K., Liu, J., He, W., Lyu, Y., Wu, H., Li, S., &amp; Wang, H. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1805.02220.pdf">Multi-Passage Machine Reading Comprehension with Cross-Passage Answer Verification</a>. ACL.<a href="#fnref:16" rev="footnote"> ↩</a></span></li><li id="fn:17"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">17.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yu, A.W., Dohan, D., Luong, M., Zhao, R., Chen, K., Norouzi, M., &amp; Le, Q.V. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1804.09541">QANet: Combining Local Convolution with Global Self-Attention for Reading Comprehension</a>. CoRR, abs/1804.09541.<a href="#fnref:17" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/04/02/RL/SpinningUp/RL-taxonomy/" rel="prev" title="Kinds of RL algorithms">
+      <i class="fa fa-chevron-left"></i> Kinds of RL algorithms
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/05/10/NN/Activation-functions-introduction/" rel="next" title="An Introduction to Activation Functions">
+      An Introduction to Activation Functions <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Symbol-matching-models"><span class="nav-number">1.</span> <span class="nav-text">Symbol matching models</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Frame-Semantic-parsing"><span class="nav-number">1.1.</span> <span class="nav-text">Frame-Semantic parsing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Word-Distance"><span class="nav-number">1.2.</span> <span class="nav-text">Word Distance</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Teaching-Machines-to-Read-and-Comprehend"><span class="nav-number">2.</span> <span class="nav-text">Teaching Machines to Read and Comprehend</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Deep-LSTM-Reader"><span class="nav-number">2.1.</span> <span class="nav-text">Deep LSTM Reader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attentive-Reader"><span class="nav-number">2.2.</span> <span class="nav-text">Attentive Reader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Impatient-Reader"><span class="nav-number">2.3.</span> <span class="nav-text">Impatient Reader</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Attention-Sum-Reader"><span class="nav-number">3.</span> <span class="nav-text">Attention Sum Reader</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EpiReader"><span class="nav-number">4.</span> <span class="nav-text">EpiReader</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pointer-Nets"><span class="nav-number">4.1.</span> <span class="nav-text">Pointer Nets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EpiReader-1"><span class="nav-number">4.2.</span> <span class="nav-text">EpiReader</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Extractor-Pointer-Nets"><span class="nav-number">4.2.1.</span> <span class="nav-text">Extractor: Pointer Nets</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reasoner"><span class="nav-number">4.2.2.</span> <span class="nav-text">Reasoner</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bi-Directional-Attention-Flow-BiDAF"><span class="nav-number">5.</span> <span class="nav-text">Bi-Directional Attention Flow (BiDAF)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Highway-Networks"><span class="nav-number">5.1.</span> <span class="nav-text">Highway Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BiDAF"><span class="nav-number">5.2.</span> <span class="nav-text">BiDAF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Char-embedding-layer"><span class="nav-number">5.2.1.</span> <span class="nav-text">Char embedding layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Word-embedding-layer"><span class="nav-number">5.2.2.</span> <span class="nav-text">Word embedding layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Contextual-embedding-layer"><span class="nav-number">5.2.3.</span> <span class="nav-text">Contextual embedding layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Attention-flow-layer"><span class="nav-number">5.2.4.</span> <span class="nav-text">Attention flow layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Modeling-layer"><span class="nav-number">5.2.5.</span> <span class="nav-text">Modeling layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Output-layer"><span class="nav-number">5.2.6.</span> <span class="nav-text">Output layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Match-LSTM-and-Answer-pointer"><span class="nav-number">6.</span> <span class="nav-text">Match-LSTM and Answer pointer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Match-LSTM"><span class="nav-number">6.1.</span> <span class="nav-text">Match-LSTM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Architecture"><span class="nav-number">6.2.</span> <span class="nav-text">Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LSTM-Preprocessing-layer"><span class="nav-number">6.2.1.</span> <span class="nav-text">LSTM Preprocessing layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Match-LSTM-layer"><span class="nav-number">6.2.2.</span> <span class="nav-text">Match-LSTM layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Answer-pointer-layer"><span class="nav-number">6.2.3.</span> <span class="nav-text">Answer pointer layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-sequence-model"><span class="nav-number">6.2.4.</span> <span class="nav-text">The sequence model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-boundary-model"><span class="nav-number">6.2.5.</span> <span class="nav-text">The boundary model</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gated-self-matching-networks"><span class="nav-number">7.</span> <span class="nav-text">Gated self-matching networks</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Question-and-passage-encoder"><span class="nav-number">7.1.</span> <span class="nav-text">Question and passage encoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gated-attention-based-RNNs"><span class="nav-number">7.2.</span> <span class="nav-text">Gated attention-based RNNs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-matching-attention"><span class="nav-number">7.3.</span> <span class="nav-text">Self-matching attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-layer-1"><span class="nav-number">7.4.</span> <span class="nav-text">Output layer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Attention-over-Attention-Reader"><span class="nav-number">8.</span> <span class="nav-text">Attention-over-Attention Reader</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#R-Net"><span class="nav-number">9.</span> <span class="nav-text">R-Net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Question-and-passage-encoder-1"><span class="nav-number">9.1.</span> <span class="nav-text">Question and passage encoder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gated-attention-based-RNNs-1"><span class="nav-number">9.2.</span> <span class="nav-text">Gated attention-based RNNs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-matching-attention-1"><span class="nav-number">9.3.</span> <span class="nav-text">Self-matching attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-layer-2"><span class="nav-number">9.4.</span> <span class="nav-text">Output layer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reasoning-Network-ReasoNet"><span class="nav-number">10.</span> <span class="nav-text">Reasoning Network (ReasoNet)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-passage-answer-verification"><span class="nav-number">11.</span> <span class="nav-text">Cross-passage answer verification</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Question-and-passage-modeling"><span class="nav-number">11.1.</span> <span class="nav-text">Question and passage modeling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Answer-boundary-prediction"><span class="nav-number">11.2.</span> <span class="nav-text">Answer boundary prediction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Answer-content-modeling"><span class="nav-number">11.3.</span> <span class="nav-text">Answer content modeling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-passage-answer-verification-1"><span class="nav-number">11.4.</span> <span class="nav-text">Cross-passage answer verification</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Joint-training"><span class="nav-number">11.5.</span> <span class="nav-text">Joint training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QANet"><span class="nav-number">12.</span> <span class="nav-text">QANet</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#QANet-architecture"><span class="nav-number">12.1.</span> <span class="nav-text">QANet architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-embedding-layer"><span class="nav-number">12.1.1.</span> <span class="nav-text">Input embedding layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Embedding-encoder-layer"><span class="nav-number">12.1.2.</span> <span class="nav-text">Embedding encoder layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Context-query-attention-layer"><span class="nav-number">12.1.3.</span> <span class="nav-text">Context-query attention layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-encoder-layer"><span class="nav-number">12.1.4.</span> <span class="nav-text">Model encoder layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Output-layer-3"><span class="nav-number">12.1.5.</span> <span class="nav-text">Output layer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tricks"><span class="nav-number">12.2.</span> <span class="nav-text">Tricks</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">13.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yekun Chai"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">Yekun Chai</p>
+  <div class="site-description" itemprop="description">Language is not just words.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yekun Chai</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/";
+    this.page.identifier = "2019/04/05/NLP/Machine-Reading-Comprehension-a-Survey/";
+    this.page.title = "Machine Reading Comprehension: a Survey!";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>
