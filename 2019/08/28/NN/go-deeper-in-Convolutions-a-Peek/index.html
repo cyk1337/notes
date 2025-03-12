@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="The main aim of conv op is to extract useful features for downstream tasks. And different filters could intuitionally extract different aspect of features via backprop during training. Afterward, all">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Deeper in Convolutions: a Peek ">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="The main aim of conv op is to extract useful features for downstream tasks. And different filters could intuitionally extract different aspect of features via backprop during training. Afterward, all">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/convolutions.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/convolution-vs-cross-correlation.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Conv-2D-multi.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Conv-2D.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/conv-implementation.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/conv-1d.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/1x1-conv.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transposed-conv.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/transposed%20conv-implementation.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/deconv-checkerboard-artifacts.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/dilated-conv.gif">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/spatially-sparable-conv-1-channel.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/depth-wise-separable-conv.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Grouped-conv.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Inception-1.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Inception-2.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ResNet.png">
+<meta property="article:published_time" content="2019-08-28T06:57:00.000Z">
+<meta property="article:modified_time" content="2019-08-28T06:57:00.000Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="NN">
+<meta property="article:tag" content="CNNs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/convolutions.gif">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Go Deeper in Convolutions: a Peek  | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go Deeper in Convolutions: a Peek 
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-08-28 14:57:00" itemprop="dateCreated datePublished" datetime="2019-08-28T14:57:00+08:00">2019-08-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/" itemprop="url" rel="index"><span itemprop="name">NN</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/CNNs/" itemprop="url" rel="index"><span itemprop="name">CNNs</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p><img data-src="/notes/images/convolutions.gif" alt="upload successful"></p>
+<p>The main aim of conv op is to extract useful features for downstream tasks. And different filters could intuitionally extract different aspect of features via backprop during training. Afterward, all the extracted features are combined to make decisions.</p>
+<span id="more"></span>
+<h1 id="Convolutional-Networks"><a href="#Convolutional-Networks" class="headerlink" title="Convolutional Networks"></a>Convolutional Networks</h1><p>ConvNets including local receptive fields, weight sharing, and pooling, leading to:</p>
+<ol>
+<li>Modeling the spatial structure</li>
+<li>Translation invariance</li>
+<li>Local feature detection</li>
+</ol>
+<p>Standard discrete convolution:</p>
+<script type="math/tex; mode=display">(f*k)(\mathbf{p}) = \sum_{s+t=p}F(s)k(t)</script><div class="note warning">
+            <ul><li>channels == feature maps.</li><li>channels are used to describe the structure of a layer, while the kernel is used to describe the structure of a filter.<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[A Comprehensive Introduction to Different Types of Convolutions in Deep Learning](https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215)">[5]</span></a></sup></li><li>A “kernel” refers to a 2D array of weights, while a “filter” refers to a 3D structure of multiple kernels stacked together. In 2D filters, filter==kernel; in 3D filters, a filter -&gt; a collection of stacked kernels.</li><li>Each filter provides one output channel.</li></ul>
+          </div>
+<h2 id="Properties"><a href="#Properties" class="headerlink" title="Properties"></a>Properties</h2><ul>
+<li>Weights (i.e. the conv kernel) are shared across all hidden states</li>
+<li>Spatial correspondence between pixels and hidden units (“2D matrix of hidden units”=”feature map”)</li>
+<li><code>Translation invariance</code>: extract the same features irrespective of where an image patch is located in the input.</li>
+</ul>
+<h3 id="convolution-v-s-cross-correlation"><a href="#convolution-v-s-cross-correlation" class="headerlink" title="convolution v.s. cross-correlation"></a>convolution v.s. cross-correlation</h3><ul>
+<li>Convolution in signal processing:<script type="math/tex; mode=display">(f * g)(t) = \int_{-\infty}^\infty f(\tau) g(t-\tau)d\tau</script>the filter $g$ is reversed and then slides along the axis.</li>
+<li>Cross-correlation is sliding non-reversed filter $g$ through the function $f$.</li>
+</ul>
+<p><img data-src='/notes/images/convolution-vs-cross-correlation.png' width='60%'/></p>
+<h2 id="2D-convolution"><a href="#2D-convolution" class="headerlink" title="2D convolution"></a>2D convolution</h2><ul>
+<li>Input: 4-dim tensor (N,$C_\text{in}$,H,W) -&gt; (minibatch-size, num-featuremaps, x, y)</li>
+<li>Filters: 4-dim tensor (<script type="math/tex">C_\text{out}</script>, <script type="math/tex">C_\text{in}</script>, kernel_dim1, kernel_dim2)</li>
+<li>Output: 4-dim tensor (N, $C_\text{out}$, output_dim1, output_dim2)</li>
+</ul>
+<p>2D-convolution op sums all the element-wise convolution results along <script type="math/tex">c_\text{in}</script> axis -&gt; squeeze the <script type="math/tex">c_\text{in}</script> axis to 1 by sum op.</p>
+<p><img data-src="/notes/images/Conv-2D-multi.png" alt="upload successful"></p>
+<h3 id="Conv-layer"><a href="#Conv-layer" class="headerlink" title="Conv layer"></a>Conv layer</h3><p><strong>The filter depth is the same as the input layer depth</strong>.<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[A Comprehensive Introduction to Different Types of Convolutions in Deep Learning](https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215)
+">[5]</span></a></sup> We can intuitionally think multi-channel conv op as sliding a 3D filter matrix through the input layer, performing element-wise multiplication and addition, where the 3D filter moves only in 2-direction,i.e. height and width of the image.<br><img data-src="/notes/images/Conv-2D.png" width="50%"/></p>
+<ul>
+<li>Input size: <script type="math/tex">W_1 \times H_1 \times D_1</script></li>
+<li>Requires 4 hyperparams:<ol>
+<li># of filters $K$</li>
+<li>filter size $F$</li>
+<li>stride $S$</li>
+<li>padding size $P$</li>
+</ol>
+</li>
+<li>Output size  <script type="math/tex">W_2 \times H_2 \times D_2</script><ol>
+<li>$W_2 = \text{lower_bound}\frac{W_1 + 2P -F}{S} + 1$</li>
+<li>$H_2 = \text{lower_bound}\frac{H_1 + 2P-F}{S} + 1$</li>
+<li>$D_2 = K$</li>
+</ol>
+</li>
+<li># of parameters <script type="math/tex; mode=display">
+\underbrace{F \cdot F \cdot D_1 \cdot K}_\text{ # of weight params} + \underbrace{K}_\text{ # of biases}</script></li>
+</ul>
+<h3 id="Time-complexity-of-conv-op"><a href="#Time-complexity-of-conv-op" class="headerlink" title="Time complexity of conv op"></a>Time complexity of conv op</h3><p>The time complexity of <strong>single Conv layer</strong>:</p>
+<script type="math/tex; mode=display">O( \underbrace{ \text{(out-feature-map-size)}^2 }_\text{the area of output feature map} \cdot \underbrace{\text{(Kernel-size)}^2}_\text{area of single kernel} \cdot C_\text{in} \cdot C_\text{out} )</script><ul>
+<li>where <script type="math/tex">C_\text{in}</script> and <script type="math/tex">C_\text{out}</script> denote the # of output channel.</li>
+</ul>
+<p>Total time complexity of <strong>all conv layers</strong> (sum over all the conv layers):</p>
+<script type="math/tex; mode=display">O \big(\sum_{l=1}^D \underbrace{ \text{(out-feature-map-size)}_l^2 }_\text{the area of output feature map} \cdot \underbrace{\text{(Kernel-size)}_l^2}_\text{area of single kernel}  \cdot C_{l-1} \cdot C_l \big)</script><p>where </p>
+<ul>
+<li>$D$ is the depth of conv layers</li>
+<li><script type="math/tex">C_{l-1}</script> means the input channel # of current layer, i.e. the output channel # of previous layer. </li>
+</ul>
+<h3 id="Space-complexity-of-conv-op"><a href="#Space-complexity-of-conv-op" class="headerlink" title="Space complexity of conv op"></a>Space complexity of conv op</h3><p>The space complexity includes the # of weights and the size of output feature map.</p>
+<script type="math/tex; mode=display">O(\sum_{l=1}^D \text{(kernel-size)}^2_l \cdot C_{l-1} \cdot C_l + \sum_{l-1}^D \text{(feature-map-size)}^2 \cdot C_l )</script><h3 id="Pooling-layer"><a href="#Pooling-layer" class="headerlink" title="Pooling layer"></a>Pooling layer</h3><ul>
+<li>Input size <script type="math/tex">W_1 \times H_1 \times D_1</script></li>
+<li>Requires 2 hyperparams:<ol>
+<li>pooling size $F$</li>
+<li>stride size $S$</li>
+</ol>
+</li>
+<li>Output size <script type="math/tex">W_2 \times H_2 \times D_2</script>:<ol>
+<li>$W_2 = (W_1-F)/S + 1$</li>
+<li>$H_2 = (H_1-F)/S +1$</li>
+<li>$D_2 = D_1$</li>
+</ol>
+</li>
+<li>Zero parameters since it computes a fixed function</li>
+<li>Discarding pooling layers has shown to be imortant in training good generative models, e.g, VAEs and GANs <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[http://cs231n.github.io/convolutional-networks/](http://cs231n.github.io/convolutional-networks/)
+">[1]</span></a></sup></li>
+</ul>
+<h3 id="Conv-implementation"><a href="#Conv-implementation" class="headerlink" title="Conv implementation"></a>Conv implementation</h3><p><code>im2col</code></p>
+<p><img data-src='/notes/images/conv-implementation.png' width='80%'/></p>
+<h2 id="1D-convolution"><a href="#1D-convolution" class="headerlink" title="1D convolution"></a>1D convolution</h2><p>Convolve along one axis (i.e. the sequential direction in NLP), with the kernel width the same as the input length, which is commonly used in TextCNNs. The kernel width <script type="math/tex">L_\text{in}</script> is the same as the input width, i.e. the size of embedding.</p>
+<p>The shape of dilated conv2d:</p>
+<ul>
+<li>Input <script type="math/tex">(N, C_\text{in}, L_\text{in})</script></li>
+<li>Output: <script type="math/tex">(N, C_\text{out}, L_\text{out})</script></li>
+</ul>
+<script type="math/tex; mode=display">L_\text{out}=\lfloor \frac{L_\text{in} + 2 \times \text{padding} - \text{dilation} \times (\text{kernel_size} -1) -1 }{\text{stride}} + 1 \rfloor</script><p><img data-src="/notes/images/conv-1d.png" width="30%"/></p>
+<h2 id="1x1-convolution"><a href="#1x1-convolution" class="headerlink" title="1x1 convolution"></a>1x1 convolution</h2><p>$1 \times 1$ convolution is proposed in Network in Network (NIN)<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lin, M., Chen, Q., & Yan, S. (2013). [Network in network](https://arxiv.org/pdf/1312.4400.pdf). arXiv preprint arXiv:1312.4400.
+">[6]</span></a></sup>. It can be used for:</p>
+<ul>
+<li>dimensionality reduction for efficient computations</li>
+<li>efficient low dimensional embedding, or feature pooling</li>
+<li>applying non-linearity again after convolution.</li>
+</ul>
+<p>$1 \times 1$ convolution can be used to reduce the dimension depth-wise. </p>
+<p><img data-src='/notes/images/1x1-conv.png' width='60%'/></p>
+<h2 id="Transposed-convolution-Deconvolution"><a href="#Transposed-convolution-Deconvolution" class="headerlink" title="Transposed convolution(Deconvolution)"></a>Transposed convolution(Deconvolution)</h2><p>Transposed convolution (a.k.a deconvolution, fractionally strided convolution) is used to perform <strong>up-sampling</strong>, i.e. doing transformations in the opposite direction of a normal convolution.<br>It can be used in:</p>
+<ul>
+<li>generating high-resolution images</li>
+<li>mapping a low dimensional feature map to high dimensional space</li>
+</ul>
+<p><img data-src='/notes/images/transposed-conv.gif' width='40%'/></p>
+<ul>
+<li>Input dim <script type="math/tex">(N, C_\text{in}, H_\text{in}, W_\text{in})</script></li>
+<li>output dim <script type="math/tex">(N, C_\text{out}, H_\text{out}, W_\text{out})</script><br>where the dim:<script type="math/tex; mode=display">H_\text{out} = \text{stride}[0] \times (H_\text{in}-1) - 2 \times \text{padding}[0] + \text{dilation}[0] \times (\text{kernel[0] - 1}) + \text{out_pad[0]} + 1</script><script type="math/tex; mode=display">W_\text{out} = \text{stride}[1] \times (W_\text{in}-1) - 2 \times \text{padding}[1] + \text{dilation}[1] \times (\text{kernel[1] - 1}) + \text{out_pad[1]} + 1</script></li>
+</ul>
+<p><img data-src='/notes/images/transposed conv-implementation.png' width='80%'/></p>
+<center>Transposed conv implementation</center>
+
+
+
+<h3 id="Checkerboard-artifacts"><a href="#Checkerboard-artifacts" class="headerlink" title="Checkerboard artifacts"></a>Checkerboard artifacts</h3><p>Checkerboard artifacts result from “uneven overlap” pf transposed convolution<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Deconvolution and Checkerboard Artifacts](https://distill.pub/2016/deconv-checkerboard/)
+">[8]</span></a></sup>. As shown in the following image, images on the bottom are the result of transposed convolution on the top row images. With transposed conv, a layer with a small size can be mapped to a layer with the larger size.</p>
+<p>“The transposed convolution has uneven overlap when the filter size is not divisible by the stride. This “uneven overlap” puts more of the paint in some places than others, thus creates the checkerboard effects.”<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[A guide to convolution arithmetic for deep learning](https://arxiv.org/abs/1603.07285)
+">[7]</span></a></sup></p>
+<p><img data-src="/notes/images/deconv-checkerboard-artifacts.png" alt="upload successful"></p>
+<center> Image source: <sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Deconvolution and Checkerboard Artifacts](https://distill.pub/2016/deconv-checkerboard/)
+">[8]</span></a></sup></center>
+
+<h4 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h4><ol>
+<li>Assure that the filter size can be divided by the stride, to avoid overlap issue</li>
+<li>Use transposed Conv with stride = 1</li>
+</ol>
+<p>A better up-sampling approach:</p>
+<ul>
+<li>resize the image first (using nearest-neighbor interpolation or bilinear interpolation) and then do a conv layer. -&gt; avoid checkerboard effects</li>
+</ul>
+<h2 id="Dilated-convolution-Atrous-conv"><a href="#Dilated-convolution-Atrous-conv" class="headerlink" title="Dilated convolution (Atrous conv)"></a>Dilated convolution (Atrous conv)</h2><p>Dilated convolutions inflate the kernel by inserting spaces between the kernel elements, with usually l-1 spaces inserted between kernel elements.<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, L. C., Papandreou, G., Kokkinos, I., Murphy, K., & Yuille, A. L. (2014). [Semantic image segmentation with deep convolutional nets and fully connected crfs](https://arxiv.org/abs/1412.7062). arXiv preprint arXiv:1412.7062.
+">[9]</span></a></sup></p>
+<p>With dilated conv, we can observe a large receptive field without increasing the kernel size, which is effective when stacking multiple dilated convolutions one after another.</p>
+<script type="math/tex; mode=display">(f*_l k)(\mathbf{p}) = \sum_{\mathbf{s}+l\mathbf{t}=\mathbf{p}}F(\mathbf{s})k(\mathbf{t})</script><p><img data-src='/notes/images/dilated-conv.gif' width='50%'/></p>
+<p>In PyTorch, <code>dilation</code> param means the space between kernel elements, with default 1.<br>Dilation =1 means no dilation.</p>
+<p>The shape of dilated conv2d:</p>
+<ul>
+<li>Input <script type="math/tex">(N, C_\text{in}, H_\text{in}, W_\text{in})</script></li>
+<li>Output: <script type="math/tex">(N, C_\text{out}, H_\text{out}, W_\text{out})</script></li>
+</ul>
+<script type="math/tex; mode=display">H_\text{out}=\lfloor \frac{H_\text{in} + 2 \times \text{padding} - \text{dilation} \times (\text{kernel_size} -1) -1 }{\text{stride}} + 1 \rfloor</script><script type="math/tex; mode=display">W_\text{out}=\lfloor \frac{W_\text{in} + 2 \times \text{padding} - \text{dilation} \times (\text{kernel_size} -1) -1 }{\text{stride}} + 1 \rfloor</script><h2 id="Separable-convolutions"><a href="#Separable-convolutions" class="headerlink" title="Separable convolutions"></a>Separable convolutions</h2><h3 id="Spatially-separable-convolutions"><a href="#Spatially-separable-convolutions" class="headerlink" title="Spatially separable convolutions"></a>Spatially separable convolutions</h3><p>Spatially separable conv divides kernels into two vectors, and do convolution one by one.</p>
+<ul>
+<li>drawbacks: not all filters can be divided into two smaller kernels. The training result may be sub-optimal.</li>
+</ul>
+<p><img data-src='/notes/images/spatially-sparable-conv-1-channel.png' width='50%'/></p>
+<h3 id="Depthwise-separable-convolutions"><a href="#Depthwise-separable-convolutions" class="headerlink" title="Depthwise separable convolutions"></a>Depthwise separable convolutions</h3><p>The depth-wise separable convolutions consist of two steps: depthwise convolutions and 1x1 convolutions. It is commonly used in MobileNet and Xception.</p>
+<ul>
+<li>Pros: efficient!</li>
+</ul>
+<p><img data-src='/notes/images/depth-wise-separable-conv.png' width='80%'/></p>
+<h2 id="Grouped-convolutions"><a href="#Grouped-convolutions" class="headerlink" title="Grouped convolutions"></a>Grouped convolutions</h2><p>Grouped convolutions are proposed by AlexNet paper. Filters are separated into different groups, each group is responsible for a conventional 2D convolutions with a certain depth.<br><img data-src='/notes/images/Grouped-conv.png' width='80%'/></p>
+<h2 id="Variant-convolutions"><a href="#Variant-convolutions" class="headerlink" title="Variant convolutions"></a>Variant convolutions</h2><ul>
+<li>Flattened Conv</li>
+<li>Shuffled Grouped Conv (ShuffleNet)</li>
+<li>Pointwise grouped Conv (ShuffleNet)</li>
+</ul>
+<h1 id="Inception"><a href="#Inception" class="headerlink" title="Inception"></a>Inception</h1><p>Inception module is designed to increase the depth and width of the network while keeping the computational cost constant.<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., ... & Rabinovich, A. (2015). [Going deeper with convolutions](https://arxiv.org/abs/1409.4842). In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 1-9).
+">[4]</span></a></sup></p>
+<p><img data-src='/notes/images/Inception-1.png' width='70%'/></p>
+<p>Inception modules apply 1x1 convolution to reduce dimensions before the expensive 3x3 and 5x5 convolutions. 1x1 can also include the use of rectified linear activation.</p>
+<p>Pros:<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., ... & Rabinovich, A. (2015). [Going deeper with convolutions](https://arxiv.org/abs/1409.4842). In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 1-9).
+">[4]</span></a></sup></p>
+<ul>
+<li>increase the # of units at each stage significantly without an uncontrolled blow-up in computational complexity</li>
+<li>Align with the intuition that, aggregate processed visual information at different scales could be useful, so that following stage can abstract features from different scales simultaneously.</li>
+</ul>
+<p><img data-src='/notes/images/Inception-2.png' width='70%'/></p>
+<h1 id="ResNet"><a href="#ResNet" class="headerlink" title="ResNet"></a>ResNet</h1><p>ResNet<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="He, K., Zhang, X., Ren, S., & Sun, J. (2016). [Deep residual learning for image recognition](http://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf). In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778).
+">[11]</span></a></sup> was proposed to explicitly fit a residual mapping. Instead of directly fitting the  desired mapping as $\mathcal{H}(\pmb{x})$, use stacked non-linear layers to fit the residual mapping <script type="math/tex">\mathcal{F}(\pmb{x}):= \mathcal{H}(\pmb{x}) - \pmb{x}</script>. The original mapping is thus recast into $\mathcal{F}(\pmb{x})+\pmb{x}$.</p>
+<ul>
+<li>Intuitionally, to the extreme, if an identity mapping were optimal, pushing the residual to zero is much easier than to fit an identity mapping by a stack of non-linear layers.<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="He, K., Zhang, X., Ren, S., & Sun, J. (2016). [Deep residual learning for image recognition](http://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf). In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778).
+">[11]</span></a></sup></li>
+<li>“+” shortcut connections introduce nor extra parameter neither computational complexity.</li>
+</ul>
+<p><img data-src='/notes/images/ResNet.png' width='50%'/></p>
+<center> Image source:<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="He, K., Zhang, X., Ren, S., & Sun, J. (2016). [Deep residual learning for image recognition](http://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf). In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778).
+">[11]</span></a></sup></center>
+
+<h2 id="ResNet-vs-Highway-Nets"><a href="#ResNet-vs-Highway-Nets" class="headerlink" title="ResNet vs Highway Nets"></a>ResNet vs Highway Nets</h2><ul>
+<li>“Highway nets” can be seen as a shortcut connection with gated functions, whose gates are data-dependent and have parameters to be trained.</li>
+<li>To the extreme, if the gate in Highway nets is closed (~0), the highway net is non-residual at all.</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://cs231n.github.io/convolutional-networks/">http://cs231n.github.io/convolutional-networks/</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/31575074">blog (in Chinese): complexity analysis of CNNs (in Chinese)</a><a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">He, K., &amp; Sun, J. (2015). <a target="_blank" rel="noopener" href="https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/He_Convolutional_Neural_Networks_2015_CVPR_paper.pdf">Convolutional neural networks at constrained time cost</a>. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 5353-5360).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., ... &amp; Rabinovich, A. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1409.4842">Going deeper with convolutions</a>. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 1-9).<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215">A Comprehensive Introduction to Different Types of Convolutions in Deep Learning</a><a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lin, M., Chen, Q., &amp; Yan, S. (2013). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1312.4400.pdf">Network in network</a>. arXiv preprint arXiv:1312.4400.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1603.07285">A guide to convolution arithmetic for deep learning</a><a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://distill.pub/2016/deconv-checkerboard/">Deconvolution and Checkerboard Artifacts</a><a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, L. C., Papandreou, G., Kokkinos, I., Murphy, K., &amp; Yuille, A. L. (2014). <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1412.7062">Semantic image segmentation with deep convolutional nets and fully connected crfs</a>. arXiv preprint arXiv:1412.7062.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://towardsdatascience.com/up-sampling-with-transposed-convolution-9ae4f2df52d0">Up-sampling with Transposed Convolution</a><a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf">Deep residual learning for image recognition</a>. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778).<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Dumoulin, V., &amp; Visin, F. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1603.07285">A guide to convolution arithmetic for deep learning</a>. arXiv preprint arXiv:1603.07285.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/48501100">Transposed CNN (in Chinese)</a><a href="#fnref:13" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NN/" rel="tag"># NN</a>
+              <a href="/notes/tags/CNNs/" rel="tag"># CNNs</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/07/21/RL/DRL/Decipher-AlphaStar-on-StarCraft-II/" rel="prev" title="Deciphering AlphaStar on StarCraft II">
+      <i class="fa fa-chevron-left"></i> Deciphering AlphaStar on StarCraft II
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/09/06/Programming/PyTorch-notes/" rel="next" title="PyTorch Notes">
+      PyTorch Notes <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Convolutional-Networks"><span class="nav-number">1.</span> <span class="nav-text">Convolutional Networks</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Properties"><span class="nav-number">1.1.</span> <span class="nav-text">Properties</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#convolution-v-s-cross-correlation"><span class="nav-number">1.1.1.</span> <span class="nav-text">convolution v.s. cross-correlation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2D-convolution"><span class="nav-number">1.2.</span> <span class="nav-text">2D convolution</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Conv-layer"><span class="nav-number">1.2.1.</span> <span class="nav-text">Conv layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Time-complexity-of-conv-op"><span class="nav-number">1.2.2.</span> <span class="nav-text">Time complexity of conv op</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Space-complexity-of-conv-op"><span class="nav-number">1.2.3.</span> <span class="nav-text">Space complexity of conv op</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pooling-layer"><span class="nav-number">1.2.4.</span> <span class="nav-text">Pooling layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conv-implementation"><span class="nav-number">1.2.5.</span> <span class="nav-text">Conv implementation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1D-convolution"><span class="nav-number">1.3.</span> <span class="nav-text">1D convolution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1x1-convolution"><span class="nav-number">1.4.</span> <span class="nav-text">1x1 convolution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transposed-convolution-Deconvolution"><span class="nav-number">1.5.</span> <span class="nav-text">Transposed convolution(Deconvolution)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Checkerboard-artifacts"><span class="nav-number">1.5.1.</span> <span class="nav-text">Checkerboard artifacts</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">Solution</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dilated-convolution-Atrous-conv"><span class="nav-number">1.6.</span> <span class="nav-text">Dilated convolution (Atrous conv)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Separable-convolutions"><span class="nav-number">1.7.</span> <span class="nav-text">Separable convolutions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spatially-separable-convolutions"><span class="nav-number">1.7.1.</span> <span class="nav-text">Spatially separable convolutions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Depthwise-separable-convolutions"><span class="nav-number">1.7.2.</span> <span class="nav-text">Depthwise separable convolutions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Grouped-convolutions"><span class="nav-number">1.8.</span> <span class="nav-text">Grouped convolutions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Variant-convolutions"><span class="nav-number">1.9.</span> <span class="nav-text">Variant convolutions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inception"><span class="nav-number">2.</span> <span class="nav-text">Inception</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ResNet"><span class="nav-number">3.</span> <span class="nav-text">ResNet</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ResNet-vs-Highway-Nets"><span class="nav-number">3.1.</span> <span class="nav-text">ResNet vs Highway Nets</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/";
+    this.page.identifier = "2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/";
+    this.page.title = "Go Deeper in Convolutions: a Peek ";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A survey of the normalization tricks in Neural Networks.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Normalization in Neural Networks: A Summary !">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="A survey of the normalization tricks in Neural Networks.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/BN-Steve.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/bn-experiment.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SwitchableNorm.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/normalization-comparison.png">
+<meta property="article:published_time" content="2019-02-28T14:22:00.000Z">
+<meta property="article:modified_time" content="2019-02-28T14:22:00.000Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="NN">
+<meta property="article:tag" content="NN tricks">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/BN-Steve.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Normalization in Neural Networks: A Summary ! | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Normalization in Neural Networks: A Summary !
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-02-28 22:22:00" itemprop="dateCreated datePublished" datetime="2019-02-28T22:22:00+08:00">2019-02-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/" itemprop="url" rel="index"><span itemprop="name">NN</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/NN-tricks/" itemprop="url" rel="index"><span itemprop="name">NN tricks</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NN/NN-tricks/Normalization/" itemprop="url" rel="index"><span itemprop="name">Normalization</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A survey of the <code>normalization</code> tricks in Neural Networks.<br><span id="more"></span></p>
+<h1 id="Feature-Normalization"><a href="#Feature-Normalization" class="headerlink" title="Feature Normalization"></a>Feature Normalization</h1><h2 id="Data-Preprocessing"><a href="#Data-Preprocessing" class="headerlink" title="Data Preprocessing"></a>Data Preprocessing</h2><ul>
+<li><p><strong>Normalization</strong>: subtract the mean of the input data from every feature, and scale by its std deviation.</p>
+<script type="math/tex; mode=display">\hat{x}_i^n = \frac{x_i^n - \text{mean}(x_i)}{\text{std}(x_i)}</script></li>
+<li><p><strong>PCA</strong> (Principal Components Analysis)</p>
+<ul>
+<li>Decorrelate the data by projecting onto the principal components</li>
+<li>Also possible to reduce dimensionality by only projecting onto the top $P$ principal components.</li>
+</ul>
+</li>
+<li><p><strong>Whitening</strong></p>
+<ul>
+<li>Decorrelate by PCA</li>
+<li>Scale each dimension</li>
+</ul>
+</li>
+</ul>
+<h2 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h2><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li><code>Internal covariate shift</code>: the distribution of each layer’s inputs changes during training, as the parameters of the previous layers change. This slows down the training by requiring <span class="label default">lower learning rates</span> and <span class="label default">careful parameter initialization</span>， and make it notoriously hard to train models with <code>saturating nonlinearities</code>.</li></ul>
+          </div>
+<ul>
+<li><strong>Intuition</strong> : To reduce the <code>internal covariate shift</code>, by fixing the distribution of the layer inputs $x$.</li>
+<li>Idea: The NN converges faster if the inputs is whitened, i.e. linearly transformed to have zero mean and unit variance, and decorrelated.</li>
+</ul>
+<p><strong>Solution</strong>: <code>batch normalization</code> (BN) <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](http://proceedings.mlr.press/v37/ioffe15.html)
+">[1]</span></a></sup>. </p>
+<ul>
+<li>Use mini-batch statistics to <strong>normalize activations of each layer</strong>.</li>
+<li>Parameter $\gamma$ and $\beta$ can scale and shift (a.k.a. bias) the normalized activations. </li>
+<li>BatchNorm depends on the current training example - and on examples in mini-batch (for computing mean and variance)</li>
+<li><p>Training</p>
+<ul>
+<li>Set parameters $\gamma$ and $\beta$ by gradient descent - require gradients $\frac{\partial E}{\partial \gamma}$ and $\frac{\partial E}{\partial \beta}$</li>
+<li>TO backpropagate gradients through the batchNorm layer aliso require: $\frac{\partial E}{\partial \hat{u}}$,  $\frac{\partial E}{\partial \sigma^2}$,  $\frac{\partial E}{\partial \mu}$,  $\frac{\partial E}{\partial u_i}$</li>
+</ul>
+</li>
+<li><p>Runtime: use the sample mean and variance computed over the complete training data as the mean and variance parameters for each layer - fixed transform:</p>
+</li>
+</ul>
+<script type="math/tex; mode=display">\hat{u}_i = \frac{u_i - \text{mean}(u_i)}{\sqrt{\text{Var}(u_i) + \epsilon}}</script><ul>
+<li>Backprop: see <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[What does the gradient flowing through batch normalization looks like ?](http://cthorey.github.io/backpropagation/)
+">[2]</span></a></sup></li>
+</ul>
+<p><img data-src="/notes/images/BN-Steve.png" alt="Batch Norm"></p>
+<ul>
+<li><strong>Input</strong>: values of $x$ over a mini-batch: <script type="math/tex">\beta = {x_{1 \cdots m}}</script></li>
+<li><p><strong>Outputs</strong>: <script type="math/tex">{y_i = BN_{\gamma, \beta} (x_i)}</script></p>
+<p>  mini-batch mean:</p>
+<script type="math/tex; mode=display">\mu_{\beta} \leftarrow \sum_{i=1}^m x_i</script><p>  mini-batch variance:</p>
+<script type="math/tex; mode=display">\sigma_{\beta}^2 \leftarrow \frac{1}{m} \sum_{i=1}^m (x_i - \mu_{\beta})^2</script><p>  normalize:</p>
+<script type="math/tex; mode=display">\hat{x} \leftarrow \frac{x_i - \mu_{\beta}}{\sqrt{\sigma_{\beta}^2 + \epsilon}}</script><p>  scale and shift:</p>
+<script type="math/tex; mode=display">y_i \leftarrow \gamma \hat{x_i} + \beta \equiv \text{BN}_{\gamma, \beta}(x_i)</script></li>
+<li><p><strong>Parameters</strong>: $\gamma$ and $\beta$ are trainable parameters with size $C$ (where $C$ is the channel size). By default, the elements of $\gamma$ are set to 1s and the elements of $\beta$ are set to 0s. </p>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BatchNorm</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># `num_features`: the number of outputs for a fully-connected layer</span></span><br><span class="line">    <span class="comment"># or the number of output channels for a convolutional layer. `num_dims`:</span></span><br><span class="line">    <span class="comment"># 2 for a fully-connected layer and 4 for a convolutional layer</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, num_features, num_dims</span>):</span></span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="keyword">if</span> num_dims == <span class="number">2</span>:</span><br><span class="line">            shape = (<span class="number">1</span>, num_features)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            shape = (<span class="number">1</span>, num_features, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># The scale parameter and the shift parameter (model parameters) are</span></span><br><span class="line">        <span class="comment"># initialized to 1 and 0, respectively</span></span><br><span class="line">        self.gamma = nn.Parameter(torch.ones(shape))</span><br><span class="line">        self.beta = nn.Parameter(torch.zeros(shape))</span><br><span class="line">        <span class="comment"># The variables that are not model parameters are initialized to 0 and 1</span></span><br><span class="line">        self.moving_mean = torch.zeros(shape)</span><br><span class="line">        self.moving_var = torch.ones(shape)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, X</span>):</span></span><br><span class="line">        <span class="comment"># If `X` is not on the main memory, copy `moving_mean` and</span></span><br><span class="line">        <span class="comment"># `moving_var` to the device where `X` is located</span></span><br><span class="line">        <span class="keyword">if</span> self.moving_mean.device != X.device:</span><br><span class="line">            self.moving_mean = self.moving_mean.to(X.device)</span><br><span class="line">            self.moving_var = self.moving_var.to(X.device)</span><br><span class="line">        <span class="comment"># Save the updated `moving_mean` and `moving_var`</span></span><br><span class="line">        Y, self.moving_mean, self.moving_var = batch_norm(</span><br><span class="line">            X, self.gamma, self.beta, self.moving_mean, self.moving_var,</span><br><span class="line">            eps=<span class="number">1e-5</span>, momentum=<span class="number">0.9</span>)</span><br><span class="line">        <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Benefits</strong><ul>
+<li>Make training many-layered networks easier.<ul>
+<li>allow <code>higher learning rates</code></li>
+<li><code>weight initialization</code> less cruc</li>
+</ul>
+</li>
+<li>Can act like a regularizer: can reduce need for techniques like dropout</li>
+</ul>
+</li>
+</ul>
+<div class="note success">
+            <p><strong>Pros</strong>: </p><ul><li>Prevent small changes to the parameters from amplifying into larger and suboptimal changes in activations in gradients, e.g. it prevents the training from getting stuck in the saturated regimes of nonlinearities.</li><li>More resilient to the the <strong>parameter scale</strong>. Large learning rates may increase the scale of layer parameters, which then amplify the gradient during back-propagation and lead to the model explosion.</li></ul>
+          </div>
+<p><strong>Drawbacks</strong>:</p>
+<ul>
+<li>BN performs different in training and test time.</li>
+<li>It is not legitimate at <code>inference time</code>, so the mean and variance are <strong>pre-computed from the training set</strong>, often by running <code>average</code>.</li>
+</ul>
+<div class="note danger">
+            <p>Different opinion at <strong>NIPS 2018</strong>: <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[How Does Batch Normalization Help Optimization?](https://arxiv.org/pdf/1805.11604.pdf)">[7]</span></a></sup></p><ul><li>Argument: BatchNorm cannot handle <code>internal covariate shift</code>, i.e. no link between the performance gain of BatchNorm and the reduction of internal covariate shift. It makes the <code>optimization landscape significantly smoother</code>.</li><li>Experiment: inject random noise with a severe covariate shift after batch normalization, which still performs better when training.</li></ul><p><img data-src="/notes/images/bn-experiment.png" alt="upload successful"></p><ul><li>BatchNorm makes the landscape significantly more smooth: improvement in the Lipschitzness of the loss function. i.e. the loss exhibits a significantly better “effective” $\beta$-smoothness.<ol><li>Reparametrization make it more stable (in the sense of loss Lipschitzness)</li><li>more smooth (in the sense of “effective” $\beta$-smoothness of the loss) </li></ol></li></ul>
+          </div>
+<h2 id="Layer-Normalization"><a href="#Layer-Normalization" class="headerlink" title="Layer Normalization"></a>Layer Normalization</h2><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li>Batch normalization is dependent on the mini-batch size, i.e. cannot apply on extremely small minibatches.</li><li>Not obvious how to apply on RNNs. It can easily applied on FFNN because of the fixed length of inputs.</li></ul>
+          </div>
+<p><strong>Solution</strong>: <code>layer normalization</code> (LN)<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Layer normalization](https://arxiv.org/pdf/1607.06450v1.pdf)
+">[3]</span></a></sup>.</p>
+<ul>
+<li>Compute the layer normalization statistics over all <em>hidden units</em> in the same layer:<script type="math/tex; mode=display">\mu^l = \frac{1}{H} \sum_{i=1}^{H} \alpha_i^l</script></li>
+</ul>
+<script type="math/tex; mode=display">\sigma^l = \sqrt{\frac{1}{H} \sum_{i=1}^H (a_i^l - \mu^l)^2 }</script><p>where $H$ denotes the # of hidden units in a layer. Under layer norm, all hidden states in a layer share the same normalization terms $\mu$ and $\sigma$. Furthermore, it does not impose any constraint on the size of a mini-batch, and it can be used in the pure online regime with batch size 1.</p>
+<script type="math/tex; mode=display">
+y = \frac{x-\mathbb{E}[x]}{\sqrt{\textrm{Var}[x] + \epsilon}} * \gamma + \beta</script><p>where the mean and standard deviation are calculated seperately over the last certain number dimensions which have to be of the shape specified by the last dim. $\gamma$ and $\beta$ are learnable affine transform parameters. Denoting the hidden dim as $D$, the parameter count of LN is $2*D$.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LayerNorm</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot; layer norm&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, features, eps=<span class="number">1e-6</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(LayerNorm, self).__init__()</span><br><span class="line">        self.weight = nn.Parameter(torch.ones(features))</span><br><span class="line">        self.bias = nn.Parameter(torch.zeros(features))</span><br><span class="line">        self.eps = eps</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        mean = x.mean(-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">        std = x.std(-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">return</span> self.weight * (x - mean) / (std + self.eps) + self.bias</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
+<h3 id="Layer-Normalization-on-RNNs"><a href="#Layer-Normalization-on-RNNs" class="headerlink" title="Layer Normalization on RNNs"></a>Layer Normalization on RNNs</h3><p>In a std RNN, $h^{t-1}$ denotes previous hidden states, $x^t$ represents the current input vector:</p>
+<script type="math/tex; mode=display">\pmb{a}^t = W_{hh}\pmb{h}^{t-1} + W_{xh}\pmb{x}^t</script><p>Do layer normalization:</p>
+<script type="math/tex; mode=display">\pmb{h}^t = f(\frac{\pmb{g}}{\sigma^t} \odot(\pmb{a}^t - \mu^t) + \pmb{b})</script><script type="math/tex; mode=display">\mu^t = \frac{1}{H} \sum_{i=1}^H a_i^t</script><script type="math/tex; mode=display">\sigma^t = \sqrt{\frac{1}{H} \sum_{i=1}^H (a_i^t - \mu^t)^2}</script><p>where <script type="math/tex">W_{hh}</script> is the recurrent hidden to hidden weights and <script type="math/tex">W_{xh}</script> are the bottom up input to hidden weights, $\odot$ is element-wise multiplication between to vectors.</p>
+<div class="note warn">
+            <p><strong>Differences</strong> between batch normalization and layer normalization:</p><ul><li>LN: <span class="label info">neurons in the same layer</span> have the same mean and variance; different input samples have different mean and variance.</li><li>BN: <span class="label info">input samples in the same batch</span> have the same mean and variance; different neurons.</li></ul><p>Unlike BN, layer norm performs exactly <code>the same</code> computation at <code>training</code> and <code>test</code> times.</p>
+          </div>
+<h2 id="RMSNorm"><a href="#RMSNorm" class="headerlink" title="RMSNorm"></a>RMSNorm</h2><p>Root Mean Square Normalization (RMSNorm)<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Biao, and Rico Sennrich. "Root mean square layer normalization." Advances in Neural Information Processing Systems 32 (2019).">[8]</span></a></sup> hypothesize that the rescaling invariance is the reason for success of LayerNorm, rather than re-centering invariance. RMSNorm rescales invariance and regularizes the summed inputs using root mean square (RMS) statistic:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \bar{a}_i=\frac{a_i}{\mathrm{RMS}(\mathbf{a})}g_i,\quad\text{where RMS}(\mathbf{a})=\sqrt{\frac1n\sum_{i=1}^na_i^2}.
+\end{equation}</script><p>RMSNorm simplifies LayerNorm by totally removing the mean statistic at the cost of sacrificing the invariance that mean normalization affords. When the mean of summed inputs is zero, RMSNorm is exactly equal to LayerNorm.</p>
+<p>Implementation:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Code source: https://github.com/bzhangGo/rmsnorm/blob/master/rmsnorm_torch.py</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RMSNorm</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, d, p=-<span class="number">1.</span>, eps=<span class="number">1e-8</span>, bias=<span class="literal">False</span></span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            Root Mean Square Layer Normalization</span></span><br><span class="line"><span class="string">        :param d: model size</span></span><br><span class="line"><span class="string">        :param p: partial RMSNorm, valid value [0, 1], default -1.0 (disabled)</span></span><br><span class="line"><span class="string">        :param eps:  epsilon value, default 1e-8</span></span><br><span class="line"><span class="string">        :param bias: whether use bias term for RMSNorm, disabled by</span></span><br><span class="line"><span class="string">            default because RMSNorm doesn&#x27;t enforce re-centering invariance.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>(RMSNorm, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.eps = eps</span><br><span class="line">        self.d = d</span><br><span class="line">        self.p = p</span><br><span class="line">        self.bias = bias</span><br><span class="line"></span><br><span class="line">        self.scale = nn.Parameter(torch.ones(d))</span><br><span class="line">        self.register_parameter(<span class="string">&quot;scale&quot;</span>, self.scale)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.bias:</span><br><span class="line">            self.offset = nn.Parameter(torch.zeros(d))</span><br><span class="line">            self.register_parameter(<span class="string">&quot;offset&quot;</span>, self.offset)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">if</span> self.p &lt; <span class="number">0.</span> <span class="keyword">or</span> self.p &gt; <span class="number">1.</span>:</span><br><span class="line">            norm_x = x.norm(<span class="number">2</span>, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">            d_x = self.d</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            partial_size = <span class="built_in">int</span>(self.d * self.p)</span><br><span class="line">            partial_x, _ = torch.split(x, [partial_size, self.d - partial_size], dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">            norm_x = partial_x.norm(<span class="number">2</span>, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">            d_x = partial_size</span><br><span class="line"></span><br><span class="line">        rms_x = norm_x * d_x ** (-<span class="number">1.</span> / <span class="number">2</span>)</span><br><span class="line">        x_normed = x / (rms_x + self.eps)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.bias:</span><br><span class="line">            <span class="keyword">return</span> self.scale * x_normed + self.offset</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> self.scale * x_normed</span><br></pre></td></tr></table></figure></p>
+<p>Llama Implementation:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># source: https://github.com/huggingface/transformers/blob/e42587f596181396e1c4b63660abf0c736b10dae/src/transformers/models/llama/modeling_llama.py#L75C1-L89C59</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LlamaRMSNorm</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, hidden_size, eps=<span class="number">1e-6</span></span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Llama RMSNorm is equivalent to T5LayerNorm</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.weight = nn.Parameter(torch.ones(hidden_size))</span><br><span class="line">        self.var_eps = eps</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        dtype = x.dtype</span><br><span class="line">        h = h.to(torch.float32)</span><br><span class="line">        var = x.<span class="built_in">pow</span>(<span class="number">2</span>).mean(-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">        x = x * torch.rsqrt(var+self.eps) <span class="comment"># w*\frac&#123;x&#125;&#123;RMS(x)&#125;</span></span><br><span class="line">        <span class="keyword">return</span> self.weight * x.to(dtype)</span><br></pre></td></tr></table></figure>
+<h2 id="Instance-Normalization"><a href="#Instance-Normalization" class="headerlink" title="Instance Normalization"></a>Instance Normalization</h2><div class="note danger">
+            <p><strong>Image style transfer</strong></p><ul><li>Transfer a style from one image to another, which relies more on a specific instance rather than a batch.</li></ul>
+          </div>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li><strong>Instance normalization</strong> (IN) <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/pdf/1607.08022.pdf)
+">[4]</span></a></sup> , a.k.a. contrast normalization,  do instance-specific normalization rather than batch normalization.</li>
+<li>It performs the same at training and test time.</li>
+</ul>
+<script type="math/tex; mode=display">y_{tijk} = \frac{x_{tijk} - \mu_{ti}}{\sqrt{\sigma^2_{ti}+ \epsilon}}</script><script type="math/tex; mode=display">\mu_{ti} = \frac{1}{HW} \sum_{l=1}^W \sum_{m=1}^H x_{tilm}</script><script type="math/tex; mode=display">\sigma^2_{ti} = \frac{1}{HW} \sum_{l=1}^W \sum_{m=1}^H (x_{tilm} - mu_{ti})^2</script><h2 id="Group-Normalization"><a href="#Group-Normalization" class="headerlink" title="Group Normalization"></a>Group Normalization</h2><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li>BN’s error increases rapidly when the <code>batch size</code> becomes <strong>smaller</strong> because of <code>inaccurate batch statistics estimation</code>.</li></ul>
+          </div>
+<p><strong>Solution</strong>: <code>Group Normalization</code> (GN)<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Group Normalization](https://arxiv.org/pdf/1803.08494.pdf)
+">[5]</span></a></sup>. GN <strong>divides the <code>channels</code> into groups</strong> and computes within each group the mean and variance for normalization. GN’s computation is <strong>independent of batch sizes</strong>, and its accuracy is stable in a wide range of batch sizes.</p>
+<p>GN divides the set <script type="math/tex">S_i</script> as:</p>
+<script type="math/tex; mode=display">S_i = \{k \vert k_N = i_N, \lfloor \frac{k_C}{C/G} \rfloor = \lfloor \frac{i_C}{c/G} \rfloor \}</script><p>where $G$ is the number of groups, $C/G$ is the number of channels per group, $k$, $i$ is the index. GN compute the $\mu$ and $\sigma$ along the (H,W) axes and along a group by $\frac{C}{G}$ channels.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">GroupNorm</span>(<span class="params">x, gamma, beta, G, eps=<span class="number">1e-5</span></span>):</span></span><br><span class="line">	<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    : param x: input features with shape [N,C,H,W]</span></span><br><span class="line"><span class="string">    : param gamma, beta: scale and offset, with shape [1,C,1,1]</span></span><br><span class="line"><span class="string">    : param G: number of groups for GN</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">	</span><br><span class="line">    N,C,H,W = x.shape</span><br><span class="line">    x = tf.reshape(x, [N, G, C//G, H, W]</span><br><span class="line">    </span><br><span class="line">    mean, var = tf.nn.moments(x, [<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>], keep_dims=<span class="literal">True</span>)</span><br><span class="line">    x = (x - mean) / tf.sqrt(var + eps)</span><br><span class="line">    </span><br><span class="line">    x = tf.reshape(x, [N, C, H, W])</span><br><span class="line">    <span class="keyword">return</span> x* gamma + beta</span><br></pre></td></tr></table></figure>
+<h2 id="Switchable-Normalization"><a href="#Switchable-Normalization" class="headerlink" title="Switchable Normalization"></a>Switchable Normalization</h2><div class="note danger">
+            <p><strong>Problems</strong>:</p><ul><li>Existing BN, IN, LN employed the same normalizer in all normalization layers of an entire network, rendering suboptimal performance.</li><li>Different normalizers are used to solve different tasks, making model design cumbersome.</li></ul>
+          </div>
+<p><strong>Solution</strong>: </p>
+<ul>
+<li>Switchable Normalization (SN) <sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Differentiable learning-to-normalize via Switchable Normalization](https://arxiv.org/pdf/1806.10779.pdf)
+">[6]</span></a></sup>. It combines three distinct scopes to compute statistics (i.e. mean and variance): channel-wise, layer-wise and minibatch-wise, by using IN, LN and BN respectively. SN switches them by learning their importance weights end-to-end.</li>
+</ul>
+<p>Given a 4D tensor [N,C,H,W], denoting the # of samples, # of channels, heights and weights. Let <script type="math/tex">h_{ncij}</script> and  <script type="math/tex">\hat{h_{ncij}}</script> be a pixel before and after the normalization, where $n \in [1,N]$, $c \in [1,C]$, $i \in [1,H]$ and $j \in [1,W]$. $\gamma$ and $\beta$ are a scale and shift parameter respectively, $\epsilon$ is a small constant to preserve numerical stability.</p>
+<script type="math/tex; mode=display">\hat{h_{ncij}} = \gamma \frac{h_{ncij} - \sum_{k \in \omega}w_k\mu_k}{ \sqrt{ \sum_{k \in \omega} w'_k \sigma_k^2 + \epsilon}} + \beta</script><p>where $\Omega = { \text{in, ln, bn} }$:</p>
+<script type="math/tex; mode=display">\mu_{in} = \frac{1}{HW} \sum_{i,j}^{H,W} h_{ncij}, \quad \sigma_{in}^2 = \frac{1}{HW} \sum_{i,j}^{H,W} (h_{ncij} - \mu_{in})^2</script><script type="math/tex; mode=display">\mu_{ln} = \frac{1}{C} \sum_{c=1}^{C} \mu_{in}, \quad \sigma_{ln}^2 = \frac{1}{C} \sum_{c=1}^{C} (\sigma_{in}^2 + \mu_{in}^2)^2 -\mu_{ln}^2</script><script type="math/tex; mode=display">\mu_{bn} = \frac{1}{N} \sum_{n=1}^{N} \mu_{in}, \quad \sigma_{bn}^2 = \frac{1}{N} \sum_{n=1}^{N} (\sigma_{in} + \mu_{in})^2 -\mu_{bn}^2</script><p>Different normalizers estimate statistics along different axes.<br><img data-src="/notes/images/SwitchableNorm.png" alt="upload successful"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">SwitchableNorm</span>(<span class="params">x, gamma, beta, w_mean, w_var, eps=<span class="number">1e-5</span></span>):</span></span><br><span class="line">	<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    x: shape [N,C,H,W]</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># Instance Norm</span></span><br><span class="line">    mean_in = np.mean(x, axis=(<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">    var_in = np.var(x, axis=(<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Layer Norm</span></span><br><span class="line">    mean_ln = np.mean(x, axis=(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">    var_ln = np.var(x, axis=(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">	</span><br><span class="line">    <span class="comment"># Batch Norm</span></span><br><span class="line">    mean_bn = np.mean(x, axis=(<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">    var_bn = np.var(x, axis=(<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">	</span><br><span class="line">    <span class="comment"># Switchable Norm</span></span><br><span class="line">    mean = w_mean[<span class="number">0</span>]*mean_in + w_mean[<span class="number">1</span>]*mean_ln + w_mean[<span class="number">2</span>]*mean_bn</span><br><span class="line">    var = w_var[<span class="number">0</span>]*var_in + w_var[<span class="number">1</span>]*var_ln + w_var[<span class="number">2</span>]*var_bn</span><br><span class="line">    </span><br><span class="line">    x_normalized = (x-mean) / np.sqrt(var + eps)</span><br><span class="line">    <span class="keyword">return</span> gamma * x_normalized + beta</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Comparison"><a href="#Comparison" class="headerlink" title="Comparison"></a>Comparison</h2><p><img data-src="/notes/images/normalization-comparison.png" alt="Normalization comparison"></p>
+<p>The mini-batch data has the shape [N, C, H, W], where </p>
+<ul>
+<li>$N$ is the batch axis</li>
+<li>$C$ is the channel axis (rgb for image data)</li>
+<li>$H$ and $W$ are the spatial hight and weight axis</li>
+</ul>
+<div class="note info">
+            <p><strong>Comparison</strong>:</p><ul><li><strong>Batch Norm</strong> is applied on batch, normalizing along (N, H, W) axis, i.e. compute the mean and variance for the whole batch of input data. (It performs badly for small batch size)</li><li><strong>Layer Norm</strong> is on channel, normalizing along (C,H,W) axis, i.e. it is independent with batch dimension, by normalizing the neurons. (It is obvious for RNNs).</li><li><strong>Instance Norm</strong> is applied on image pixel, doing normalization along (H,W) axis, i.e. compute $\mu$ and $\sigma$ for each sample and channel. (It is for style transfer)</li><li><strong>Group Norm</strong>: divide the channel into groups, normalizing along the (H,W) axis and along a group of $\frac{C}{G}$ channels. </li><li><strong>Switchable Norm</strong>: dynamically learn weights for IN/LN/BN statistics in the e2e manner (c.f. ELMo).</li></ul>
+          </div>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v37/ioffe15.html">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://cthorey.github.io/backpropagation/">What does the gradient flowing through batch normalization looks like ?</a><a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1607.06450v1.pdf">Layer normalization</a><a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1607.08022.pdf">Instance Normalization: The Missing Ingredient for Fast Stylization</a><a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1803.08494.pdf">Group Normalization</a><a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1806.10779.pdf">Differentiable learning-to-normalize via Switchable Normalization</a><a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1805.11604.pdf">How Does Batch Normalization Help Optimization?</a><a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, Biao, and Rico Sennrich. &quot;Root mean square layer normalization.&quot; Advances in Neural Information Processing Systems 32 (2019).<a href="#fnref:8" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NN/" rel="tag"># NN</a>
+              <a href="/notes/tags/NN-tricks/" rel="tag"># NN tricks</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/02/23/RL/David%20Silver/RL-notes-3-Planning-by-Dynamic-Programming-RL/" rel="prev" title="Planning by Dynamic Programming (RL)">
+      <i class="fa fa-chevron-left"></i> Planning by Dynamic Programming (RL)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/02/28/Programming/TensorFlow-v1/" rel="next" title="Notes of TensorFlow v1.x">
+      Notes of TensorFlow v1.x <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Feature-Normalization"><span class="nav-number">1.</span> <span class="nav-text">Feature Normalization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Preprocessing"><span class="nav-number">1.1.</span> <span class="nav-text">Data Preprocessing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Batch-Normalization"><span class="nav-number">1.2.</span> <span class="nav-text">Batch Normalization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Layer-Normalization"><span class="nav-number">1.3.</span> <span class="nav-text">Layer Normalization</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Layer-Normalization-on-RNNs"><span class="nav-number">1.3.1.</span> <span class="nav-text">Layer Normalization on RNNs</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RMSNorm"><span class="nav-number">1.4.</span> <span class="nav-text">RMSNorm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance-Normalization"><span class="nav-number">1.5.</span> <span class="nav-text">Instance Normalization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Group-Normalization"><span class="nav-number">1.6.</span> <span class="nav-text">Group Normalization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Switchable-Normalization"><span class="nav-number">1.7.</span> <span class="nav-text">Switchable Normalization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Comparison"><span class="nav-number">1.8.</span> <span class="nav-text">Comparison</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">2.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/";
+    this.page.identifier = "2019/02/28/NN/Normalization-in-Neural-Networks-a-Summary/";
+    this.page.title = "Normalization in Neural Networks: A Summary !";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

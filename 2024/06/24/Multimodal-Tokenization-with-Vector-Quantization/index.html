@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="A review of multimodal tokenization approaches using vector quantization[1] approaches.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Multimodal Tokenization with Vector Quantization: A Review">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="A review of multimodal tokenization approaches using vector quantization[1] approaches.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/VQ-VAE.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/VQVAE-2.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/VQVAE-2%20algorithm.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/VQGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/iGPT.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/ViT-VQGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RQVAE.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Contextual%20RQ-Transformer.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/HQ-VAE.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/FSQ.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MaskGIT-pipeline.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MaskGIT.png">
+<meta property="article:published_time" content="2024-06-24T08:30:00.000Z">
+<meta property="article:modified_time" content="2025-03-10T09:07:16.340Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="Tokenization">
+<meta property="article:tag" content="Multimodality">
+<meta property="article:tag" content="LMM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/VQ-VAE.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Multimodal Tokenization with Vector Quantization: A Review | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Multimodal Tokenization with Vector Quantization: A Review
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-06-24 16:30:00" itemprop="dateCreated datePublished" datetime="2024-06-24T16:30:00+08:00">2024-06-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/LMM/" itemprop="url" rel="index"><span itemprop="name">LMM</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/LMM/Tokenization/" itemprop="url" rel="index"><span itemprop="name">Tokenization</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>A review of multimodal tokenization approaches using vector quantization<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Vector quantization (wiki)](https://en.wikipedia.org/wiki/Vector_quantization)">[1]</span></a></sup> approaches.<br><span id="more"></span></p>
+<h1 id="Codebook-Learning-with-Vector-Quantization"><a href="#Codebook-Learning-with-Vector-Quantization" class="headerlink" title="Codebook Learning with Vector Quantization"></a>Codebook Learning with Vector Quantization</h1><h2 id="VQ-VAE-NeurIPS’17"><a href="#VQ-VAE-NeurIPS’17" class="headerlink" title="VQ-VAE (NeurIPS’17)"></a>VQ-VAE (NeurIPS’17)</h2><p>Vector-quantized AutoEncoder (VQ-VAE)<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Van Den Oord, Aaron, and Oriol Vinyals. "[Neural discrete representation learning.](https://proceedings.neurips.cc/paper/2017/file/7a98af17e63a0ac09ce2e96d03992fbc-Paper.pdf)" Advances in neural information processing systems 30 (2017).">[2]</span></a></sup> combines the variational autoencoder (VAE) with vector quantization (VQ)<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Vector quantization (wiki)](https://en.wikipedia.org/wiki/Vector_quantization)">[1]</span></a></sup>, using the parameterization of the posterior distribution of (discrete) latents given an observation. </p>
+<div class="note info">
+            <p>It does not suffer from large variance, and avoids the ‘’posterior collapse’’ issue which has been problematic with many VAEs that have a strong decoder, often caused by latents being ignored.</p>
+          </div>
+<h3 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h3><p>VAEs encompass following parts:<br>(1) an encoder network parameterized by a posterior distribution $q(z|x)$ of discrete latent random variables $z$ given the input data $x$, (2) a prior distribution $p(z)$, and (3) a decoder with a distribution $p(x|z)$ over input data.</p>
+<h3 id="Discrete-latents"><a href="#Discrete-latents" class="headerlink" title="Discrete latents"></a>Discrete latents</h3><p>VQ-VAE defines the posterior and prior distributions as categorical, and the samples drawn from these distributions index an embedding table, which are used as the decoder inputs.</p>
+<p><img data-src="/notes/images/VQ-VAE.png" alt="VQ-VAE"></p>
+<p>VQ-VAE defines the latent embedding space $e \in \mathbb{R}^{K \times D}$ where $K$ is the $K$-way categorical embedding table size, $D$ is the size of latent embedding vector $e_i \in \mathbb{R}^D, i \in 1,2,\cdots, K$. The encoder takes the input $x$ to get the output $z_e(x)$. The discrete latent variables $z$ are then calculated by nearest neighbour look-up using shared embedding space $e$. The posterior categorical distribution $q(z|x)$ are defined as 1-hot distribution:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+q(z=k|x)=\begin{cases}1&\text{for k}=\text{argmin}_j\|z_e(x)-e_j\|_2,\\0&\text{otherwise}\end{cases}, \label{eq:posterior}
+\end{align}</script><p>We view this as a VAE that can bound $\log p(x)$ with the ELBO. The distribution $q(z=k|x)$ is deterministic and by defining a simple uniform prior over $z$ we obtain a KL divergence constant and equal to $\log K$.</p>
+<p>The representation $z_e(x)$ is passed through the discretization bottleneck followed by mapping onto the nearest element of embedding $e$. The input to the decoder is the nearest embedding vector $e_k$ as follows:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+z_q(x)=e_k,\quad\text{where}\quad k=\text{argmin}_j\|z_e(x)-e_j\|_2 \label{eq:emb}
+\end{align}</script><p>This can be treated as an autoencoder with a particular non-linearity that maps the latents to 1-of-$K$ embedding vectors.</p>
+<h3 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h3><p>The Eq.$\eqref{eq:emb}$ and $\eqref{eq:posterior}$ approximate the gradient using straight-through estimator and just copy gradients from decoder input $z_q(x)$ to encoder output $z_e(x)$.</p>
+<script type="math/tex; mode=display">
+\begin{align} 
+    \mathcal{L} &{}= \underbrace{\log p(x|z_q(x))}_{\text{reconstruction loss}} + \underbrace{\|\|\mathrm{sg}[z_e(x)]-e\|\|_2^2}_{\text{codebook loss}} + \underbrace{\beta\|\|z_e(x)-\mathrm{sg}[e]\|\|_2^2}_{\text{commitment loss}}, \\
+    &{}= \underbrace{\Vert x - D(e) \Vert_2^2}_{\text{reconstruction loss}} + \underbrace{\Vert \text{sg}[E(x)] - e \Vert_2^2}_{\text{codebook loss}} + \underbrace{\beta  \Vert \text{sg}[e] - E(x) \Vert_2^2}_{\text{commitment loss}}  \label{eq:vq_loss}
+\end{align}</script><p>Here, $\beta=0.25$.</p>
+<h4 id="EMA-Update"><a href="#EMA-Update" class="headerlink" title="EMA Update"></a>EMA Update</h4><p>VQVAE can use exponential moving average (EMA) updates for the codebook, as the replacement for the codebook loss, the 2nd term in Eq.$\eqref{eq:vq_loss}$.</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+    N_{i}^{(t)} &{}:=N_{i}^{(t-1)}*\gamma+n_{i}^{(t)}(1-\gamma) \\
+    \quad m_{i}^{(t)} &{}:=m_{i}^{(t-1)}*\gamma+\sum_{j}^{n_{i}^{(t)}}E(x)_{i,j}^{(t)}(1-\gamma)\\
+    e_{i}^{(t)} &{}:=\frac{m_{i}^{(t)}}{N_{i}^{(t)}}
+\end{aligned}</script><p>where $n_{i}^{(t)}$ is the number of quantized vectors in $E(x)$, $\gamma \in [0,1] $ is a decay parameter. </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># reconstruction loss</span></span><br><span class="line">loss = F.mse_loss(quantize, x.detach())</span><br><span class="line"><span class="comment"># determine code to use for commitment loss</span></span><br><span class="line">maybe_detach = torch.detach <span class="keyword">if</span> <span class="keyword">not</span> self.learnable_codebook <span class="keyword">or</span> freeze_codebook <span class="keyword">else</span> identity</span><br><span class="line"></span><br><span class="line">commit_quantize = maybe_detach(quantize)            </span><br><span class="line"></span><br><span class="line"><span class="comment"># straight through</span></span><br><span class="line">quantize = x + (quantize - x).detach()</span><br><span class="line"></span><br><span class="line">commit_loss = F.mse_loss(commit_quantize, x)</span><br><span class="line"></span><br><span class="line">loss = loss + commit_loss * self.commitment_weight</span><br></pre></td></tr></table></figure>
+<h2 id="VQVAE-2-NeurIPS’19"><a href="#VQVAE-2-NeurIPS’19" class="headerlink" title="VQVAE-2 (NeurIPS’19)"></a>VQVAE-2 (NeurIPS’19)</h2><p>VQVAE-2<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Razavi, Ali, Aaron Van den Oord, and Oriol Vinyals. "[Generating diverse high-fidelity images with vq-vae-2](https://proceedings.neurips.cc/paper/2019/file/5f8e2fa1718d1bbcadf1cd9c7a54fb8c-Paper.pdf)." Advances in neural information processing systems 32 (2019). ">[3]</span></a></sup> introduces a multi-scale hierarchical structure to the original VQVAE framework, complemented by PixelCNN priors that govern the latent codes.</p>
+<h3 id="Stage-1-Hierarchical-Latent-Codes"><a href="#Stage-1-Hierarchical-Latent-Codes" class="headerlink" title="Stage 1: Hierarchical Latent Codes"></a>Stage 1: Hierarchical Latent Codes</h3><div class="note info">
+            <p><strong>Motivation:</strong> Hierarchical VQ models capture local features, such as textures, distinctly from global features, like the shape and geometry of objects.</p>
+          </div>
+<p>VQVAE-2<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Razavi, Ali, Aaron Van den Oord, and Oriol Vinyals. "[Generating diverse high-fidelity images with vq-vae-2](https://proceedings.neurips.cc/paper/2019/file/5f8e2fa1718d1bbcadf1cd9c7a54fb8c-Paper.pdf)." Advances in neural information processing systems 32 (2019). ">[3]</span></a></sup> employs a hierarchical arrangement of VQ codes to effectively model large images. In this hierarchy, the <strong>top-level</strong> latent code encapsulates global information, while the <strong>bottom-level</strong> latent code, which is conditioned on the top-level code, is tasked with capturing local details.</p>
+<p><img data-src="/notes/images/VQVAE-2.png" alt="VQVAE-2"></p>
+<p>Without the conditioning of the bottom-level latent on the top-level latent, the top-level latent would be burdened with the task of encoding every minute detail from the pixels. By allowing each level in the hierarchy to focus on different aspects of the pixels, the model encourages the encoding of complementary information across each latent map. This strategy is instrumental in minimizing the reconstruction error during the encoding process. For a more in-depth understanding, refer to the algorithmic details provided.</p>
+<h3 id="Stage-2-Learning-Priors-over-Latent-Codes"><a href="#Stage-2-Learning-Priors-over-Latent-Codes" class="headerlink" title="Stage 2: Learning Priors over Latent Codes"></a>Stage 2: Learning Priors over Latent Codes</h3><p>In the second stage, VQVAE-2 learns a prior for the latent codes. It involves fitting a prior distribution to the learned posterior, effectively achieving lossless compression of the latent space. This is accomplished by re-encoding the latent variables with a distribution that more accurately approximates their true underlying distribution. Also, they find that self-attention layers can capture correlations in spatial locations that are far apart in the image.</p>
+<p><img data-src="/notes/images/VQVAE-2 algorithm.png" alt="VQVAE-2 algorithm"></p>
+<h2 id="VQGAN-CVPR’21"><a href="#VQGAN-CVPR’21" class="headerlink" title="VQGAN (CVPR’21)"></a>VQGAN (CVPR’21)</h2><p>VQGAN<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Esser, Patrick, Robin Rombach, and Bjorn Ommer. "[Taming transformers for high-resolution image synthesis.](http://openaccess.thecvf.com/content/CVPR2021/papers/Esser_Taming_Transformers_for_High-Resolution_Image_Synthesis_CVPR_2021_paper.pdf)" Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2021.">[4]</span></a></sup> proposes to combine CNNs with transformer architectures to learn a codebook of contextually rich visual elements. The model then utilizes the transformer’s capability to capture long-range interactions within global compositions. To ensure that the codebook effectively captures perceptually significant local structures, VQGAN employs an adversarial training strategy, reducing the transformer’s need to model low-level statistics.</p>
+<p>QGAN employs a discriminator and perceptual loss to maintain high perceptual quality even at increased compression rates. It utilizes a patch-based discriminator, $D$, which is trained to differentiate between real and reconstructed images:</p>
+<p>\begin{equation}<br>    \mathcal{L}_{\mathrm{GAN}}({E,G,\mathcal{Z}},D)=[\log D(x)+\log(1-D(\hat{x}))]<br>\end{equation}</p>
+<p>Here, $E$ denotes the encoder, $G$ is the generator, <script type="math/tex">\mathcal{Z} = \{z_{k}\}_{k=1}^{K} \subset \mathbb{R}^{n_{z}}</script> represents the learned sicrete codebook.</p>
+<p><img data-src="/notes/images/VQGAN.png" alt=""></p>
+<p>The optimization objective for VQGAN is formulated as a min-max problem:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \begin{aligned}\mathcal{Q}^{*}=\arg\operatorname*{min}_{E,G,\mathcal{Z}}\operatorname*{max}_{D}\mathbb{E}_{x\sim p(x)}\Big[\mathcal{L}_{\mathrm{VQ}}(E,G,\mathcal{Z}) +\lambda\mathcal{L}_{\mathrm{GAN}}(\{E,G,\mathcal{Z}\},D)\Big]\end{aligned}
+\end{equation}</script><p>The adaptive weight $\lambda$ is computed as follows:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \lambda=\frac{\nabla_{G_L}[\mathcal{L}_{\mathrm{recon}}]}{\nabla_{G_L}[\mathcal{L}_{\mathrm{GAN}}]+\delta}
+\end{equation}</script><p>where <script type="math/tex">\mathcal{L}_{\mathrm{recon}}</script> is the perceptual reconstruction loss, <script type="math/tex">\nabla_{G_L}[\cdot]</script> denotes the gradient with respect to the last layer of the decoder.</p>
+<p>Through this adversarial process, VQGAN not only learns to compress visual information efficiently but also ensures that the resulting images are perceptually convincing, bridging the gap between high-level semantic understanding and low-level pixel accuracy.</p>
+<p>In the second stage, it pretrains a transformer to predict rasterized image tokens autoregressively.</p>
+<h2 id="iGPT-ICML’20"><a href="#iGPT-ICML’20" class="headerlink" title="iGPT (ICML’20)"></a>iGPT (ICML’20)</h2><p>iGPT<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, Mark, et al. "Generative pretraining from pixels." International conference on machine learning. PMLR, 2020.">[10]</span></a></sup> delves into the realm of autoregressive pre-training applied directly to image pixels. The process begins with reducing the image to a lower resolution to manage the extensive context that high-resolution images entail. Subsequently, iGPT employs a clustering strategy to further compress the pixel information. By applying $k$-means clustering to the (R, G, B) values of each pixel with $k$ set to 512, the model effectively condenses the color space, reducing the context length by a factor of three.</p>
+<p>However, even after these initial steps, the resulting context—such as $96^2 \times 3$ or $192^2 \times 3$ —can remain unwieldy for efficient processing. To address this, iGPT utilizes a Variational Autoencoder with Vector Quantization (VQ-VAE) that compresses the pixel space into a latent grid of $48^2$. This transformation significantly shrinks the context size while retaining the image’s critical features.</p>
+<p>iGPT assesses the quality of the learned representations through two different methods:</p>
+<ol>
+<li><p>Linear Probe: This technique involves training a linear classifier on top of the frozen pre-trained representations to evaluate how well they capture the necessary information for accurate classification tasks.</p>
+</li>
+<li><p>Finetuning: Alternatively, the model fine-tunes the pre-trained representations on downstream tasks.</p>
+</li>
+</ol>
+<p><img data-src="/notes/images/iGPT.png" alt=""></p>
+<h2 id="DALL-E-ICML’21"><a href="#DALL-E-ICML’21" class="headerlink" title="DALL-E (ICML’21)"></a>DALL-E (ICML’21)</h2><p>DALL-E<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ramesh, Aditya, et al. "Zero-shot text-to-image generation." International conference on machine learning. Pmlr, 2021.">[11]</span></a></sup> applies a transformer that autoregressively models the text and image tokens as a single stream of data. It uses two-stage training procedure:</p>
+<ol>
+<li>Stage 1: Train a discrete VAE to compress each $256 \times 256$ RGB image into a $32 \times 32$ grid of image tokens, each element of which can assume 8192 possible values.</li>
+<li>Stage 2: Concatenate up to 256 BPE-encoded text tokens with the $1024 (32 \times 32)$ image tokens, and train an autoregressive transformer to model the joint distribution over the text and image tokens.</li>
+</ol>
+<p>The overall procedure can be viewed as maximizing the evidence lower bound (ELB) on the joint likelihood of the model distribution over iamges $x$, captions $y$, and the tokens $z$ for the encoded RGB image. We model this distribution using the factorization <script type="math/tex">p_{\theta,\psi}(x,y,z)=p_{\theta}(x\mid y,z)p_{\psi}(y,z)</script>, which yields the lower bound:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \ln p_{\theta,\psi}(x,y)\geqslant\mathbb{E}_{z\sim q_{\phi}(z\mid x)}\left(\ln p_{\theta}(x\mid y,z)-\beta D_{\mathrm{KL}}(q_{\phi}(y,z\mid x),p_{\psi}(y,z))\right)
+\end{equation}</script><p>where:</p>
+<ul>
+<li>$q_\phi$ denotes the distribution over the $32\times 32$ image tokens generated by the dVAE encoder given the RAB image $x$;</li>
+<li>$p_\theta$ denotes  the distribution over the RGB images generated by the dVAE decoder given the image tokens;</li>
+<li>$p_\phi$ denotes the joint distribution over the text image tokens modeled by transformer.</li>
+</ul>
+<h3 id="Stage-1-Visual-Codebook-Learning"><a href="#Stage-1-Visual-Codebook-Learning" class="headerlink" title="Stage 1: Visual Codebook Learning"></a>Stage 1: Visual Codebook Learning</h3><p>DALL-E firstly train a dVAE using gumbel-softmax relaxation instead of the straight-through estimator used in VQVAE. Each $256 \times 256$ RGB image is transformed into a $32 \times 32$ grid of discrete tokens through a discrete Variational Autoencoder (dVAE). These tokens can each take on one of 8192 unique values, resulting in a compact encoding of the visual information.</p>
+<p>The dVAE leverages a Gumbel-Softmax relaxation technique, as opposed to the straight-through estimator often used in VQ-VAE. Its architecture comprises convolutional ResNets with bottleneck-style blocks, utilizing 3x3 convolutions and 1x1 convolutions for skip connections. Downscaling of feature maps is performed by max-pooling in the encoder, while the decoder employs nearest-neighbor upsampling for reconstruction.</p>
+<h3 id="Stage-2-Prior-Learning"><a href="#Stage-2-Prior-Learning" class="headerlink" title="Stage 2: Prior Learning"></a>Stage 2: Prior Learning</h3><p>The subsequent stage is focused on modeling the relationship between text and images:  The model concatenates up to 256 BPE-encoded text tokens with the 1024 image tokens from Stage 1. An autoregressive transformer is then trained to capture the joint distribution of both text and image tokens.</p>
+<p>DALL-E normalizes the cross-entropy losses for text and image tokens by their respective totals in the data batch. The text token loss is weighted by $1/8$, and the image token loss by $7/8$, reflecting a higher emphasis on image modeling.</p>
+<h2 id="ViT-VQGAN-ICLR’22"><a href="#ViT-VQGAN-ICLR’22" class="headerlink" title="ViT-VQGAN (ICLR’22)"></a>ViT-VQGAN (ICLR’22)</h2><p>ViT-VQGAN<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Jiahui, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. "[Vector-quantized image modeling with improved vqgan](https://arxiv.org/pdf/2110.04627)." arXiv preprint arXiv:2110.04627 (2021).">[5]</span></a></sup> leverages ViT-based VQGAN to encode discrete latent codes, and adopt combined objectives such as logit-laplace loss, L2 loss, adversarial loss, and perceptual loss.</p>
+<p><sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Jiahui, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. "[Vector-quantized image modeling with improved vqgan](https://arxiv.org/pdf/2110.04627)." arXiv preprint arXiv:2110.04627 (2021).">[5]</span></a></sup> uses a combination of logit-laplace loss, L2 loss, perceptual loss based on VGG net, and GAN loss with a StyleGAN discriminator:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    L=L_{\mathrm{VQ}}+0.1 L_{\mathrm{Adv}}+0.1 L_{\mathrm{Perceptual}}+0.1 L_{\mathrm{Logit-laplace}}+ 1.0L_{2}
+\end{equation}</script><p><img data-src="/notes/images/ViT-VQGAN.png" alt=""></p>
+<div class="note info">
+            <p><strong>Dimension reduction</strong>: <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Jiahui, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. "[Vector-quantized image modeling with improved vqgan](https://arxiv.org/pdf/2110.04627)." arXiv preprint arXiv:2110.04627 (2021).">[5]</span></a></sup> finds that reducing the dimensionality of the lookup space can significantly enhance the reconstruction process. By reducing the dimensions from 256 to 32 through a linear mapping applied after the encoder’s output, the model can achieve a more efficient and accurate reconstruction of the input data.</p>
+          </div>
+<div class="note success">
+            <p><strong>L2-normalized codes</strong>: It applies L2 norm on encoded latents $z_e(x)$ and codebook latents $e$. The codebook variables are initialized from a normal distribution. This normalization process projects all latent variables onto the surface of a hypersphere, which means that the Euclidean distance between L2-normalized latents transitions to measuring the cosine similarity between two vectors <script type="math/tex">\|\ell_2(z_e(x))-\ell_2(e_j)\|_2^2</script>. This shift to cosine similarity offers a more consistent and reliable way to compare the angles between vectors, which is particularly useful in high-dimensional spaces where Euclidean distances can become inflated and less meaningful.</p>
+          </div>
+<h2 id="RQ-VAE-CVPR’22"><a href="#RQ-VAE-CVPR’22" class="headerlink" title="RQ-VAE (CVPR’22)"></a>RQ-VAE (CVPR’22)</h2><p>The Residual-Quantized Variational Autoencoder (RQ-VAE)<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lee, D., Kim, C., Kim, S., Cho, M., & Han, W. S. (2022). [Autoregressive image generation using residual quantization](https://openaccess.thecvf.com/content/CVPR2022/papers/Lee_Autoregressive_Image_Generation_Using_Residual_Quantization_CVPR_2022_paper.pdf). In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 11523-11532).">[7]</span></a></sup> incorporates residual quantization (RQ) to progressively refine the quantization of a feature map in a hierarchical, coarse-to-fine approach. At each quantized position, RQ-VAE employs a sequence of $D$ residual quantization iterations, yielding $D$ discrete codes. RQ’s ability to generate a vast number of compositions—exponential in the number of iterations ($D$)—allows RQ-VAE to closely approximate feature maps without depending on an excessively large codebook. This efficiency in representation enables a reduction in the spatial resolution of the quantized feature map without compromising the integrity of the encoded image.</p>
+<p><img data-src="/notes/images/RQVAE.png" alt="RQVAE"></p>
+<p>The dual-stage framework combines RQ-VAE with an RQ-Transformer, which is designed for the autoregressive modeling of images:</p>
+<p>Stage 1: RQ-VAE encodes an image into a stacked map of $D$ discrete codes using a codebook.<br>Stage 2: RQ-Transformer addresses the training challenges of autoregressive models, particularly exposure bias.</p>
+<h3 id="Stage-1-RQ-VAE"><a href="#Stage-1-RQ-VAE" class="headerlink" title="Stage 1: RQ-VAE"></a>Stage 1: RQ-VAE</h3><div class="note info">
+            <p><strong>Reducing Spatial Resolution</strong>: While VQ-VAE performs a form of lossy compression on images and necessitates a balance between dimensionality reduction and information preservation, it typically requires $HW \log_2 K$ bits to encode an image using a codebook of size $K$. According to rate-distortion theory, the minimum reconstruction error is contingent on the bit count. To reduce spatial dimensions from $(H,W)$ to $(H/2,W/2)$ while maintaining reconstruction quality, the codebook would need to increase to a size of $K^4$. However, a VQ-VAE with an expansive codebook is impractical due to the potential for codebook collapse and unstable training dynamics.</p>
+          </div>
+<p>Instead of enlarging the codebook, RQ-VAE applies residual quantization to discretize a vector $z$. Given a quantization depth $D$, RQ represents $z$ with a sequence of $D$ codes:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \mathcal{RQ}(\mathbf{z};\mathcal{C},D)=(k_{1},\cdots,k_{D})\in[K]^{D}
+\end{equation}</script><p>Here $\mathcal{C}$ is the codebook of size $|\mathcal{C}|=K$, and $k<em>d$ is the code assigned to vector $z$ at depth $d$. Starting from the initial residual $r_0 = z$, RQ iteratively computes the code $k_d$ for the residual $r</em>{d-1}$, and the subsequent residual $r_d$ is determined as follows:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    k_{d}=\mathcal{Q}(\mathbf{r}_{d-1};\mathcal{C}),\\\mathbf{r}_{d}=\mathbf{r}_{d-1}-\mathbf{e}(k_{d}),
+\end{equation}</script><p>This process is repeated for $d=1,\cdots, D$. </p>
+<div class="note info">
+            <p>While traditional VQ segments the entire vector space <script type="math/tex">\mathbb{R}^n_z</script> into $K$ distinct clusters, RQ with a depth $D$ can partition this space into $K^D$ clusters at most. This means that RQ with depth $D$ has a comparable partitioning capacity to that of a VQ with $K^D$ codes.</p>
+          </div>
+<p>RQ-VAE augments the encoder-decoder structure of VQ-VAE by replacing VQ with the RQ module outlined above. With a depth of $D$, RQ-VAE represents a feature map $Z$ as a stacked map of codes <script type="math/tex">\mathbf{M}\in[K]^{H\times W\times D}</script> and constructs <script type="math/tex">\hat{\mathbf{Z}}^{(d)}\in\mathbb{R}^{H\times W\times n_{z}}</script>, which is quantized feature map at depth $d$ for each $d \in [D]$ such that:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+\mathrm{M}_{hw} &=\mathcal{RQ}(E(\mathbf{X})_{hw};\mathcal{C},D), \\
+\hat{\mathbf{Z}}_{hw}^{(d)} &=\sum_{d^{\prime}=1}^d\mathbf{e}(\mathbf{M}_{hwd^{\prime}}). 
+\end{aligned}
+\end{equation}</script><p>Finally, the decoder $G$ reconstructs the input image from $\hat{\mathbf{Z}}$ as $\hat{\mathbf{X}} = G(\hat{\mathbf{Z}})$. </p>
+<p>The RQ-VAE training loss is as follows:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\mathcal{L}=\mathcal{L}_{\mathrm{recon}}+\beta\mathcal{L}_{\mathrm{commit}}
+\end{equation}</script><p>Note that it applies the exponential moving average (EMA) of the clusted features for the codebook update.</p>
+<h3 id="Stage-2-RQ-Transformer"><a href="#Stage-2-RQ-Transformer" class="headerlink" title="Stage 2: RQ-Transformer"></a>Stage 2: RQ-Transformer</h3><p>In the second stage, the RQ-Transformer employs a two-pronged approach to model images autoregressively. This stage is pivotal in enhancing the predictive accuracy of the model and can be broken down into two components:</p>
+<ol>
+<li><p><strong>Spatial Transformer</strong>: This module captures the contextual information by summarizing the data from preceding positions in the image. It acts like a lens, focusing on relevant areas to create a context vector that encapsulates the essence of what has been encoded so far.</p>
+</li>
+<li><p><strong>Depth Transformer</strong>: Building upon the foundation laid by the Spatial Transformer, the Depth Transformer then takes a step-by-step approach to anticipate the sequence of $D$ codes for each position in the image. It does this by considering the context vector, which provides the necessary backdrop against which the predictions are made.</p>
+</li>
+</ol>
+<p>By combining these two transformers, the RQ-Transformer adeptly synthesizes the spatial nuances and the depth-wise details, thereby generating a comprehensive representation of the image at each step.</p>
+<h3 id="Contextual-RQ-Transformer-NeurIPS’22"><a href="#Contextual-RQ-Transformer-NeurIPS’22" class="headerlink" title="Contextual RQ-Transformer (NeurIPS’22)"></a>Contextual RQ-Transformer (NeurIPS’22)</h3><p>Contextual RQ-Transformer<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lee, Doyup, et al. "Draft-and-revise: Effective image generation with contextual rq-transformer." Advances in Neural Information Processing Systems 35 (2022): 30127-30138.">[9]</span></a></sup> uses two-stage framework: (1) RQVAE tokenization; (2) Contextual RQ-transformer.</p>
+<p><img data-src="/notes/images/Contextual RQ-Transformer.png" alt="Contextual RQ-Transformer"></p>
+<h4 id="RQVAE-tokenization"><a href="#RQVAE-tokenization" class="headerlink" title="RQVAE tokenization"></a>RQVAE tokenization</h4><p>The first stage of the Contextual RQ-Transformer employs the RQ-VAE—a powerful tokenizer capable of condensing high-dimensional data into a discrete set of latent tokens. </p>
+<h4 id="Bidirectional-context-integration"><a href="#Bidirectional-context-integration" class="headerlink" title="Bidirectional context integration"></a>Bidirectional context integration</h4><p>Once the data is tokenized, the Contextual RQ-Transformer performs two key operations to model the relationships within the tokenized sequence:</p>
+<ol>
+<li><p><strong>Bidirectional Spatial Attention</strong>: Utilizing bidirectional attention mechanisms, the model predicts the masked positions in the sequence, given a masked scheduling function. This approach allows the model to consider both past and future context, leading to a more accurate and coherent understanding of the data.</p>
+</li>
+<li><p><strong>Autoregressive Depth</strong>: The model employs autoregressive transformers to process the sequence depth-wise. This structure is akin to modifying the lower layers of a RQ-Transformer<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lee, D., Kim, C., Kim, S., Cho, M., & Han, W. S. (2022). [Autoregressive image generation using residual quantization](https://openaccess.thecvf.com/content/CVPR2022/papers/Lee_Autoregressive_Image_Generation_Using_Residual_Quantization_CVPR_2022_paper.pdf). In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 11523-11532).">[7]</span></a></sup> from a causal (unidirectional) to a bidirectional model. By doing so, the contextual RQ-Transformer captures the sequential dependencies with greater precision.</p>
+</li>
+</ol>
+<h2 id="HQ-VAE-NeurIPS’22"><a href="#HQ-VAE-NeurIPS’22" class="headerlink" title="HQ-VAE (NeurIPS’22)"></a>HQ-VAE (NeurIPS’22)</h2><p>HQ-VAE<sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="You, Tackgeun, et al. "Locally hierarchical auto-regressive modeling for image generation." Advances in Neural Information Processing Systems 35 (2022): 16360-16372.">[12]</span></a></sup> adopts a hierarchical VQ scheme to encode input data using two levels of discrete codes, top $\mathbf{t}$ and bottom $\mathbf{b}$, respectively. It transforms the feature map $\mathbf{z} \in \mathbb{R}^{rl \times rl \times d}$ into two code maps $(\mathbf{t}, \mathbf{b})$, where $\mathbf{t} \in \mathcal{Z}^{l\times l}$ and $\mathbf{b} \in \mathcal{Z}^{rl\times rl}$ with an interger scaling factor $r \in \{1,2,\cdots \}$.</p>
+<p>It first captures the high-level information of a feature map by quantizing its downsampled version using the top codes:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \mathbf{z}^{\mathrm{top}}=\mathrm{Downsample}(\mathbf{z};r),\quad t_{ij}=VQ^{\mathrm{top}}(\mathbf{z}_{ij}^{\mathrm{top}};\mathcal{C}_{ij}^{\mathrm{top}}),\quad\mathbf{e}_{ij}^{\mathrm{top}}=\mathcal{C}^{\mathrm{top}}[t_{ij}],
+\end{equation}</script><p>where $\mathcal{C}^{\mathrm{top}}$ is the codebook of top codes. Then given the top code map $\mathbf{t}$, the bottom codes are derived at:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \mathbf{z}^{\text{bot}}=\mathbf{z}-\text{Upsample}(\mathbf{e}^{\text{top}};r),\quad b_{ij}=VQ^{\text{bot}}(\mathbf{z}^{\text{bot}};\mathcal{C}^{\text{bot}}),\quad\mathbf{e}^{\text{bot}}=\mathcal{C}^{\text{bot}}[b_{ij}],
+\end{equation}</script><p>where $\mathcal{C}^{\mathrm{bot}}$ is the codebook of bottom codes. </p>
+<p><img data-src="/notes/images/HQ-VAE.png" alt=""></p>
+<h2 id="LFQ-MagViT-V2-ICLR’24"><a href="#LFQ-MagViT-V2-ICLR’24" class="headerlink" title="LFQ (MagViT-V2; ICLR’24)"></a>LFQ (MagViT-V2; ICLR’24)</h2><p>MagViT-V2<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Lijun, José Lezama, Nitesh B. Gundavarapu, Luca Versari, Kihyuk Sohn, David Minnen, Yong Cheng et al. "[Language Model Beats Diffusion--Tokenizer is Key to Visual Generation](https://arxiv.org/pdf/2310.05737)." ICLR 2024.">[8]</span></a></sup> proposed the lookup-free quantization (LFQ) method that assumes independent codebook dimensins and binary latents. Specifically, the latent space of LFQ is decomposed as Cartesian product of single-dimensional variables, as <script type="math/tex">\mathbb{C}=\times_{i=1}^{\mathrm{log}_{2}^{*}K}C_{i}</script>. Given a feature vector $\mathbf{z} \in \mathbb{R}^{\log_2 K}$, each dimension of the quantized representation $q(\mathbf{z})$ is obtained from:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    q(\mathrm{z}_i)=C_{i,j},\text{where}j=\arg\min_k\|\mathrm{z}_i-C_{i,k}\|,
+\end{equation}</script><p>where $C_{i,j}$ is the $j$-th value in $C_i$. With $C_i = \{-1,1\}$, the $\arg\min$ can be computed by the sign function as:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    q(\mathbf{z}_i)=\mathrm{sign}(\mathbf{z}_i)=-\mathbb{1}\{\mathbf{z}_i\leqslant0\}+\mathbb{1}\{\mathbf{z}_i>0\}.
+\end{equation}</script><p>With LFQ, the token index for $q(\mathbf{z})$ is given by:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \text{Index}(\mathbf{z})=\sum_{i=1}^{\log_{2}K}\operatorname{arg}\operatorname*{min}_{k}\|\mathbf{z}_{i}-C_{i,k}\|\prod_{b=0}^{i-1}|C_{b}|=\sum_{i=1}^{\operatorname{log}_{2}K}2^{i-1}\mathbb{1}\{\mathbf{z}_{i}>0\}
+\end{equation}</script><p>where $|C_0|=1$ sets the virtual basis.</p>
+<p>It adds an entropy penalty during training to encourage codebook utilization:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+    \mathcal{L}_\text{entropy}=\mathbb{E}[H(q(\mathbf{z}))]-H[\mathbb{E}(q(\mathbf{z}))].
+\end{equation}</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">Lookup Free Quantization</span></span><br><span class="line"><span class="string">Proposed in https://arxiv.org/abs/2310.05737</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">In the simplest setup, each dimension is quantized into &#123;-1, 1&#125;.</span></span><br><span class="line"><span class="string">An entropy penalty is used to encourage utilization.</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> log2, ceil</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, einsum</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> Module</span><br><span class="line"><span class="keyword">from</span> torch.cuda.amp <span class="keyword">import</span> autocast</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> einops <span class="keyword">import</span> rearrange, reduce, pack, unpack</span><br><span class="line"></span><br><span class="line"><span class="comment"># constants</span></span><br><span class="line"></span><br><span class="line">Return = namedtuple(<span class="string">&#x27;Return&#x27;</span>, [<span class="string">&#x27;quantized&#x27;</span>, <span class="string">&#x27;indices&#x27;</span>, <span class="string">&#x27;entropy_aux_loss&#x27;</span>])</span><br><span class="line"></span><br><span class="line">LossBreakdown = namedtuple(<span class="string">&#x27;LossBreakdown&#x27;</span>, [<span class="string">&#x27;per_sample_entropy&#x27;</span>, <span class="string">&#x27;batch_entropy&#x27;</span>, <span class="string">&#x27;commitment&#x27;</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># helper functions</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exists</span>(<span class="params">v</span>):</span></span><br><span class="line">    <span class="keyword">return</span> v <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">default</span>(<span class="params">*args</span>):</span></span><br><span class="line">    <span class="keyword">for</span> arg <span class="keyword">in</span> args:</span><br><span class="line">        <span class="keyword">if</span> exists(arg):</span><br><span class="line">            <span class="keyword">return</span> arg() <span class="keyword">if</span> <span class="built_in">callable</span>(arg) <span class="keyword">else</span> arg</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pack_one</span>(<span class="params">t, pattern</span>):</span></span><br><span class="line">    <span class="keyword">return</span> pack([t], pattern)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">unpack_one</span>(<span class="params">t, ps, pattern</span>):</span></span><br><span class="line">    <span class="keyword">return</span> unpack(t, ps, pattern)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># entropy</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">log</span>(<span class="params">t, eps = <span class="number">1e-5</span></span>):</span></span><br><span class="line">    <span class="keyword">return</span> t.clamp(<span class="built_in">min</span> = eps).log()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">entropy</span>(<span class="params">prob</span>):</span></span><br><span class="line">    <span class="keyword">return</span> (-prob * log(prob)).<span class="built_in">sum</span>(dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># class</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LFQ</span>(<span class="params">Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        self,</span></span></span><br><span class="line"><span class="params"><span class="function">        *,</span></span></span><br><span class="line"><span class="params"><span class="function">        dim = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        codebook_size = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        entropy_loss_weight = <span class="number">0.1</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        commitment_loss_weight = <span class="number">0.25</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        diversity_gamma = <span class="number">1.</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        straight_through_activation = nn.Identity(<span class="params"></span>),</span></span></span><br><span class="line"><span class="params"><span class="function">        num_codebooks = <span class="number">1</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        keep_num_codebooks_dim = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        codebook_scale = <span class="number">1.</span>,            <span class="comment"># for residual LFQ, codebook scaled down by 2x at each layer</span></span></span></span><br><span class="line"><span class="params"><span class="function">        frac_per_sample_entropy = <span class="number">1.</span>    <span class="comment"># make less than 1. to only use a random fraction of the probs for per sample entropy</span></span></span></span><br><span class="line"><span class="params"><span class="function">    </span>):</span></span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># some assert validations</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">assert</span> exists(dim) <span class="keyword">or</span> exists(codebook_size), <span class="string">&#x27;either dim or codebook_size must be specified for LFQ&#x27;</span></span><br><span class="line">        <span class="keyword">assert</span> <span class="keyword">not</span> exists(codebook_size) <span class="keyword">or</span> log2(codebook_size).is_integer(), <span class="string">f&#x27;your codebook size must be a power of 2 for lookup free quantization (suggested <span class="subst">&#123;<span class="number">2</span> ** ceil(log2(codebook_size))&#125;</span>)&#x27;</span></span><br><span class="line"></span><br><span class="line">        codebook_size = default(codebook_size, <span class="keyword">lambda</span>: <span class="number">2</span> ** dim)</span><br><span class="line">        codebook_dim = <span class="built_in">int</span>(log2(codebook_size))</span><br><span class="line"></span><br><span class="line">        codebook_dims = codebook_dim * num_codebooks</span><br><span class="line">        dim = default(dim, codebook_dims)</span><br><span class="line"></span><br><span class="line">        has_projections = dim != codebook_dims</span><br><span class="line">        self.project_in = nn.Linear(dim, codebook_dims) <span class="keyword">if</span> has_projections <span class="keyword">else</span> nn.Identity()</span><br><span class="line">        self.project_out = nn.Linear(codebook_dims, dim) <span class="keyword">if</span> has_projections <span class="keyword">else</span> nn.Identity()</span><br><span class="line">        self.has_projections = has_projections</span><br><span class="line"></span><br><span class="line">        self.dim = dim</span><br><span class="line">        self.codebook_dim = codebook_dim</span><br><span class="line">        self.num_codebooks = num_codebooks</span><br><span class="line"></span><br><span class="line">        keep_num_codebooks_dim = default(keep_num_codebooks_dim, num_codebooks &gt; <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">assert</span> <span class="keyword">not</span> (num_codebooks &gt; <span class="number">1</span> <span class="keyword">and</span> <span class="keyword">not</span> keep_num_codebooks_dim)</span><br><span class="line">        self.keep_num_codebooks_dim = keep_num_codebooks_dim</span><br><span class="line"></span><br><span class="line">        <span class="comment"># straight through activation</span></span><br><span class="line"></span><br><span class="line">        self.activation = straight_through_activation</span><br><span class="line"></span><br><span class="line">        <span class="comment"># entropy aux loss related weights</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">assert</span> <span class="number">0</span> &lt; frac_per_sample_entropy &lt;= <span class="number">1.</span></span><br><span class="line">        self.frac_per_sample_entropy = frac_per_sample_entropy</span><br><span class="line"></span><br><span class="line">        self.diversity_gamma = diversity_gamma</span><br><span class="line">        self.entropy_loss_weight = entropy_loss_weight</span><br><span class="line"></span><br><span class="line">        <span class="comment"># codebook scale</span></span><br><span class="line"></span><br><span class="line">        self.codebook_scale = codebook_scale</span><br><span class="line"></span><br><span class="line">        <span class="comment"># commitment loss</span></span><br><span class="line"></span><br><span class="line">        self.commitment_loss_weight = commitment_loss_weight</span><br><span class="line"></span><br><span class="line">        <span class="comment"># for no auxiliary loss, during inference</span></span><br><span class="line"></span><br><span class="line">        self.register_buffer(<span class="string">&#x27;mask&#x27;</span>, <span class="number">2</span> ** torch.arange(codebook_dim - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>))</span><br><span class="line">        self.register_buffer(<span class="string">&#x27;zero&#x27;</span>, torch.tensor(<span class="number">0.</span>), persistent = <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># codes</span></span><br><span class="line"></span><br><span class="line">        all_codes = torch.arange(codebook_size)</span><br><span class="line">        bits = ((all_codes[..., <span class="literal">None</span>].<span class="built_in">int</span>() &amp; self.mask) != <span class="number">0</span>).<span class="built_in">float</span>()</span><br><span class="line">        codebook = self.bits_to_codes(bits)</span><br><span class="line"></span><br><span class="line">        self.register_buffer(<span class="string">&#x27;codebook&#x27;</span>, codebook, persistent = <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">bits_to_codes</span>(<span class="params">self, bits</span>):</span></span><br><span class="line">        <span class="keyword">return</span> bits * self.codebook_scale * <span class="number">2</span> - self.codebook_scale <span class="comment"># [-1 ,1]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">dtype</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> self.codebook.dtype</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">indices_to_codes</span>(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        self,</span></span></span><br><span class="line"><span class="params"><span class="function">        indices,</span></span></span><br><span class="line"><span class="params"><span class="function">        project_out = <span class="literal">True</span></span></span></span><br><span class="line"><span class="params"><span class="function">    </span>):</span></span><br><span class="line">        is_img_or_video = indices.ndim &gt;= (<span class="number">3</span> + <span class="built_in">int</span>(self.keep_num_codebooks_dim))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.keep_num_codebooks_dim:</span><br><span class="line">            indices = rearrange(indices, <span class="string">&#x27;... -&gt; ... 1&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># indices to codes, which are bits of either -1 or 1</span></span><br><span class="line"></span><br><span class="line">        bits = ((indices[..., <span class="literal">None</span>].<span class="built_in">int</span>() &amp; self.mask) != <span class="number">0</span>).to(self.dtype)</span><br><span class="line"></span><br><span class="line">        codes = self.bits_to_codes(bits)</span><br><span class="line"></span><br><span class="line">        codes = rearrange(codes, <span class="string">&#x27;... c d -&gt; ... (c d)&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># whether to project codes out to original dimensions</span></span><br><span class="line">        <span class="comment"># if the input feature dimensions were not log2(codebook size)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> project_out:</span><br><span class="line">            codes = self.project_out(codes)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># rearrange codes back to original shape</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            codes = rearrange(codes, <span class="string">&#x27;b ... d -&gt; b d ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> codes</span><br><span class="line"></span><br><span class="line"><span class="meta">    @autocast(<span class="params">enabled = <span class="literal">False</span></span>)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        self,</span></span></span><br><span class="line"><span class="params"><span class="function">        x,</span></span></span><br><span class="line"><span class="params"><span class="function">        inv_temperature = <span class="number">100.</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        return_loss_breakdown = <span class="literal">False</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        mask = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    </span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        einstein notation</span></span><br><span class="line"><span class="string">        b - batch</span></span><br><span class="line"><span class="string">        n - sequence (or flattened spatial dimensions)</span></span><br><span class="line"><span class="string">        d - feature dimension, which is also log2(codebook size)</span></span><br><span class="line"><span class="string">        c - number of codebook dim</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        x = x.<span class="built_in">float</span>()</span><br><span class="line"></span><br><span class="line">        is_img_or_video = x.ndim &gt;= <span class="number">4</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># standardize image or video into (batch, seq, dimension)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            x = rearrange(x, <span class="string">&#x27;b d ... -&gt; b ... d&#x27;</span>)</span><br><span class="line">            x, ps = pack_one(x, <span class="string">&#x27;b * d&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">assert</span> x.shape[-<span class="number">1</span>] == self.dim, <span class="string">f&#x27;expected dimension of <span class="subst">&#123;self.dim&#125;</span> but received <span class="subst">&#123;x.shape[-<span class="number">1</span>]&#125;</span>&#x27;</span></span><br><span class="line"></span><br><span class="line">        x = self.project_in(x)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># split out number of codebooks</span></span><br><span class="line"></span><br><span class="line">        x = rearrange(x, <span class="string">&#x27;b n (c d) -&gt; b n c d&#x27;</span>, c = self.num_codebooks)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># quantize by eq 3.</span></span><br><span class="line"></span><br><span class="line">        original_input = x</span><br><span class="line"></span><br><span class="line">        codebook_value = torch.ones_like(x) * self.codebook_scale</span><br><span class="line">        quantized = torch.where(x &gt; <span class="number">0</span>, codebook_value, -codebook_value)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># use straight-through gradients (optionally with custom activation fn) if training</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.training:</span><br><span class="line">            x = self.activation(x)</span><br><span class="line">            x = x + (quantized - x).detach()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            x = quantized</span><br><span class="line"></span><br><span class="line">        <span class="comment"># calculate indices</span></span><br><span class="line"></span><br><span class="line">        indices = reduce((x &gt; <span class="number">0</span>).<span class="built_in">int</span>() * self.mask.<span class="built_in">int</span>(), <span class="string">&#x27;b n c d -&gt; b n c&#x27;</span>, <span class="string">&#x27;sum&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># entropy aux loss</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.training:</span><br><span class="line">            <span class="comment"># the same as euclidean distance up to a constant</span></span><br><span class="line">            distance = -<span class="number">2</span> * einsum(<span class="string">&#x27;... i d, j d -&gt; ... i j&#x27;</span>, original_input, self.codebook)</span><br><span class="line"></span><br><span class="line">            prob = (-distance * inv_temperature).softmax(dim = -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># account for mask</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> exists(mask):</span><br><span class="line">                prob = prob[mask]</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                prob = rearrange(prob, <span class="string">&#x27;b n ... -&gt; (b n) ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># whether to only use a fraction of probs, for reducing memory</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> self.frac_per_sample_entropy &lt; <span class="number">1.</span>:</span><br><span class="line">                num_tokens = prob.shape[<span class="number">0</span>]</span><br><span class="line">                num_sampled_tokens = <span class="built_in">int</span>(num_tokens * self.frac_per_sample_entropy)</span><br><span class="line">                rand_mask = torch.randn(num_tokens).argsort(dim = -<span class="number">1</span>) &lt; num_sampled_tokens</span><br><span class="line">                per_sample_probs = prob[rand_mask]</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                per_sample_probs = prob</span><br><span class="line"></span><br><span class="line">            <span class="comment"># calculate per sample entropy</span></span><br><span class="line"></span><br><span class="line">            per_sample_entropy = entropy(per_sample_probs).mean()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># distribution over all available tokens in the batch</span></span><br><span class="line"></span><br><span class="line">            avg_prob = reduce(per_sample_probs, <span class="string">&#x27;... c d -&gt; c d&#x27;</span>, <span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">            codebook_entropy = entropy(avg_prob).mean()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 1. entropy will be nudged to be low for each code, to encourage the network to output confident predictions</span></span><br><span class="line">            <span class="comment"># 2. codebook entropy will be nudged to be high, to encourage all codes to be uniformly used within the batch</span></span><br><span class="line"></span><br><span class="line">            entropy_aux_loss = per_sample_entropy - self.diversity_gamma * codebook_entropy</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># if not training, just return dummy 0</span></span><br><span class="line">            entropy_aux_loss = per_sample_entropy = codebook_entropy = self.zero</span><br><span class="line"></span><br><span class="line">        <span class="comment"># commit loss</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.training:</span><br><span class="line">            commit_loss = F.mse_loss(original_input, quantized.detach(), reduction = <span class="string">&#x27;none&#x27;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> exists(mask):</span><br><span class="line">                commit_loss = commit_loss[mask]</span><br><span class="line"></span><br><span class="line">            commit_loss = commit_loss.mean()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            commit_loss = self.zero</span><br><span class="line"></span><br><span class="line">        <span class="comment"># merge back codebook dim</span></span><br><span class="line"></span><br><span class="line">        x = rearrange(x, <span class="string">&#x27;b n c d -&gt; b n (c d)&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># project out to feature dimension if needed</span></span><br><span class="line"></span><br><span class="line">        x = self.project_out(x)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># reconstitute image or video dimensions</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            x = unpack_one(x, ps, <span class="string">&#x27;b * d&#x27;</span>)</span><br><span class="line">            x = rearrange(x, <span class="string">&#x27;b ... d -&gt; b d ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">            indices = unpack_one(indices, ps, <span class="string">&#x27;b * c&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># whether to remove single codebook dim</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.keep_num_codebooks_dim:</span><br><span class="line">            indices = rearrange(indices, <span class="string">&#x27;... 1 -&gt; ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># complete aux loss</span></span><br><span class="line"></span><br><span class="line">        aux_loss = entropy_aux_loss * self.entropy_loss_weight + commit_loss * self.commitment_loss_weight</span><br><span class="line"></span><br><span class="line">        ret = Return(x, indices, aux_loss)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> return_loss_breakdown:</span><br><span class="line">            <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> ret, LossBreakdown(per_sample_entropy, codebook_entropy, commit_loss)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="FSQ"><a href="#FSQ" class="headerlink" title="FSQ"></a>FSQ</h2><p>Finite Scalar Quantization (FSQ)<sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Mentzer, Fabian, et al. "Finite scalar quantization: Vq-vae made simple." arXiv preprint arXiv:2309.15505 (2023).">[13]</span></a></sup> is a technique that applies a bounding function $f$ to a $d$-dimensional representation $z \in \mathbb{R}^d$, subsequently rounding the result to an integer. The choice of $f$ is critical, as it determines the quantization scheme. Specifically, $f$ is selected such that the output $\hat{z} = \text{round}(f(z))$ can take one of $L$ unique values. An illustrative example of $f$ is given by:</p>
+<script type="math/tex; mode=display">f: z \mapsto \left\lfloor \frac{L}{2} \right\rfloor \tanh(z)</script><p>This approach effectively maps $z$ to a quantized representation $\hat{z}$ that belongs to a codebook $\mathcal{C}$, where $\mathcal{C}$ is constructed as the product of per-channel codebook sets. Consequently, the number of distinct codebook entries is given by:</p>
+<script type="math/tex; mode=display">|\mathcal{C}| = L^d</script><p>For each vector $\hat{z} \in \mathcal{C}$, there exists a bijective mapping to an integer in the range ${1, \cdots, L^d}$, simplifying the encoding and decoding processes.</p>
+<p><strong>Generalized FSQ</strong>: </p>
+<p>The concept can be further generalized to handle heterogeneous channels, where the $i$-th channel is mapped to $L_i$ unique values. This generalization yields a more flexible codebook with a total number of entries as follows:</p>
+<script type="math/tex; mode=display">|\mathcal{C}| = \prod_{i=1}^d L_i</script><p><strong>Gradient Propagation via Straight-Through Estimator (STE)</strong>:</p>
+<p>To enable gradient propagation through the discrete <code>round</code> operation, we employ the Straight-Through Estimator (STE) method. This involves replacing the gradients with a simple identity term that ignores the rounding operation during backpropagation. Specifically, the STE-based rounding function is implemented as:</p>
+<script type="math/tex; mode=display">\text{round_ste}: x \mapsto x + \text{sg}(\text{round}(x) - x)</script><p>Here, <code>sg</code> represents the stop gradient operation, which blocks gradients from flowing through the second term, effectively treating it as a constant during backpropagation. This allows gradients to “pass through” the rounding operation, enabling training of neural networks utilizing FSQ.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">round_ste</span>(<span class="params">z: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Round with straight through gradients.&quot;&quot;&quot;</span></span><br><span class="line">    zhat = z.<span class="built_in">round</span>()</span><br><span class="line">    <span class="keyword">return</span> z + (zhat - z).detach()</span><br></pre></td></tr></table></figure>
+<p><img data-src="/notes/images/FSQ.png" alt=""></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">Finite Scalar Quantization: VQ-VAE Made Simple - https://arxiv.org/abs/2309.15505</span></span><br><span class="line"><span class="string">Code adapted from Jax version in Appendix A.1</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span>, <span class="type">Tuple</span>, <span class="type">Optional</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> Module</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> Tensor, int32</span><br><span class="line"><span class="keyword">from</span> torch.cuda.amp <span class="keyword">import</span> autocast</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> einops <span class="keyword">import</span> rearrange, pack, unpack</span><br><span class="line"></span><br><span class="line"><span class="comment"># helper functions</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exists</span>(<span class="params">v</span>):</span></span><br><span class="line">    <span class="keyword">return</span> v <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">default</span>(<span class="params">*args</span>):</span></span><br><span class="line">    <span class="keyword">for</span> arg <span class="keyword">in</span> args:</span><br><span class="line">        <span class="keyword">if</span> exists(arg):</span><br><span class="line">            <span class="keyword">return</span> arg</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pack_one</span>(<span class="params">t, pattern</span>):</span></span><br><span class="line">    <span class="keyword">return</span> pack([t], pattern)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">unpack_one</span>(<span class="params">t, ps, pattern</span>):</span></span><br><span class="line">    <span class="keyword">return</span> unpack(t, ps, pattern)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># tensor helpers</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">round_ste</span>(<span class="params">z: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Round with straight through gradients.&quot;&quot;&quot;</span></span><br><span class="line">    zhat = z.<span class="built_in">round</span>()</span><br><span class="line">    <span class="keyword">return</span> z + (zhat - z).detach()</span><br><span class="line"></span><br><span class="line"><span class="comment"># main class</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FSQ</span>(<span class="params">Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        self,</span></span></span><br><span class="line"><span class="params"><span class="function">        levels: <span class="type">List</span>[<span class="built_in">int</span>],</span></span></span><br><span class="line"><span class="params"><span class="function">        dim: <span class="type">Optional</span>[<span class="built_in">int</span>] = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        num_codebooks = <span class="number">1</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        keep_num_codebooks_dim: <span class="type">Optional</span>[<span class="built_in">bool</span>] = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        scale: <span class="type">Optional</span>[<span class="built_in">float</span>] = <span class="literal">None</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        allowed_dtypes: <span class="type">Tuple</span>[torch.dtype, ...] = (<span class="params">torch.float32, torch.float64</span>)</span></span></span><br><span class="line"><span class="params"><span class="function">    </span>):</span></span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        _levels = torch.tensor(levels, dtype=int32)</span><br><span class="line">        self.register_buffer(<span class="string">&quot;_levels&quot;</span>, _levels, persistent = <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        _basis = torch.cumprod(torch.tensor([<span class="number">1</span>] + levels[:-<span class="number">1</span>]), dim=<span class="number">0</span>, dtype=int32)</span><br><span class="line">        self.register_buffer(<span class="string">&quot;_basis&quot;</span>, _basis, persistent = <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        self.scale = scale</span><br><span class="line"></span><br><span class="line">        codebook_dim = <span class="built_in">len</span>(levels)</span><br><span class="line">        self.codebook_dim = codebook_dim</span><br><span class="line"></span><br><span class="line">        effective_codebook_dim = codebook_dim * num_codebooks</span><br><span class="line">        self.num_codebooks = num_codebooks</span><br><span class="line">        self.effective_codebook_dim = effective_codebook_dim</span><br><span class="line"></span><br><span class="line">        keep_num_codebooks_dim = default(keep_num_codebooks_dim, num_codebooks &gt; <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">assert</span> <span class="keyword">not</span> (num_codebooks &gt; <span class="number">1</span> <span class="keyword">and</span> <span class="keyword">not</span> keep_num_codebooks_dim)</span><br><span class="line">        self.keep_num_codebooks_dim = keep_num_codebooks_dim</span><br><span class="line"></span><br><span class="line">        self.dim = default(dim, <span class="built_in">len</span>(_levels) * num_codebooks)</span><br><span class="line"></span><br><span class="line">        has_projections = self.dim != effective_codebook_dim</span><br><span class="line">        self.project_in = nn.Linear(self.dim, effective_codebook_dim) <span class="keyword">if</span> has_projections <span class="keyword">else</span> nn.Identity()</span><br><span class="line">        self.project_out = nn.Linear(effective_codebook_dim, self.dim) <span class="keyword">if</span> has_projections <span class="keyword">else</span> nn.Identity()</span><br><span class="line">        self.has_projections = has_projections</span><br><span class="line"></span><br><span class="line">        self.codebook_size = self._levels.prod().item()</span><br><span class="line"></span><br><span class="line">        implicit_codebook = self.indices_to_codes(torch.arange(self.codebook_size), project_out = <span class="literal">False</span>)</span><br><span class="line">        self.register_buffer(<span class="string">&quot;implicit_codebook&quot;</span>, implicit_codebook, persistent = <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        self.allowed_dtypes = allowed_dtypes</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">bound</span>(<span class="params">self, z: Tensor, eps: <span class="built_in">float</span> = <span class="number">1e-3</span></span>) -&gt; Tensor:</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;Bound `z`, an array of shape (..., d).&quot;&quot;&quot;</span></span><br><span class="line">        half_l = (self._levels - <span class="number">1</span>) * (<span class="number">1</span> + eps) / <span class="number">2</span></span><br><span class="line">        offset = torch.where(self._levels % <span class="number">2</span> == <span class="number">0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>)</span><br><span class="line">        shift = (offset / half_l).atanh()</span><br><span class="line">        <span class="keyword">return</span> (z + shift).tanh() * half_l - offset</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">quantize</span>(<span class="params">self, z: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;Quantizes z, returns quantized zhat, same shape as z.&quot;&quot;&quot;</span></span><br><span class="line">        quantized = round_ste(self.bound(z))</span><br><span class="line">        half_width = self._levels // <span class="number">2</span> <span class="comment"># Renormalize to [-1, 1].</span></span><br><span class="line">        <span class="keyword">return</span> quantized / half_width</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_scale_and_shift</span>(<span class="params">self, zhat_normalized: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">        half_width = self._levels // <span class="number">2</span></span><br><span class="line">        <span class="keyword">return</span> (zhat_normalized * half_width) + half_width</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_scale_and_shift_inverse</span>(<span class="params">self, zhat: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">        half_width = self._levels // <span class="number">2</span></span><br><span class="line">        <span class="keyword">return</span> (zhat - half_width) / half_width</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">codes_to_indices</span>(<span class="params">self, zhat: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;Converts a `code` to an index in the codebook.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">assert</span> zhat.shape[-<span class="number">1</span>] == self.codebook_dim</span><br><span class="line">        zhat = self._scale_and_shift(zhat)</span><br><span class="line">        <span class="keyword">return</span> (zhat * self._basis).<span class="built_in">sum</span>(dim=-<span class="number">1</span>).to(int32)</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">indices_to_codes</span>(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        self,</span></span></span><br><span class="line"><span class="params"><span class="function">        indices: Tensor,</span></span></span><br><span class="line"><span class="params"><span class="function">        project_out = <span class="literal">True</span></span></span></span><br><span class="line"><span class="params"><span class="function">    </span>) -&gt; Tensor:</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;Inverse of `codes_to_indices`.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        is_img_or_video = indices.ndim &gt;= (<span class="number">3</span> + <span class="built_in">int</span>(self.keep_num_codebooks_dim))</span><br><span class="line"></span><br><span class="line">        indices = rearrange(indices, <span class="string">&#x27;... -&gt; ... 1&#x27;</span>)</span><br><span class="line">        codes_non_centered = (indices // self._basis) % self._levels</span><br><span class="line">        codes = self._scale_and_shift_inverse(codes_non_centered)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.keep_num_codebooks_dim:</span><br><span class="line">            codes = rearrange(codes, <span class="string">&#x27;... c d -&gt; ... (c d)&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> project_out:</span><br><span class="line">            codes = self.project_out(codes)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            codes = rearrange(codes, <span class="string">&#x27;b ... d -&gt; b d ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> codes</span><br><span class="line"></span><br><span class="line"><span class="meta">    @autocast(<span class="params">enabled = <span class="literal">False</span></span>)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, z: Tensor</span>) -&gt; Tensor:</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        einstein notation</span></span><br><span class="line"><span class="string">        b - batch</span></span><br><span class="line"><span class="string">        n - sequence (or flattened spatial dimensions)</span></span><br><span class="line"><span class="string">        d - feature dimension</span></span><br><span class="line"><span class="string">        c - number of codebook dim</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        orig_dtype = z.dtype</span><br><span class="line">        is_img_or_video = z.ndim &gt;= <span class="number">4</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># standardize image or video into (batch, seq, dimension)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            z = rearrange(z, <span class="string">&#x27;b d ... -&gt; b ... d&#x27;</span>)</span><br><span class="line">            z, ps = pack_one(z, <span class="string">&#x27;b * d&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">assert</span> z.shape[-<span class="number">1</span>] == self.dim, <span class="string">f&#x27;expected dimension of <span class="subst">&#123;self.dim&#125;</span> but found dimension of <span class="subst">&#123;z.shape[-<span class="number">1</span>]&#125;</span>&#x27;</span></span><br><span class="line"></span><br><span class="line">        z = self.project_in(z)</span><br><span class="line"></span><br><span class="line">        z = rearrange(z, <span class="string">&#x27;b n (c d) -&gt; b n c d&#x27;</span>, c = self.num_codebooks)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># make sure allowed dtype before quantizing</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> z.dtype <span class="keyword">not</span> <span class="keyword">in</span> self.allowed_dtypes:</span><br><span class="line">            z = z.<span class="built_in">float</span>()</span><br><span class="line"></span><br><span class="line">        codes = self.quantize(z)</span><br><span class="line">        indices = self.codes_to_indices(codes)</span><br><span class="line"></span><br><span class="line">        codes = rearrange(codes, <span class="string">&#x27;b n c d -&gt; b n (c d)&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># cast codes back to original dtype</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> codes.dtype != orig_dtype:</span><br><span class="line">            codes = codes.<span class="built_in">type</span>(orig_dtype)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># project out</span></span><br><span class="line"></span><br><span class="line">        out = self.project_out(codes)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># reconstitute image or video dimensions</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_img_or_video:</span><br><span class="line">            out = unpack_one(out, ps, <span class="string">&#x27;b * d&#x27;</span>)</span><br><span class="line">            out = rearrange(out, <span class="string">&#x27;b ... d -&gt; b d ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">            indices = unpack_one(indices, ps, <span class="string">&#x27;b * c&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.keep_num_codebooks_dim:</span><br><span class="line">            indices = rearrange(indices, <span class="string">&#x27;... 1 -&gt; ...&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># return quantized output and indices</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> out, indices</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Related work: Binary Spherical Quantization (BSQ)<sup id="fnref:14"><a href="#fn:14" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhao, Yue, Yuanjun Xiong, and Philipp Krähenbühl. "Image and Video Tokenization with Binary Spherical Quantization." arXiv preprint arXiv:2406.07548 (2024).">[14]</span></a></sup>.</p>
+<h1 id="Prior-Learning"><a href="#Prior-Learning" class="headerlink" title="Prior Learning"></a>Prior Learning</h1><p>In the second stage, existing literature often applies a causal or bidirectional language models for prior learning.</p>
+<h2 id="Causal-Transformer-Modeling"><a href="#Causal-Transformer-Modeling" class="headerlink" title="Causal Transformer Modeling"></a>Causal Transformer Modeling</h2><p>It learns an autoregressive language models, such as VQGAN<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Esser, Patrick, Robin Rombach, and Bjorn Ommer. "[Taming transformers for high-resolution image synthesis.](http://openaccess.thecvf.com/content/CVPR2021/papers/Esser_Taming_Transformers_for_High-Resolution_Image_Synthesis_CVPR_2021_paper.pdf)" Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2021.">[4]</span></a></sup>, ViT-VQGAN<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Jiahui, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. "[Vector-quantized image modeling with improved vqgan](https://arxiv.org/pdf/2110.04627)." arXiv preprint arXiv:2110.04627 (2021).">[5]</span></a></sup>, DALL-E<sup id="fnref:11"><a href="#fn:11" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Ramesh, Aditya, et al. "Zero-shot text-to-image generation." International conference on machine learning. Pmlr, 2021.">[11]</span></a></sup>, iGPT<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chen, Mark, et al. "Generative pretraining from pixels." International conference on machine learning. PMLR, 2020.">[10]</span></a></sup>,  etc.</p>
+<h2 id="Bidirectional-Transformer-Modeling"><a href="#Bidirectional-Transformer-Modeling" class="headerlink" title="Bidirectional Transformer Modeling"></a>Bidirectional Transformer Modeling</h2><p>Another way for image prior learning applies bidirectional modeling, such as MaskGIT<sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chang, Huiwen, et al. "Maskgit: Masked generative image transformer." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2022.">[15]</span></a></sup>, MagViT-V2<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Lijun, José Lezama, Nitesh B. Gundavarapu, Luca Versari, Kihyuk Sohn, David Minnen, Yong Cheng et al. "[Language Model Beats Diffusion--Tokenizer is Key to Visual Generation](https://arxiv.org/pdf/2310.05737)." ICLR 2024.">[8]</span></a></sup>, Muse<sup id="fnref:16"><a href="#fn:16" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chang, Huiwen, et al. "Muse: Text-to-image generation via masked generative transformers." arXiv preprint arXiv:2301.00704 (2023).">[16]</span></a></sup>.</p>
+<h3 id="MaskGIT-CVPR’22"><a href="#MaskGIT-CVPR’22" class="headerlink" title="MaskGIT (CVPR’22)"></a>MaskGIT (CVPR’22)</h3><p>MaskGIT<sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Chang, Huiwen, et al. "Maskgit: Masked generative image transformer." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2022.">[15]</span></a></sup> consists of two stages:</p>
+<ol>
+<li>VQ tokenizer training as in VQGAN;</li>
+<li>Masked Visual Token Modeling (MVTM) on a bidirectional transformer.</li>
+</ol>
+<h4 id="Masked-Visual-Token-Modeling-MVTM"><a href="#Masked-Visual-Token-Modeling-MVTM" class="headerlink" title="Masked Visual Token Modeling (MVTM)"></a>Masked Visual Token Modeling (MVTM)</h4><p>MaskGIT utilizes a mask scheduling function to strategically mask input latent tokens in bidirectional transformers. Subsequently, the masked token is refined through optimization based on the cross-entropy loss calculated between the ground-truth and predicted tokens, closely resembling the approach employed in masked language models.</p>
+<p><img data-src="/notes/images/MaskGIT-pipeline.png" alt=""></p>
+<h4 id="Iterative-Decoding"><a href="#Iterative-Decoding" class="headerlink" title="Iterative Decoding"></a>Iterative Decoding</h4><p>Autoregressive decoding, known for its sequential left-to-right approach, inherently leads to slower image generation. MaskGIT overcomes this limitation by incorporating bidirectional decoding, enabling parallel processing for faster results. Below is a detailed breakdown of MaskGIT’s decoding process:</p>
+<p><strong>Decoding Process</strong>:</p>
+<p><img data-src="/notes/images/MaskGIT.png" alt="MaskGIT"></p>
+<p><strong>(1) Predict</strong>. At each iteration $t$, MaskGIT utilizes the current masked tokens $Y_M^{(t)}$ to predict probabilities $p^{(t)} \in \mathbb{R}^{N \times K}$ for <strong>all masked locations in parallel</strong>. This step leverages the capabilities of bidirectional transformers to simultaneously assess potential replacements for each masked token.</p>
+<p><strong>(2) Sample</strong>. For each masked location $i$, MaskGIT samples tokens $y_i^{(t)}$ based on the predicted probabilities $p_i^{(t)} \in \mathbb{R}^{K}$ over all possible tokens in the codebook. The sampled token’s prediction score serves as a “confidence” score, indicating the model’s certainty in its prediction. For unmasked positions in $Y_M^{(t)}$, the confidence score is set to 1.0, representing absolute certainty.</p>
+<p><strong>(3) Mask Schedule</strong>. The number of tokens to mask at iteration $t$ is determined using the mask scheduling function $\gamma$:</p>
+<script type="math/tex; mode=display">n = \lceil\gamma\left(\frac{t}{T}\right)N\rceil</script><p>Here, $N$ is the input length, $T$ is the total number of iterations, and $n$ is the number of tokens to be masked. As $t$ progresses, $\gamma$ ensures a decreasing mask ratio, allowing the model to gradually generate more tokens until all are uncovered within $T$ steps.</p>
+<p><strong>(4) Mask</strong>. To obtain $Y_M^{(t+1)}$ for iteration $t+1$, MaskGIT masks $n$ tokens in $Y_M^{(t)}$ based on their confidence scores. The mask $M^{(t+1)}$ is calculated as follows:</p>
+<p>\begin{equation}<br>    m_i^{(t+1)}=\begin{cases}1,&amp;\text{if }c_i&lt;\text{ sorted}_j(c_j)[n].\\<br>    0,&amp;\text{ otherwise.}\end{cases},<br>\end{equation}</p>
+<p>where $c_i$ is the confidence score for the $i$-th token, and $\text{sorted}_j(c_j)[n]$ represents the $n$-th smallest confidence score among all tokens.</p>
+<p><strong>Synthesis in $T$ Steps</strong>:  MaskGIT’s decoding algorithm systematically generates an image in $T$ iterations. At each step, the model simultaneously predicts probabilities for all masked tokens but only retains the most confident predictions. The remaining tokens are masked out and re-predicted in the next iteration. This process, with a progressively decreasing mask ratio, ensures that all tokens are generated within $T$ steps, leading to faster and more efficient image generation.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Vector_quantization">Vector quantization (wiki)</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Van Den Oord, Aaron, and Oriol Vinyals. &quot;<a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2017/file/7a98af17e63a0ac09ce2e96d03992fbc-Paper.pdf">Neural discrete representation learning.</a>&quot; Advances in neural information processing systems 30 (2017).<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Razavi, Ali, Aaron Van den Oord, and Oriol Vinyals. &quot;<a target="_blank" rel="noopener" href="https://proceedings.neurips.cc/paper/2019/file/5f8e2fa1718d1bbcadf1cd9c7a54fb8c-Paper.pdf">Generating diverse high-fidelity images with vq-vae-2</a>.&quot; Advances in neural information processing systems 32 (2019).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Esser, Patrick, Robin Rombach, and Bjorn Ommer. &quot;<a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content/CVPR2021/papers/Esser_Taming_Transformers_for_High-Resolution_Image_Synthesis_CVPR_2021_paper.pdf">Taming transformers for high-resolution image synthesis.</a>&quot; Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2021.<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yu, Jiahui, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2110.04627">Vector-quantized image modeling with improved vqgan</a>.&quot; arXiv preprint arXiv:2110.04627 (2021).<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yu, Lijun, Yong Cheng, Kihyuk Sohn, José Lezama, Han Zhang, Huiwen Chang, Alexander G. Hauptmann et al. &quot;<a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2023/papers/Yu_MAGVIT_Masked_Generative_Video_Transformer_CVPR_2023_paper.pdf">Magvit: Masked generative video transformer</a>.&quot; In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 10459-10469. 2023.<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lee, D., Kim, C., Kim, S., Cho, M., &amp; Han, W. S. (2022). <a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2022/papers/Lee_Autoregressive_Image_Generation_Using_Residual_Quantization_CVPR_2022_paper.pdf">Autoregressive image generation using residual quantization</a>. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 11523-11532).<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yu, Lijun, José Lezama, Nitesh B. Gundavarapu, Luca Versari, Kihyuk Sohn, David Minnen, Yong Cheng et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2310.05737">Language Model Beats Diffusion--Tokenizer is Key to Visual Generation</a>.&quot; ICLR 2024.<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lee, Doyup, et al. &quot;Draft-and-revise: Effective image generation with contextual rq-transformer.&quot; Advances in Neural Information Processing Systems 35 (2022): 30127-30138.<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, Mark, et al. &quot;Generative pretraining from pixels.&quot; International conference on machine learning. PMLR, 2020.<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Ramesh, Aditya, et al. &quot;Zero-shot text-to-image generation.&quot; International conference on machine learning. Pmlr, 2021.<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">You, Tackgeun, et al. &quot;Locally hierarchical auto-regressive modeling for image generation.&quot; Advances in Neural Information Processing Systems 35 (2022): 16360-16372.<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Mentzer, Fabian, et al. &quot;Finite scalar quantization: Vq-vae made simple.&quot; arXiv preprint arXiv:2309.15505 (2023).<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhao, Yue, Yuanjun Xiong, and Philipp Krähenbühl. &quot;Image and Video Tokenization with Binary Spherical Quantization.&quot; arXiv preprint arXiv:2406.07548 (2024).<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chang, Huiwen, et al. &quot;Maskgit: Masked generative image transformer.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2022.<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chang, Huiwen, et al. &quot;Muse: Text-to-image generation via masked generative transformers.&quot; arXiv preprint arXiv:2301.00704 (2023).<a href="#fnref:16" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Tokenization/" rel="tag"># Tokenization</a>
+              <a href="/notes/tags/Multimodality/" rel="tag"># Multimodality</a>
+              <a href="/notes/tags/LMM/" rel="tag"># LMM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2024/05/10/Memory-Efficient-Attention/" rel="prev" title="Memory-Efficient Attention: MHA vs. MQA vs. GQA vs. MLA">
+      <i class="fa fa-chevron-left"></i> Memory-Efficient Attention: MHA vs. MQA vs. GQA vs. MLA
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Codebook-Learning-with-Vector-Quantization"><span class="nav-number">1.</span> <span class="nav-text">Codebook Learning with Vector Quantization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VQ-VAE-NeurIPS%E2%80%9917"><span class="nav-number">1.1.</span> <span class="nav-text">VQ-VAE (NeurIPS’17)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#VAE"><span class="nav-number">1.1.1.</span> <span class="nav-text">VAE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Discrete-latents"><span class="nav-number">1.1.2.</span> <span class="nav-text">Discrete latents</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training"><span class="nav-number">1.1.3.</span> <span class="nav-text">Training</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EMA-Update"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">EMA Update</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VQVAE-2-NeurIPS%E2%80%9919"><span class="nav-number">1.2.</span> <span class="nav-text">VQVAE-2 (NeurIPS’19)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-1-Hierarchical-Latent-Codes"><span class="nav-number">1.2.1.</span> <span class="nav-text">Stage 1: Hierarchical Latent Codes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-2-Learning-Priors-over-Latent-Codes"><span class="nav-number">1.2.2.</span> <span class="nav-text">Stage 2: Learning Priors over Latent Codes</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VQGAN-CVPR%E2%80%9921"><span class="nav-number">1.3.</span> <span class="nav-text">VQGAN (CVPR’21)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iGPT-ICML%E2%80%9920"><span class="nav-number">1.4.</span> <span class="nav-text">iGPT (ICML’20)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DALL-E-ICML%E2%80%9921"><span class="nav-number">1.5.</span> <span class="nav-text">DALL-E (ICML’21)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-1-Visual-Codebook-Learning"><span class="nav-number">1.5.1.</span> <span class="nav-text">Stage 1: Visual Codebook Learning</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-2-Prior-Learning"><span class="nav-number">1.5.2.</span> <span class="nav-text">Stage 2: Prior Learning</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-VQGAN-ICLR%E2%80%9922"><span class="nav-number">1.6.</span> <span class="nav-text">ViT-VQGAN (ICLR’22)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RQ-VAE-CVPR%E2%80%9922"><span class="nav-number">1.7.</span> <span class="nav-text">RQ-VAE (CVPR’22)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-1-RQ-VAE"><span class="nav-number">1.7.1.</span> <span class="nav-text">Stage 1: RQ-VAE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stage-2-RQ-Transformer"><span class="nav-number">1.7.2.</span> <span class="nav-text">Stage 2: RQ-Transformer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Contextual-RQ-Transformer-NeurIPS%E2%80%9922"><span class="nav-number">1.7.3.</span> <span class="nav-text">Contextual RQ-Transformer (NeurIPS’22)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RQVAE-tokenization"><span class="nav-number">1.7.3.1.</span> <span class="nav-text">RQVAE tokenization</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bidirectional-context-integration"><span class="nav-number">1.7.3.2.</span> <span class="nav-text">Bidirectional context integration</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HQ-VAE-NeurIPS%E2%80%9922"><span class="nav-number">1.8.</span> <span class="nav-text">HQ-VAE (NeurIPS’22)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LFQ-MagViT-V2-ICLR%E2%80%9924"><span class="nav-number">1.9.</span> <span class="nav-text">LFQ (MagViT-V2; ICLR’24)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSQ"><span class="nav-number">1.10.</span> <span class="nav-text">FSQ</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Prior-Learning"><span class="nav-number">2.</span> <span class="nav-text">Prior Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Causal-Transformer-Modeling"><span class="nav-number">2.1.</span> <span class="nav-text">Causal Transformer Modeling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bidirectional-Transformer-Modeling"><span class="nav-number">2.2.</span> <span class="nav-text">Bidirectional Transformer Modeling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MaskGIT-CVPR%E2%80%9922"><span class="nav-number">2.2.1.</span> <span class="nav-text">MaskGIT (CVPR’22)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Masked-Visual-Token-Modeling-MVTM"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">Masked Visual Token Modeling (MVTM)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Iterative-Decoding"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">Iterative Decoding</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/";
+    this.page.identifier = "2024/06/24/Multimodal-Tokenization-with-Vector-Quantization/";
+    this.page.title = "Multimodal Tokenization with Vector Quantization: A Review";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

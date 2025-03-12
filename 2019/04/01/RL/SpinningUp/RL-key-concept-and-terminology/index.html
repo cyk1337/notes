@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="An introduction to key concepts and terminology in reinforcement learning.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Key Concepts in RL">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="An introduction to key concepts and terminology in reinforcement learning.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/rl-interact-loop.png">
+<meta property="article:published_time" content="2019-04-01T01:08:00.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.867Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="RL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/rl-interact-loop.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Key Concepts in RL | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Key Concepts in RL
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-04-01 09:08:00" itemprop="dateCreated datePublished" datetime="2019-04-01T09:08:00+08:00">2019-04-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/RL/" itemprop="url" rel="index"><span itemprop="name">RL</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/RL/SpinningUp/" itemprop="url" rel="index"><span itemprop="name">SpinningUp</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>An introduction to key concepts and terminology in reinforcement learning.</p>
+<span id="more"></span>
+<p><img data-src="/notes/images/rl-interact-loop.png" alt="upload successful"></p>
+<h1 id="Environment-and-agent"><a href="#Environment-and-agent" class="headerlink" title="Environment and agent"></a>Environment and agent</h1><p>The main components of RL are <strong>environment</strong> and <strong>agent</strong>. </p>
+<ul>
+<li>The <strong>environment</strong> is the world that the agent lives in and interacts with. At every step of interaction, the agent sees a (possibly partial) observation of the state of the word, then decide on an action to take. The environment changes when the agent acts on it, but my also change on its own.</li>
+</ul>
+<ul>
+<li>The agent also perceives a <strong>reward</strong> signal from the environment, a number that tells it how good or bad the current world state is. The goal of the agent is to <span class="label danger">maximize its cumulative reward</span>, called <strong>return</strong>.</li>
+</ul>
+<h1 id="State-and-observations"><a href="#State-and-observations" class="headerlink" title="State and observations"></a>State and observations</h1><div class="note info">
+            <p><strong>State</strong>:</p><ul><li>A <strong>state</strong> $s$ is a complete description of the state of the world. There is no information which is hidden from the state.</li></ul><p><strong>Observation</strong>:</p><ul><li>An observation $o$ is a partial description of a state, which may omit information.</li></ul>
+          </div>
+<p>State and observations are almost a <code>real-valued vector, matrix, higher-order tensor</code> in deep RL.</p>
+<ul>
+<li>When the agent can observe the complete <strong>state</strong> of the environment, we say the environment is <code>fully observed</code>.</li>
+<li>When the agent can only see a partial observation, the environment is <code>partially observed</code> (c.f. POMDP).</li>
+</ul>
+<div class="note warning">
+            <p>In practice, RL state $s$ is more appropriate to use observation $o$. Specifically, we often signal in notation that the action is conditioned on the state, when <code>in practice, the action is conditioned on the observation</code> because the agent does not have the access to the state. In notation, also use standard notation $s$, rather than $o$.</p>
+          </div>
+<h1 id="Action-spaces"><a href="#Action-spaces" class="headerlink" title="Action spaces"></a>Action spaces</h1><ul>
+<li><strong>Action space</strong>: the set of all valid actions in a given environment.</li>
+<li><strong>Discrete action space</strong>: only a finite number of moves are available to the agent, e.g. Atari, Go.</li>
+<li><strong>Continuous action space</strong>: actions are <em>real-valued vectors</em>, e.g. robot walk control.</li>
+</ul>
+<h1 id="Policies"><a href="#Policies" class="headerlink" title="Policies"></a>Policies</h1><p>A <strong>policy</strong> is a rule used by an agent to decide what actions to take. It is the agent’s brain. It is common to substitute the word “policy” for “agent”, e.g. saying “The policy is trying to maximize the reward”.</p>
+<h2 id="Deterministic-policies"><a href="#Deterministic-policies" class="headerlink" title="Deterministic policies"></a>Deterministic policies</h2><ul>
+<li><code>deterministic</code> (denoted by $\mu$)<script type="math/tex; mode=display">a_t = \mu(s_t)</script></li>
+</ul>
+<p>Tensorflow code snippet:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">obs = tf.placeholder(shape=(<span class="literal">None</span>, obs_dim), dtype=tf.float32)</span><br><span class="line">net = mlp(obs, hidden_dims=(<span class="number">64</span>,<span class="number">64</span>), activation=tf.tanh)</span><br><span class="line">actions = tf.layers.dense(net, units=act_dim, activation=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure><br>where <code>mlp</code> represents MLP layers.</p>
+<h3 id="Stochastic-policies"><a href="#Stochastic-policies" class="headerlink" title="Stochastic policies"></a>Stochastic policies</h3><ul>
+<li><code>stochastic</code> (denoted by $\pi$)<script type="math/tex; mode=display">a_t \sim \pi(\cdot \vert s_t)</script></li>
+</ul>
+<p>Two most common kinds of stochastic policies:</p>
+<h3 id="Categorical-policies"><a href="#Categorical-policies" class="headerlink" title="Categorical policies"></a>Categorical policies</h3><ul>
+<li>used in discrete action spaces</li>
+</ul>
+<p>A categorical policy is like a classifier over discrete actions:</p>
+<ul>
+<li><p>build the NN (the same as a classifier): input is the observation, followed by some layers (CNNs FC layers, depending on the kind of input). Then one dense layer gives the logits for each action, followed by a softmax to convert the logits to probabilities.</p>
+</li>
+<li><p><strong>Sampling</strong>: Given probabilities for each action, frameworks like tensorflow has builtin tools for sampling. E.g. <code>tf.distributions.Categorical</code> or <code>tf.multinomial</code></p>
+</li>
+<li><p><strong>Log-likelihood</strong>: Denote the last layer of probabilities as <script type="math/tex">P_{\theta}(s)</script>. Treat the actions as the indices of the vector. The log likeligood for an action $a$ can then be obtained by indexing into the vector.</p>
+<script type="math/tex; mode=display">\text{log} \pi_{\theta} (a \vert s) = \text{log} [P_{\theta}(s)]_a</script></li>
+</ul>
+<h3 id="Diagonal-Gaussian-policies"><a href="#Diagonal-Gaussian-policies" class="headerlink" title="Diagonal Gaussian policies"></a><strong>Diagonal Gaussian policies</strong></h3><ul>
+<li>used in continuous action spaces</li>
+</ul>
+<p>A diagonal Gaussian distribution is a special case of multivariate Gaussians where the covariance matrix only has entries on the diagonal, which can be represented as a vector.</p>
+<p>NN maps from observations to mean actions, <script type="math/tex">\mu_{\theta}(s)</script>, in two different ways:</p>
+<ol>
+<li><strong>The first way</strong>: there is a single vector of log standard deviations, $\text{log} \sigma$ are standalone parameters.</li>
+<li><strong>The second way</strong>: NN maps from states to log standard deviations, <script type="math/tex">\text{log} \sigma_{\theta}(s)</script>. It may optionally share some layers with the mean network.</li>
+</ol>
+<p>Both output <code>log standard deviations</code> instead of std deviations directly. Since log stds are free to take any values in $(-\infty, \infty)$, while stds must be non-negative. It’s easier to train parameters without such constraints.</p>
+<ul>
+<li><p><strong>Sampling</strong>: Given the mean action <script type="math/tex">\mu_{\theta}(s)</script> and std deviation <script type="math/tex">\sigma_{\theta}(s)</script>, and a vector $z$ of noise from a spherical Gaussian $(z \sim ~ \mathcal{N}(0, \mathcal{I}))$, an action sample can be computed:</p>
+<script type="math/tex; mode=display">a = \mu_{\theta}(s) + \sigma_{\theta}(s) \odot z</script><p>where $\odot$ denotes the element-wise product.</p>
+</li>
+<li><p><strong>Log-likelihood</strong>: the log-likelihood of a $k$-dimensional action $a$, for a diagonal Gaussian with mean <script type="math/tex">\mu = \mu_{\theta}(s)</script> and std dev <script type="math/tex">\sigma = \sigma_{\theta}(s)</script> is:</p>
+<script type="math/tex; mode=display">\text{log} \pi_{\theta}(a \vert s) = - \frac{1}{2} \big( \sum_{i=1}^k (\frac{(a_i - \mu_i)^2}{\sigma_i^2} + 2 \text{log} \sigma_i) + k \text{log} 2 \pi \big)</script></li>
+</ul>
+<p><strong>Parameterized policies</strong>: </p>
+<ul>
+<li><p>In deep RL, policies whose output are computable functions that depend on a set of parameters (e.g. the weights and biases in NNs).</p>
+</li>
+<li><p>Let $\theta$ or $\phi$ denotes the parameters, written as a subscript:</p>
+<script type="math/tex; mode=display">a_t = \mu_{\theta}(s_t)</script><script type="math/tex; mode=display">a_t \sim \pi_{\theta}(\cdot \vert s_t)</script></li>
+</ul>
+<h1 id="Trajectories-a-k-a-Episodes-Rollouts"><a href="#Trajectories-a-k-a-Episodes-Rollouts" class="headerlink" title="Trajectories(a.k.a Episodes, Rollouts)"></a>Trajectories(a.k.a Episodes, Rollouts)</h1><p>A trajectory $\tau$ is a sequence of states and actions in the world:</p>
+<script type="math/tex; mode=display">\tau = (s_0, a_0, s_1, a_1, \cdots)</script><p>The very first state of the world, <script type="math/tex">s_0</script> is randomly sampled from the <strong>start-state distribution</strong>, sometimes denoted by <script type="math/tex">\rho_0</script></p>
+<script type="math/tex; mode=display">s_0 \sim \rho(\cdot)</script><p>State transitions are governed by the natural laws of the environment, and depend only the most recent action <script type="math/tex">a_t</script>. It is either deterministic，</p>
+<script type="math/tex; mode=display">s_{t+1} = f(s_t, a_t)</script><p>or stochastic</p>
+<script type="math/tex; mode=display">s_{t=1} \sim P(\cdot \vert s_t, a_t)</script><h1 id="Reward-and-return"><a href="#Reward-and-return" class="headerlink" title="Reward and return"></a>Reward and return</h1><p>The reward function $R$ depends on the current state of the world, the action just taken, and the next state of the world:</p>
+<script type="math/tex; mode=display">r_t = R(s_t, a_t, s_{t+1})</script><p>Although frequently this is simplified to just a dependence on the current state, <script type="math/tex">r_t = R(s_t)</script>, or state-action pair <script type="math/tex">r_t = R(s_t, a_t)</script></p>
+<p>The goal of the agent is to maximize some notation of <strong>cumulative reward over a trajectory</strong>, $R(\tau)$.</p>
+<p>Two kinds of returns:</p>
+<ol>
+<li><strong>Finite-horizon undiscounted return</strong>: the sum of rewards obtained in a fixed window of steps:<script type="math/tex; mode=display">R(\tau) = \sum_{t=0}^T r_t</script></li>
+<li><p><strong>Infinite-horizon discounted return</strong>: the sumof all rewards ever obtained by the agent, but discounted by how far off in the future they’re obtained. This includes a discounted factor $\gamma \in (0,1)$:</p>
+<script type="math/tex; mode=display">R(\tau) = \sum_{t=0}^{\infty} \gamma^t r_t</script><ul>
+<li>Intuition: “cash now is better than cash later”</li>
+<li>Mathematically: more convenient to converge. An infinite-horizon sum of rewards may not converge to a finite value, and is hard to deal with in equations. But with a discount factor and under reasonable conditions, the infinite sum converges.</li>
+</ul>
+</li>
+</ol>
+<h1 id="The-RL-Problem"><a href="#The-RL-Problem" class="headerlink" title="The RL Problem"></a>The RL Problem</h1><p>Whatever the choice of return measure and policy, the goal of RL is to select a policy which maximize <strong>expected return</strong> when the agent acts accordingly.</p>
+<p>Let us suppose the environment transitions and the policy are stochastic. The probability of a $T$-step trajectory is:</p>
+<script type="math/tex; mode=display">P(\tau \vert \pi) = \rho_0 (s_0) \sum_{t=0}^{T-1} P(s_{t+1} \vert s_t, a_t) \pi(a_t \vert s_t)</script><p>The expected return denoted by $J(\pi)$ is:</p>
+<script type="math/tex; mode=display">J(\pi) = \int_\tau P(\tau \vert \pi) R(\tau) = \underset{\tau \sim \pi}{E} [R(\tau)]</script><p>The central optimization problem in RL is expressed as:</p>
+<script type="math/tex; mode=display">\pi^* = \arg\max_\pi J(\pi)</script><p>where <script type="math/tex">\pi^{*}</script> being the <strong>optimal policy</strong></p>
+<h1 id="Value-Functions"><a href="#Value-Functions" class="headerlink" title="Value Functions"></a>Value Functions</h1><h2 id="Q-function"><a href="#Q-function" class="headerlink" title="Q-function"></a>Q-function</h2><ul>
+<li>Q-function: total reward from taking <script type="math/tex">\pmb{a}_t</script> in <script type="math/tex">\pmb{s}_t</script><script type="math/tex; mode=display">Q^{\pi}(\pmb{s}_t, \pmb{a}_t) = \sum_{t=t'}^T E_{\pi_{\theta}} [r(\pmb{s}_{t'}, \pmb{a}_{t'}) \vert \pmb{s}_t, \pmb{a}_t]</script></li>
+</ul>
+<h2 id="Value-function"><a href="#Value-function" class="headerlink" title="Value function"></a>Value function</h2><ul>
+<li>Value function: total reward from <script type="math/tex">\pmb{s}_t</script><script type="math/tex; mode=display">V^{\pi}(\pmb{s}_t) = \sum_{t=t'}^T E_{\pi_{\theta}}[r(\pmb{s}_{t'}, \pmb{a}_{t'}) \vert \pmb{s}_t]</script><script type="math/tex; mode=display">V^{\pi}(\pmb{s}_t) = E_{\pmb{a}_t \sim \pi(\pmb{a}_t \vert \pmb{s}_t)} [Q^{\pi} (\pmb{s}_t, \pmb{a}_t)]</script></li>
+</ul>
+<div class="note info">
+            <p><script type="math/tex">E_{\pmb{s_1 \sim p(\pmb{s}_1)}}[V^{\pi}(\pmb{s}_1)]</script> is the RL objective!</p>
+          </div>
+<div class="note warning">
+            <p><strong>Idea:</strong> compute gradient to increase the probability of good actions <strong>a</strong>:</p><ul><li>If <script type="math/tex">Q^{\pi}(\pmb{s}, \pmb{a}) > V^{\pi}(\pmb{s})</script>, then $\pmb{a}$ is better than average. (recall <script type="math/tex">V^{\pi}(s) = E[Q^\pi (\pmb{s}, \pmb{a})]</script> under <script type="math/tex">\pi(\pmb{a} \vert \pmb{s})</script>) </li><li>modify <script type="math/tex">\pi(\pmb{a} \vert \pmb{s})</script> to increase the probability of $\pmb{a}$ if <script type="math/tex">Q^{\pi}(\pmb{s}, \pmb{a}) > V^{\pi}(\pmb{s})</script></li></ul>
+          </div>
+<p>By value, we mean the expected return if you start in that state or state-action pair, and then act according to a particular policy forever after. <strong>Value functions</strong> are used in almost every RL algorithm.</p>
+<p>Four main functions:</p>
+<ol>
+<li><p><strong>On-policy value function</strong>, $V^\pi(s)$: give the expected return if you <strong>start in state $s$</strong> and always act according to policy $\pi$</p>
+<script type="math/tex; mode=display">V^\pi(s) = \underset{\tau \sim \pi}{E}[R(\tau) \vert s_0 = s]</script></li>
+<li><p><strong>On-policy action-value function</strong>, $Q^\pi(s,a)$: gives the expected return if you <strong>start in state $s$, take an arbitrary action $a$</strong>, and then forever after act according to policy $\pi$:</p>
+<script type="math/tex; mode=display">Q^{\pi}(s,a) = \underset{\tau \sim \pi}{E}[R(\tau) \vert s_0=s, a_0=a]</script></li>
+<li><strong>Optimal value function</strong>, $V^<em>(s)$: give the expected reutrn if you <em>*start in state $s$</em></em>, and always act according to the optimal policy in the environment:<script type="math/tex; mode=display">V^*(s) = \max_\pi \underset{\tau \sim \pi}{E}[R(\tau) \vert s_0 = s]</script></li>
+<li><strong>Optimal action-value function</strong>, $Q^<em>(s,a)$: give the expected return if you <strong>start in state $s$, take and arbitrary action $a$</strong>, and then forever after act according to the </em>optimal* policy in the environment:<script type="math/tex; mode=display">Q^*(s,a) = \max_\pi \underset{\tau \sim \pi}{E} [R(\tau) \vert s_0=s, a_0=a]</script></li>
+</ol>
+<h1 id="The-optimal-Q-function-and-the-optimal-action"><a href="#The-optimal-Q-function-and-the-optimal-action" class="headerlink" title="The optimal Q-function and the optimal action"></a>The optimal Q-function and the optimal action</h1><script type="math/tex; mode=display">a^*(s) = \arg\max_{a} Q^*(s,a)</script><h1 id="Bellman-equations"><a href="#Bellman-equations" class="headerlink" title="Bellman equations"></a>Bellman equations</h1><ul>
+<li><p>Basic idea: the value of your starting point is <strong>the reward you expect to get from being there, plus the value of wherever you land next</strong>.</p>
+</li>
+<li><p>Bellman equation for the <strong>on-policy value functions</strong>:</p>
+<script type="math/tex; mode=display">V^{\pi}(s) = \underset{\underset{s' \sim P}{a \sim \pi}}{E} [r(s,a) + \gamma V^{\pi}(s')]</script><script type="math/tex; mode=display">Q^\pi (s,a) = \underset{s' \sim P}{E} \big[r(s,a) + \gamma \underset{a' \sim \pi}{E} [Q^\pi (s', a')] \big]</script></li>
+</ul>
+<p>where $s’ \sim P$ is shorthand for $s’ \sim P(\cdot \vert s,a)$, indicating that the next state $s’$ is sampled from the environment’s transition rules; $a \sim \pi$ is shorthand for $a \sim \pi(\cdot \vert s)$ and $a’ \sim \pi$ is shorthand for $a’ \sim \pi(\cdot \vert s’)$</p>
+<ul>
+<li>Bellman equation for the <strong>optimal value functions</strong>:<script type="math/tex; mode=display">V^*(s) = \max_a \underset{s' \sim P}{E} [r(s,a) + \gamma V^*(s')]</script><script type="math/tex; mode=display">Q^*(s,a) = \underset{s' \sim P}{E} \big[ r(s,a) + \gamma \max_{a'} Q^*(s', a') \big]</script></li>
+</ul>
+<div class="note default">
+            <p><strong>Difference</strong> between the Bellman equations for the on-policy value functions and the optimal value functions: the absence or presence of the $\max$ over actions.</p>
+          </div>
+<h1 id="Advantage-functions"><a href="#Advantage-functions" class="headerlink" title="Advantage functions"></a>Advantage functions</h1><ul>
+<li><p>Intuition: In RL, we want to know how much better it is than other on average, i.e the <strong>relative advantage</strong> of that action.</p>
+</li>
+<li><p>The advantage function $A^\pi (s,a)$ corresponding to a policy $\pi$ describes how much better it is to take a specific action $a$ in state $s$, over randomly selecting an action according to <script type="math/tex">\pi(\cdot \vert s)</script>, assuming you act according to $\pi$ forever after.</p>
+<script type="math/tex; mode=display">A^\pi(s,a) = Q^\pi (s,a) - V^\pi(s)</script></li>
+</ul>
+<h1 id="Markov-Decision-Process"><a href="#Markov-Decision-Process" class="headerlink" title="Markov Decision Process"></a>Markov Decision Process</h1><p>An MDP is a 5-tuple <script type="math/tex"><S,A,R,P, \rho_0></script>, where</p>
+<ul>
+<li>$S$ is the set of all valid states</li>
+<li>$A$ is the set of all valid actions</li>
+<li>$R$: $S \times A \times S \rightarrow \mathbb{R}$ is the reward function, with <script type="math/tex">r_t = R(s_t, a_t, s_{t+1})</script></li>
+<li>$P$: $S \times A \rightarrow \mathcal{P}(S)$ is the transition probability function, with $P(S’ \vert s,a)$ being the prob of transitioning into state $s’$ if you start in state $s$ and take action $a$</li>
+<li><script type="math/tex">\rho_0</script> is the starting state distribution.</li>
+</ul>
+<p><strong>Markov property</strong>:</p>
+<ul>
+<li>transitions only depend on the most recent state and action, and no prior history.</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://spinningup.openai.com/en/latest/spinningup/rl_intro.html">OpenAI, Spinning Up, Part 1: Key Concepts in RL</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/RL/" rel="tag"># RL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/03/26/RL/David%20Silver/RL-notes-5-Model-Free-control/" rel="prev" title="Model-Free Control (RL)">
+      <i class="fa fa-chevron-left"></i> Model-Free Control (RL)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/04/02/RL/SpinningUp/RL-taxonomy/" rel="next" title="Kinds of RL algorithms">
+      Kinds of RL algorithms <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Environment-and-agent"><span class="nav-number">1.</span> <span class="nav-text">Environment and agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#State-and-observations"><span class="nav-number">2.</span> <span class="nav-text">State and observations</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Action-spaces"><span class="nav-number">3.</span> <span class="nav-text">Action spaces</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Policies"><span class="nav-number">4.</span> <span class="nav-text">Policies</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Deterministic-policies"><span class="nav-number">4.1.</span> <span class="nav-text">Deterministic policies</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stochastic-policies"><span class="nav-number">4.1.1.</span> <span class="nav-text">Stochastic policies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Categorical-policies"><span class="nav-number">4.1.2.</span> <span class="nav-text">Categorical policies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Diagonal-Gaussian-policies"><span class="nav-number">4.1.3.</span> <span class="nav-text">Diagonal Gaussian policies</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Trajectories-a-k-a-Episodes-Rollouts"><span class="nav-number">5.</span> <span class="nav-text">Trajectories(a.k.a Episodes, Rollouts)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reward-and-return"><span class="nav-number">6.</span> <span class="nav-text">Reward and return</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#The-RL-Problem"><span class="nav-number">7.</span> <span class="nav-text">The RL Problem</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Value-Functions"><span class="nav-number">8.</span> <span class="nav-text">Value Functions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Q-function"><span class="nav-number">8.1.</span> <span class="nav-text">Q-function</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Value-function"><span class="nav-number">8.2.</span> <span class="nav-text">Value function</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#The-optimal-Q-function-and-the-optimal-action"><span class="nav-number">9.</span> <span class="nav-text">The optimal Q-function and the optimal action</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bellman-equations"><span class="nav-number">10.</span> <span class="nav-text">Bellman equations</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Advantage-functions"><span class="nav-number">11.</span> <span class="nav-text">Advantage functions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Markov-Decision-Process"><span class="nav-number">12.</span> <span class="nav-text">Markov Decision Process</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">13.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/";
+    this.page.identifier = "2019/04/01/RL/SpinningUp/RL-key-concept-and-terminology/";
+    this.page.title = "Key Concepts in RL";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

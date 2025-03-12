@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Summary of word tokenization, as well as coping with OOV words.  (This is expanded based on my MT course lectured by Dr. Rico Sennrich in Edinburgh Informatics in 2018.)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Word Tokenization: How to Handle Out-Of-Vocabulary Vocabularies?">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="Summary of word tokenization, as well as coping with OOV words.  (This is expanded based on my MT course lectured by Dr. Rico Sennrich in Edinburgh Informatics in 2018.)">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/char-level%20OOV.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/fully%20char-level%20model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/word-char-token-cons.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/BPE-slides.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SubwordRegularization.png">
+<meta property="article:published_time" content="2019-03-08T03:03:00.000Z">
+<meta property="article:modified_time" content="2019-03-08T03:03:00.000Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="Tokenization">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/char-level%20OOV.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Word Tokenization: How to Handle Out-Of-Vocabulary Vocabularies? | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Word Tokenization: How to Handle Out-Of-Vocabulary Vocabularies?
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-08 11:03:00" itemprop="dateCreated datePublished" datetime="2019-03-08T11:03:00+08:00">2019-03-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/OOV/" itemprop="url" rel="index"><span itemprop="name">OOV</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>Summary of word tokenization, as well as coping with OOV words. <small> (This is expanded based on my MT course lectured by Dr. Rico Sennrich in Edinburgh Informatics in 2018.) </small><br><span id="more"></span></p>
+<h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><h2 id="How-to-Represent-Text"><a href="#How-to-Represent-Text" class="headerlink" title="How to Represent Text?"></a>How to Represent Text?</h2><ul>
+<li>One-hot encoding<ul>
+<li>lookup of word embedding for input</li>
+<li>probability distribution over vocabulary for output</li>
+</ul>
+</li>
+<li>Large vocabulary<ul>
+<li>increase network size</li>
+<li>decrease training and decoding speed</li>
+</ul>
+</li>
+</ul>
+<h2 id="Problems"><a href="#Problems" class="headerlink" title="Problems"></a>Problems</h2><p><strong>Open-vocabulary</strong> problems:</p>
+<ul>
+<li>Many training corpora contain millions of word types</li>
+<li>Productive word formation processes (compounding; derivation) allow formation and understanding of unseen words</li>
+<li>Names, numbers are morphologically simple, but open word classes</li>
+</ul>
+<h1 id="Word-based-Tokenization"><a href="#Word-based-Tokenization" class="headerlink" title="Word-based Tokenization"></a>Word-based Tokenization</h1><div class="note info">
+            <p>Limits:</p><ul><li>Very similar words have entirely different meanings, such as dog vs dogs.</li><li>The vocabulary can end up very large.</li><li>Large vocabularies result in enormous embedding matrix as the input and output layer.</li></ul>
+          </div>
+<p>Common methods include:</p>
+<ul>
+<li>Space and punctuation tokenization;</li>
+<li>Rule-based tokenization.</li>
+</ul>
+<h2 id="Non-solution-Ignoring-Rare-Words"><a href="#Non-solution-Ignoring-Rare-Words" class="headerlink" title="Non-solution: Ignoring Rare Words"></a>Non-solution: Ignoring Rare Words</h2><ul>
+<li>Replace OOV words with UNK</li>
+<li>A vocabulary of 50,000 words covers 95% of text: <strong> <span class="label danger">95% is not enough !</span> </strong></li>
+</ul>
+<div class="note warning">
+            <p><strong>OOV problem</strong>:</p><ul><li>If two very different words are both OOV, they wil get the same id ([UNK]).</li><li>Large vocabulary will increase the <strong>embedding layer’s parameters</strong>.</li></ul>
+          </div>
+<h2 id="Approximative-Softmax"><a href="#Approximative-Softmax" class="headerlink" title="Approximative Softmax"></a>Approximative Softmax</h2><p>Compute softmax over “active” subset of vocabulary $\rightarrow$ smaller weight matrix, faster softmax<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[On Using Very Large Target Vocabulary for Neural Machine Translation](https://arxiv.org/pdf/1412.2007)
+">[1]</span></a></sup></p>
+<ul>
+<li>At training time: vocabulary based on words occurring in training set partition</li>
+<li>At test time: determine likely target words based on source text (using cheap method like translation dictionary)</li>
+</ul>
+<p><strong>Limitations</strong>:</p>
+<ul>
+<li>Allow larger vocabulary, but still not open</li>
+<li>Networks may not learn good representation of rare words</li>
+</ul>
+<h2 id="Back-off-Models"><a href="#Back-off-Models" class="headerlink" title="Back-off Models"></a>Back-off Models</h2><ul>
+<li>Replace rare words with UNK at training time <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Addressing the Rare Word Problem in Neural Machine Translation](https://arxiv.org/pdf/1410.8206.pdf)
+">[2]</span></a></sup></li>
+<li>When system produces UNK, alight UNK to source word, and translate this with back-off method</li>
+</ul>
+<p><strong>Limitations</strong>:</p>
+<ul>
+<li>Compounds: hard to model 1-to-many relationships</li>
+<li>Morphology: hard to predict inflection with back-off dictionary</li>
+<li>Names: if alphabets differ, we need transliteration</li>
+<li>Alignment: attention model unreliable</li>
+</ul>
+<h1 id="Character-based-Tokenization"><a href="#Character-based-Tokenization" class="headerlink" title="Character-based Tokenization"></a>Character-based Tokenization</h1><p><strong>Advantages</strong>:<br>Character tokens solve the OOV problem with following benefits:</p>
+<ul>
+<li>Vocabularies are slimmer.</li>
+<li><span class="label success"> Mostly open-vocabulary</span>: fewer OOV words;</li>
+<li>No heuristic or language-specific segmentation;</li>
+<li>Neural networks can conceivably learn from raw char sequences.</li>
+</ul>
+<p><strong>Drawbacks</strong>:<br>Representing the input as a squences of characters can have following problems:</p>
+<ul>
+<li>Character tokens can <span class="label warning"> increase sequence length</span>, which will slow down the speed of training and decoding (x2 - x4 increase in training time), as well as make it difficult to learn relationships between characters to form meaningful words.</li>
+<li>It is harder for the model to learn meaningful input representations. E.g., learn the context-independent reprsentation for a single char “N” is much harder than learning a context-indepdent reprentation for the word “NLP”.</li>
+<li>Naive char-level encoder-decoders are currently resource-limited.</li>
+</ul>
+<div class="note info">
+            <p><strong>OPEN QUESTIONS</strong>:</p><ul><li>On which level do we represent meaning?</li><li>On which level do attention operate?</li></ul>
+          </div>
+<h2 id="Hierarchical-Model-Backoff"><a href="#Hierarchical-Model-Backoff" class="headerlink" title="Hierarchical Model: Backoff"></a>Hierarchical Model: Backoff</h2><ul>
+<li>Word-level model produces UNKs <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models](https://arxiv.org/pdf/1604.00788)
+">[4]</span></a></sup></li>
+<li>For each UNK, char-level model predicts word based on word hidden state</li>
+</ul>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li>Prediction is more flexible than dictionary look-up</li>
+<li>More efficient than pure char-level translation</li>
+</ul>
+<p><strong>Cons</strong>:</p>
+<ul>
+<li>Independence assumptions between main model and backoff model</li>
+</ul>
+<h2 id="Char-level-Output"><a href="#Char-level-Output" class="headerlink" title="Char-level Output"></a>Char-level Output</h2><ul>
+<li>No word segmentation on target side <sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[A Character-level Decoder without Explicit Segmentation for Neural Machine Translation](https://arxiv.org/pdf/1603.06147)
+">[5]</span></a></sup></li>
+<li>Encoder is BPE-level</li>
+</ul>
+<h2 id="Char-level-Input"><a href="#Char-level-Input" class="headerlink" title="Char-level Input"></a>Char-level Input</h2><p>Hierarchical representation: RNN states represent words, but their representation is computed from char-level LSTM <sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Character-based Neural Machine Translation](https://arxiv.org/pdf/1511.04586)
+">[6]</span></a></sup></p>
+<p><img data-src="/notes/images/char-level OOV.png" alt="char-level input"></p>
+<h2 id="Fully-Char-level"><a href="#Fully-Char-level" class="headerlink" title="Fully Char-level"></a>Fully Char-level</h2><ul>
+<li>Goal: get rid of word boundaries <sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Fully Character-Level Neural Machine Translation without Explicit Segmentation](https://www.mitpressjournals.org/doi/pdf/10.1162/tacl_a_00067)
+">[7]</span></a></sup></li>
+<li>Target side: char-level RNNs</li>
+<li>Source side: convolution and max-pooling layers</li>
+</ul>
+<p><img data-src="/notes/images/fully char-level model.png" alt="Fully char-level model"></p>
+<h1 id="Subword-based-Tokenization"><a href="#Subword-based-Tokenization" class="headerlink" title="Subword-based Tokenization"></a>Subword-based Tokenization</h1><p>The <strong>idea</strong> behind subword tokenization is that <span class="label success"> frequently occurring words should be in the vocabulary</span>, whereas <span class="label danger">rare words should be split into frequent sub words.</span></p>
+<p><img data-src="/notes/images/word-char-token-cons.png" alt="Image source: Huggingface"></p>
+<div class="note primary">
+            <p>Subword-based tokenization lies between character and word-based tokenization.</p><ul><li>Frequently used words should not be split into smaller subwords;</li><li>Rare words should be decomposed into meaningful subwords.</li><li>Subwords help identify similar syntactic or semantic situations in texts.</li><li>Subword. tokenization can identify start of word tokens, such as “##” in WordPiece.</li></ul>
+          </div>
+<h2 id="Byte-Pair-Encoding"><a href="#Byte-Pair-Encoding" class="headerlink" title="Byte-Pair Encoding"></a>Byte-Pair Encoding</h2><p>Byte-Pair Encoding (BPE) relies on a pre-tokenizer that splits the training data into words.</p>
+<p><img data-src="/notes/images/BPE-slides.png" alt="Dr. Rico Sennrich MT Lecture 2018/07"></p>
+<p><strong>Why BPE</strong>? <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rico Sennrich. MT lecture 07. Edinburgh Informatics 2018.
+">[13]</span></a></sup></p>
+<ul>
+<li>Open-vocabulary: operations learned on the training set can be applied to <code>&lt;UNK&gt;</code></li>
+<li>Compression of frequent character sequences improves efficiency $\rightarrow$ <span class="label primary">trade-off between text length and vocabulary size</span>.</li>
+</ul>
+<h3 id="Pre-tokenization"><a href="#Pre-tokenization" class="headerlink" title="Pre-tokenization"></a>Pre-tokenization</h3><p>Pretokenzation splits the texts into words, For example:</p>
+<ul>
+<li>Space tokenization, e.g. GPT-2, RoBERTa;</li>
+<li>Rule-based tokenization (using Moses), e.g., XLM, FlauBERT;</li>
+<li>Space and ftfy: GPT.</li>
+</ul>
+<h3 id="BPE-Training"><a href="#BPE-Training" class="headerlink" title="BPE Training"></a>BPE Training</h3><p>Given pre-tokenized tokens, we can train a BPE tokenizer as follows:<br><div class="note info">
+            <p><strong>Bottom-up character merging</strong>: <sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[[BPE] Neural Machine Translation of Rare Words with Subword UnitsRico](http://www.aclweb.org/anthology/P16-1162.pdf)">[3]</span></a></sup><sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Rico Sennrich. MT lecture 07. Edinburgh Informatics 2018.">[13]</span></a></sup></p><ul><li>Starting point: char-level representation $\rightarrow$ computationally expensive.</li><li>Compress representation based on information theory $\rightarrow$ byte-pair encoding.</li><li>Repeatedly replace most frequent symbol pair <code>(&#39;A&#39;, &#39;B&#39;)</code> with <code>&#39;AB&#39;</code>.</li><li>Hyperparameter: when to stop $\rightarrow$ controls vocabulary size.</li></ul>
+          </div></p>
+<p>Step by step:</p>
+<ol>
+<li>Cut the pre-tokenized corpus into smallest units, usually characters, as a base vocabulary.</li>
+<li>Append <code>&lt;/w&gt;</code> at the end of original tokens.</li>
+<li>Count the neighbor unit pairs, and merge the pair that occurs most frequently.</li>
+<li>Go to 2 until reach the maximum vocabulary size.</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re, collections</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_stats</span>(<span class="params">vocab</span>):</span></span><br><span class="line">    pairs = collections.defaultdict(<span class="built_in">int</span>) <span class="comment"># default count 0</span></span><br><span class="line">    <span class="keyword">for</span> word, freq <span class="keyword">in</span> vocab.items():</span><br><span class="line">        symbols = word.split() <span class="comment"># split to chars</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(symbols) - <span class="number">1</span>):</span><br><span class="line">            pairs[symbols[i], symbols[i + <span class="number">1</span>]] += freq <span class="comment"># count bigram</span></span><br><span class="line">    <span class="keyword">return</span> pairs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">merge_vocab</span>(<span class="params">pair, v_in</span>):</span></span><br><span class="line">    v_out = &#123;&#125;</span><br><span class="line">    bigram = re.escape(<span class="string">&quot; &quot;</span>.join(pair)) <span class="comment"># escape</span></span><br><span class="line">    p = re.<span class="built_in">compile</span>(<span class="string">r&#x27;(?&lt;!\S&gt;)&#x27;</span> + bigram + <span class="string">r&#x27;(?!\S)&#x27;</span>) <span class="comment"># lookaround assertion, equal to [^\f\n\r\t\v]</span></span><br><span class="line">    <span class="keyword">for</span> word <span class="keyword">in</span> v_in:</span><br><span class="line">        w_out = p.sub(<span class="string">&quot;&quot;</span>.join(pair), word) <span class="comment"># merge the most frequent pair by removing whitespace</span></span><br><span class="line">        v_out[w_out] = v_in[word] <span class="comment"># assign pair count</span></span><br><span class="line">    <span class="keyword">return</span> v_out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    vocab = &#123;<span class="string">&#x27;l o w &lt;/w&gt;&#x27;</span>: <span class="number">5</span>, <span class="string">&#x27;l o w e r &lt;/w&gt;&#x27;</span>: <span class="number">2</span>, <span class="string">&#x27;n e w e s t &lt;/w&gt;&#x27;</span>: <span class="number">6</span>, <span class="string">&#x27;w i d e s t &lt;/w&gt;&#x27;</span>: <span class="number">3</span>&#125;</span><br><span class="line">    num_merges = <span class="number">10</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_merges):</span><br><span class="line">        pairs = get_stats(vocab)</span><br><span class="line">        best = <span class="built_in">max</span>(pairs, key=pairs.get)</span><br><span class="line">        vocab = merge_vocab(best, vocab)</span><br><span class="line">        <span class="built_in">print</span>(best)</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">output:</span></span><br><span class="line"><span class="string">----------------------</span></span><br><span class="line"><span class="string">(&#x27;e&#x27;, &#x27;s&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;es&#x27;, &#x27;t&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;est&#x27;, &#x27;&lt;/w&gt;&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;l&#x27;, &#x27;o&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;lo&#x27;, &#x27;w&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;n&#x27;, &#x27;e&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;ne&#x27;, &#x27;w&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;new&#x27;, &#x27;est&lt;/w&gt;&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;low&#x27;, &#x27;&lt;/w&gt;&#x27;)</span></span><br><span class="line"><span class="string">(&#x27;w&#x27;, &#x27;i&#x27;)</span></span><br><span class="line"><span class="string">----------------------</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+<h3 id="BPE-Encoding"><a href="#BPE-Encoding" class="headerlink" title="BPE Encoding"></a>BPE Encoding</h3><p>BPE encodes the input tokens one by one, progressively merging the pairs according to frequency during training (from high to low). In other words, merge according to the merge order <code>bpe_codes</code> in <em>merge.txt</em> (with decreasing frequency).<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># subword-nmt/apply_bpe.py</span></span><br><span class="line"><span class="comment"># Author: R. Sennrich</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode</span>(<span class="params">orig, bpe_codes, bpe_codes_reverse, vocab, separator, version, </span></span></span><br><span class="line"><span class="params"><span class="function">    cache, glossaries_regex=<span class="literal">None</span>, dropout=<span class="number">0</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Encode word based on list of BPE merge operations,</span></span><br><span class="line"><span class="string">    which are applied consecutively</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> dropout <span class="keyword">and</span> orig <span class="keyword">in</span> cache:</span><br><span class="line">        <span class="keyword">return</span> cache[orig]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> glossaries_regex <span class="keyword">and</span> glossaries_regex.match(orig):</span><br><span class="line">        cache[orig] = (orig,)</span><br><span class="line">        <span class="keyword">return</span> (orig,)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(orig) == <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">return</span> orig</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> version == (<span class="number">0</span>, <span class="number">1</span>):</span><br><span class="line">        word = <span class="built_in">list</span>(orig) + [<span class="string">&#x27;&lt;/w&gt;&#x27;</span>]</span><br><span class="line">    <span class="keyword">elif</span> version == (<span class="number">0</span>, <span class="number">2</span>): <span class="comment"># more consistent handling of word-final segments</span></span><br><span class="line">        word = <span class="built_in">list</span>(orig[:-<span class="number">1</span>]) + [orig[-<span class="number">1</span>] + <span class="string">&#x27;&lt;/w&gt;&#x27;</span>]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="built_in">len</span>(word) &gt; <span class="number">1</span>:</span><br><span class="line"></span><br><span class="line">        <span class="comment"># get list of symbol pairs; optionally apply dropout</span></span><br><span class="line">        pairs = [(bpe_codes[pair],i,pair) <span class="keyword">for</span> (i,pair) <span class="keyword">in</span> <span class="built_in">enumerate</span>(<span class="built_in">zip</span>(word, word[<span class="number">1</span>:])) <span class="keyword">if</span> (<span class="keyword">not</span> dropout <span class="keyword">or</span> random.random() &gt; dropout) <span class="keyword">and</span> pair <span class="keyword">in</span> bpe_codes]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> pairs:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#get first merge operation in list of BPE codes</span></span><br><span class="line">        bigram = <span class="built_in">min</span>(pairs)[<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># find start position of all pairs that we want to merge</span></span><br><span class="line">        positions = [i <span class="keyword">for</span> (rank,i,pair) <span class="keyword">in</span> pairs <span class="keyword">if</span> pair == bigram]</span><br><span class="line"></span><br><span class="line">        i = <span class="number">0</span></span><br><span class="line">        new_word = []</span><br><span class="line">        bigram = <span class="string">&#x27;&#x27;</span>.join(bigram)</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> positions:</span><br><span class="line">            <span class="comment"># merges are invalid if they start before current position. </span></span><br><span class="line">            <span class="comment"># This can happen if there are overlapping pairs: (x x x -&gt; xx x)</span></span><br><span class="line">            <span class="keyword">if</span> j &lt; i:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            new_word.extend(word[i:j]) <span class="comment"># all symbols before merged pair</span></span><br><span class="line">            new_word.append(bigram) <span class="comment"># merged pair</span></span><br><span class="line">            i = j+<span class="number">2</span> <span class="comment"># continue after merged pair</span></span><br><span class="line">        new_word.extend(word[i:]) <span class="comment"># add all symbols until end of word</span></span><br><span class="line">        word = new_word</span><br><span class="line"></span><br><span class="line">    <span class="comment"># don&#x27;t print end-of-word symbols</span></span><br><span class="line">    <span class="keyword">if</span> word[-<span class="number">1</span>] == <span class="string">&#x27;&lt;/w&gt;&#x27;</span>:</span><br><span class="line">        word = word[:-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">elif</span> word[-<span class="number">1</span>].endswith(<span class="string">&#x27;&lt;/w&gt;&#x27;</span>):</span><br><span class="line">        word[-<span class="number">1</span>] = word[-<span class="number">1</span>][:-<span class="number">4</span>]</span><br><span class="line"></span><br><span class="line">    word = <span class="built_in">tuple</span>(word)</span><br><span class="line">    <span class="keyword">if</span> vocab:</span><br><span class="line">        word = check_vocab_and_split(word, bpe_codes_reverse, vocab, separator)</span><br><span class="line"></span><br><span class="line">    cache[orig] = word</span><br><span class="line">    <span class="keyword">return</span> word</span><br></pre></td></tr></table></figure></p>
+<h2 id="WordPiece"><a href="#WordPiece" class="headerlink" title="WordPiece"></a>WordPiece</h2><p>WordPiece was firstly proposed in Google’s Japanese and Korean voice search system<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[[WordPiece] Japanese and Korean voice search (ICASSP 2012, Google)](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/37842.pdf)
+">[8]</span></a></sup>, and was used in Google’s machine translation system<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Google’s Neural Machine Translation System: Bridging the Gap between Human and Machine Translation](https://arxiv.org/pdf/1609.08144.pdf)
+">[9]</span></a></sup>. It deals with an infinite vocabulary from large amounts of text automatically and increamentally by running greedy algorithms. This provides a user-specified number of word units which are chosen in a greedy way (without focusing on semantics) to maximize the likelihood on the language model (LM) training data - incidentally the same metric during decoding.</p>
+<div class="note info">
+            <p>Example:</p><ul><li><strong>Word</strong>: Jet makers feud over seat width with big orders at stake</li><li><strong>Wordpieces</strong>:  _J et _makers _fe ud _over _seat _width _with _big _orders _at _stake</li></ul>
+          </div>
+<p>Procedure:</p>
+<ol>
+<li>Initialize the word unit inventory with basic unicode characters.</li>
+<li>Build a language model on the triaining data using the inventory from 1.</li>
+<li>Generate a new word unit by combinining two units out of the current word inventory to increment the word unit inventory by one. <strong>“Choose the new word unit out of all possible ones that increases the likelihood on the training data the most when added to the model”</strong>.</li>
+<li>Goto 2 unitil reach the predefined limit of word units, or the likelihood increase falls below a certain threshold.</li>
+</ol>
+<div class="note warning">
+            <p><strong>How to choose which pair to merge?</strong><br>Suppose we get $z$ after merging neibor subwords $x$ and $y$, the difference between LM loglikelihood is:</p><script type="math/tex; mode=display">\Delta = \log P(z=[x \Vert y]) - \big( \log P(x)+\log P(y) \big) = \log \frac{P(z=[x \Vert y])}{P(x)P(y)}</script><p>This is exactly the mutual infomation (MI) under the trained LM between the subword pair $(x,y)$. Therefore, <strong>WordPiece chooses the subword pair that has the maximum MI value</strong>.</p>
+          </div>
+<h2 id="Unigram-Language-Model"><a href="#Unigram-Language-Model" class="headerlink" title="Unigram Language Model"></a>Unigram Language Model</h2><div class="note primary">
+            <p><strong>Motivation</strong>: </p><ul><li><span class="label primary"> A sentence can be represented into <strong>multiple subword sequences</strong> even with the same vocabulary using BPE</span>. Subword regularization is a regularization method for open-domain NMT.</li></ul>
+          </div>
+<p><img data-src="/notes/images/SubwordRegularization.png" alt="Subword Regularization"></p>
+<p>Subword Regularization based on a unigram language model<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates](https://www.aclweb.org/anthology/P18-1007.pdf)
+">[10]</span></a></sup> assumes that each subword occurs independently, and consequently, <span class="label primary"> the probability of a subword sequence $\mathbf{x} = (x_1, \cdots, x_M)$ is formulated as the product of the subword occurence probablities</span> $p(\mathbf{x})$:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+P(\mathbf{x}) &{}= \prod_{i=1}^M p(x_i), \quad \forall i x_i \in \mathcal{V}, \sum_{x \in \mathcal{V}} p(x)=1
+\end{aligned}</script><p>where $\mathcal{V}$ is a pre-determined vocabulary. The most probable segmentation $\mathbf{x}^*$ for the input $X$ is given by:</p>
+<script type="math/tex; mode=display">
+\mathbf{x}^* = \arg\max_{\mathbf{x} \in \mathcal{S}(X)} P(\mathbf{x})</script><p>where $\mathcal{S}(X)$ is a set of segmentation candidates built from the input sentence $X$. $\mathbf{x}^*$ is obtained from the <span class="label primary"> Viterbi algorithm</span>.</p>
+<!--
+If the vocab is given, the subword occurence probablities $p(x_i)$ are estimated via the EM algorithm that maximizes the marginal likelihood $\mathcal{L}$ assuming that $p(x_i)$ are hidden variables：
+$$
+\mathcal{L} = \sum_{s=1}^{|D|} \log (P(X^{(s)})) = \sum_{s=1}^{|D|} \log \big( \sum_{\mathbf{x} \in \mathcal{S}(X^{(s)})} P(\mathbf{x}) \big)
+$$
+-->
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Heuristically make a reasonably big seed vocabulary from the training corpus. Possible choices are:<ul>
+<li>All chars and the most frequent substrings.</li>
+<li>BPE with sufficient mergence.</li>
+</ul>
+</li>
+<li>Fix the vocab, optimize $p(x)$ with EM algorithm</li>
+<li>Compute the loss for each subword $x_i$ using a unigram language model, representing how likely the likelihood $\mathcal{L}$ is reduced when the subword $x_i$ is removed from the current vocabulary inventory.<script type="math/tex; mode=display">
+\mathcal{L} = \sum_{s=1}^{|D|} \log (P(X^{(s)})) = \sum_{s=1}^{|D|} \log \big( \sum_{\mathbf{x} \in \mathcal{S}(X^{(s)})} P(\mathbf{x}) \big)</script></li>
+<li>Sort the vocabularies by loss and keep top $\eta \%$ ($\eta = 80$) of subwords. (Always keep the single char set to avoid OOV).</li>
+<li>Goto 2.</li>
+</ol>
+<div class="note success">
+            <p>Interpretation</p><ul><li><span class="label primary"> Subword regularization with unigram language model</span> can be seen as a probabilistic mixture of characters, subwords, and word segmentations.</li><li>I regard it as a post-regularization approach to subwords techniques, such as <em>BPE units</em>. This means we can use BPE word pieces as the initialization.</li></ul>
+          </div>
+<h2 id="Comparison"><a href="#Comparison" class="headerlink" title="Comparison"></a>Comparison</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Subword tokenization</th>
+<th style="text-align:center">Merge rules</th>
+<th style="text-align:center">Trim rules</th>
+<th style="text-align:center">Frequency-based</th>
+<th style="text-align:center">Probability-based</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">BPE</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+</tr>
+<tr>
+<td style="text-align:center">WordPiece</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+</tr>
+<tr>
+<td style="text-align:center">Unigram</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="note danger">
+            <p><span class="label danger"> <strong>Comparison</strong> between subword methods:</span></p><ol><li><span class="label info"><strong>BPE</strong> $\Uparrow$</span>: start from <strong>char sets</strong>, <strong>incrementally</strong> merge according to (neighbor) subword pair co-occurrence.</li><li><span class="label info"><strong>WordPiece</strong>$\Uparrow$</span>: start from <strong>char sets</strong>, <strong>incrementally</strong> merge according to the <strong>decreased likelihood (Mutual Information)</strong> after mergence.</li><li><span class="label primary"><strong>Unigram Language Model</strong> (subword regularization)$\Downarrow$</span>: starting from <strong>subword vocabularies</strong>, <strong>reducing</strong> the subword with <strong>likelihood reduction under a unigram LM</strong> after mergence.</li></ol>
+          </div>
+<p>For attribution in academic contexts, please cite this work as:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@misc&#123;chai2019out-of-vocab,</span><br><span class="line">  author = &#123;Chai, Yekun&#125;,</span><br><span class="line">  title = &#123;&#123;Word Tokenization: How to Handle Out-Of-Vocabulary Words?&#125;&#125;,</span><br><span class="line">  year = &#123;2019&#125;,</span><br><span class="line">  howpublished = &#123;\url&#123;https://cyk1337.github.io/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/&#125;&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1412.2007">On Using Very Large Target Vocabulary for Neural Machine Translation</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1410.8206.pdf">Addressing the Rare Word Problem in Neural Machine Translation</a><a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://www.aclweb.org/anthology/P16-1162.pdf">[BPE] Neural Machine Translation of Rare Words with Subword Units
+Rico</a><a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1604.00788">Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models</a><a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1603.06147">A Character-level Decoder without Explicit Segmentation for Neural Machine Translation</a><a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1511.04586">Character-based Neural Machine Translation</a><a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://www.mitpressjournals.org/doi/pdf/10.1162/tacl_a_00067">Fully Character-Level Neural Machine Translation without Explicit Segmentation</a><a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/37842.pdf">[WordPiece] Japanese and Korean voice search (ICASSP 2012, Google)</a><a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1609.08144.pdf">Google’s Neural Machine Translation System: Bridging the Gap between Human and Machine Translation</a><a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://www.aclweb.org/anthology/P18-1007.pdf">Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates</a><a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://towardsdatascience.com/a-comprehensive-guide-to-subword-tokenisers-4bbd3bad9a7c">A comprehensive guide to subword tokenisers</a><a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Rico Sennrich. MT lecture 07. Edinburgh Informatics 2018.<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://huggingface.co/docs/tokenizers/python/latest/quicktour.html">Hugginface tokenizer</a><a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="http://www.persagen.com/files/misc/radford2019language.pdf">[GPT-2]Language models are unsupervised multitask learners</a><a href="#fnref:15" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Tokenization/" rel="tag"># Tokenization</a>
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/03/04/NLP/PoS-tagging-with-HMMs/" rel="prev" title="POS Tagging with HMMs">
+      <i class="fa fa-chevron-left"></i> POS Tagging with HMMs
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/03/10/StackOverflow/DL-GPU-installation/" rel="next" title="Deep Learning Toolkit Installation">
+      Deep Learning Toolkit Installation <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-Represent-Text"><span class="nav-number">1.1.</span> <span class="nav-text">How to Represent Text?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems"><span class="nav-number">1.2.</span> <span class="nav-text">Problems</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Word-based-Tokenization"><span class="nav-number">2.</span> <span class="nav-text">Word-based Tokenization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Non-solution-Ignoring-Rare-Words"><span class="nav-number">2.1.</span> <span class="nav-text">Non-solution: Ignoring Rare Words</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approximative-Softmax"><span class="nav-number">2.2.</span> <span class="nav-text">Approximative Softmax</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Back-off-Models"><span class="nav-number">2.3.</span> <span class="nav-text">Back-off Models</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Character-based-Tokenization"><span class="nav-number">3.</span> <span class="nav-text">Character-based Tokenization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hierarchical-Model-Backoff"><span class="nav-number">3.1.</span> <span class="nav-text">Hierarchical Model: Backoff</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Char-level-Output"><span class="nav-number">3.2.</span> <span class="nav-text">Char-level Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Char-level-Input"><span class="nav-number">3.3.</span> <span class="nav-text">Char-level Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fully-Char-level"><span class="nav-number">3.4.</span> <span class="nav-text">Fully Char-level</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Subword-based-Tokenization"><span class="nav-number">4.</span> <span class="nav-text">Subword-based Tokenization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Byte-Pair-Encoding"><span class="nav-number">4.1.</span> <span class="nav-text">Byte-Pair Encoding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-tokenization"><span class="nav-number">4.1.1.</span> <span class="nav-text">Pre-tokenization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BPE-Training"><span class="nav-number">4.1.2.</span> <span class="nav-text">BPE Training</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BPE-Encoding"><span class="nav-number">4.1.3.</span> <span class="nav-text">BPE Encoding</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WordPiece"><span class="nav-number">4.2.</span> <span class="nav-text">WordPiece</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unigram-Language-Model"><span class="nav-number">4.3.</span> <span class="nav-text">Unigram Language Model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Comparison"><span class="nav-number">4.4.</span> <span class="nav-text">Comparison</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/";
+    this.page.identifier = "2019/03/08/NLP/How-to-handle-Out-Of-Vocabulary-words/";
+    this.page.title = "Word Tokenization: How to Handle Out-Of-Vocabulary Vocabularies?";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

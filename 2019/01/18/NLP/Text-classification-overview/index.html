@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Text classification is one of the most important fundamental NLP tasks. Its goal is to assign labels to texts, including sentiment analysis, spam detection, topic labeling, Twitter hashtag prediction,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Text Classification: An Overview">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/01/18/NLP/Text-classification-overview/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="Text classification is one of the most important fundamental NLP tasks. Its goal is to assign labels to texts, including sentiment analysis, spam detection, topic labeling, Twitter hashtag prediction,">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/fasttext-model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/textcnn-model.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/Textcnn1D-conv.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RCNN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/DMN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/BERT-classification.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/HAN.png">
+<meta property="article:published_time" content="2019-01-18T02:34:53.000Z">
+<meta property="article:modified_time" content="2019-01-18T02:34:53.000Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="NLP">
+<meta property="article:tag" content="Survey">
+<meta property="article:tag" content="Text classification">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/fasttext-model.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/01/18/NLP/Text-classification-overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Text Classification: An Overview | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/01/18/NLP/Text-classification-overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Text Classification: An Overview
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-01-18 10:34:53" itemprop="dateCreated datePublished" datetime="2019-01-18T10:34:53+08:00">2019-01-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/Text-classification/" itemprop="url" rel="index"><span itemprop="name">Text classification</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/01/18/NLP/Text-classification-overview/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/18/NLP/Text-classification-overview/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>Text classification is one of the most important fundamental NLP tasks. Its goal is to <strong>assign labels to texts</strong>, including sentiment analysis, spam detection, topic labeling, Twitter hashtag prediction, domain detection, etc.<br><span id="more"></span></p>
+<h1 id="Sentence-classfication"><a href="#Sentence-classfication" class="headerlink" title="Sentence classfication"></a>Sentence classfication</h1><h2 id="Fasttext-Facebook-2016"><a href="#Fasttext-Facebook-2016" class="headerlink" title="Fasttext (Facebook 2016)"></a>Fasttext (Facebook 2016)</h2><p>A simple and efficient <code>baseline</code> for text classification.</p>
+<ul>
+<li>Model: average word representations into a text representation, and then feed into a linear classifier (the model architecture is similar to the <em>CBOW model</em>, by replacing the middle word with a label).</li>
+<li>Hierarchical softmax</li>
+<li>N-gram features: Besides bag-of-word features, <code>bag of n-grams</code> as additional features to <strong>capture partial information about the local word order</strong>.<br>  Hashing trick</li>
+</ul>
+<p><img data-src="/notes/images/fasttext-model.png" alt="upload successful"></p>
+<h2 id="TextCNN-Kim-2014"><a href="#TextCNN-Kim-2014" class="headerlink" title="TextCNN (Kim 2014)"></a>TextCNN (Kim 2014)</h2><p><strong>Background</strong></p>
+<ul>
+<li>sparse, 1-of-V encoding <script type="math/tex">\rightarrow</script> low dimensional vector space</li>
+</ul>
+<div class="note default">
+            <p>CNNs utilize layers with <strong>convolving filters</strong> that are applied to <strong>loca l features</strong>. (Lecun et al., 1998) <sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kim, Y. (2014). [Convolutional neural networks for sentence classification](https://arxiv.org/pdf/1408.5882). arXiv preprint arXiv:1408.5882.">[3]</span></a></sup></p>
+          </div>
+<p>Let <script type="math/tex">\mathbf{x}_i \in \mathbb{R}^k</script> be the $k$-dimensional word vectors w.r.t. $i$-th word in the sentence. A sentence with length $n$ (padded if necessary) is:</p>
+<script type="math/tex; mode=display">\mathbf{x}_{1:n} = \mathbf{x}_{1} \oplus \mathbf{x}_{2} \oplus ... \oplus \mathbf{x}_{n}</script><p>Convolution op applies filters $\mathbf{w} \in \mathbb{R}^{hk}$ to a window of $h$ words to extract new features:</p>
+<script type="math/tex; mode=display">c_i=f(\mathbf{w} \cdot \mathbf{x}_{i:i+h-1} + b)</script><p>where $b \in \mathbb{R} $ is a bias term and $f$ is a non-linear function, e.g. hyperbolic tangent.</p>
+<p>Thus, for a sentence <script type="math/tex">\{\mathbf{x}_{1:h},\mathbf{x}_{2:h+1},...,\mathbf{x}_{n-h+1:n}\}</script>, generate a feature map $\mathbf{c} \in \mathbb{R}^{n-h+1} $:</p>
+<script type="math/tex; mode=display">\mathbf{c} = [c_1, c_2,...,c_{n-h+1}]</script><p>Then apply a <strong>max-over-time pooling</strong> op over the feature map and takes the maximum value <script type="math/tex">\hat{c} = \max \mathbf{c}</script> as the feature w.r.t. this filter. </p>
+<div class="note primary">
+            <p><strong>max-over-time pooling</strong> op is to capture the most important feature - with maximum value - for each feature map.</p><p>One feature is extracted from $one$ filter.</p>
+          </div>
+<p>TextCNNs use multiple filters with varying window sizes $h$ to get multiple features. Then pass these features to a FC-softmax layer, and output the probability distribution over labels.</p>
+<div class="note primary">
+            <p><strong>Tricks</strong>:</p><ul><li>Dropout regularization: prevent co-adaptation of hidden units by randomly dropping out a proportion $p$ of the hidden units during the training process.<br>Given $\mathbf{c}$, conventional FC layer is:<script type="math/tex; mode=display">y = \mathbf{w} \cdot \mathbf{z} + b</script>While dropout is:<script type="math/tex; mode=display">y = \mathbf{w} \cdot (\mathbf{z} \circ \mathbf{r}) + b</script>where $ \circ $ is the element-wise multiplication op and $\mathbf{r} \in \mathbb{R}^m$ is a masking vector of Bernoulli random variables with probability $p$ to keep. </li></ul><p>At training time, after masking $(1-p)\%$ hidden units, backprop only goes though unmasked units.</p><p>At test time, the learned weight $\mathbf{w}$ is <strong>scaled</strong> by $p$: $\hat{\mathbf{w}} = p \mathbf{w}$. Then $\hat{\mathbf{w}}$ is used at <strong>test time without dropout</strong> op.</p><ul><li>Weight decay (L2-norm)</li></ul>
+          </div>
+<div class="note success">
+            <p><strong>TextCNN variants</strong>:</p><ol><li><strong>CNN-rand</strong>: randomly initialize word vectors during training.</li><li><strong>CNN-static</strong>: use pretrained embeddings and keep them <strong>static</strong> during training, i.e. only train parameters not in embedding layers.</li><li><strong>CNN-non-static</strong>: use pretrained embeddings and <strong>fine tune</strong>, a.k.a. domain-specific training.</li><li><strong>CNN-multichannel</strong>: combine aforementioned two scenarios, i.e. use two channels of word embeddings followed by convolution op, but the <strong>gradients only backprop through the fine-tuned channel</strong>.</li></ol><p><strong>Intuition</strong>: multichannel CNNs could pervent overfitting (preventing the shift of fine-tuned embeddings by considering original static embeddings in the other channel at the same time), especially on small-scale datasets.<br>(But results are mixed; further work: on regularizing the fine-tuning process, e.g. use extra dimensions for fine-tune channel)</p>
+          </div>
+<p><strong>Static v.s. Non-static representations</strong>:</p>
+<ul>
+<li><p>Static: W2V<br>“good” is similar to “bad” using word2vec!<br>Because of syntactically equivalence</p>
+</li>
+<li><p>Non-static: e.g. good ~ nice<br>Fine-tuning can learn more meaningful representations</p>
+</li>
+</ul>
+<p><img data-src="/notes/images/textcnn-model.png" alt="upload successful"></p>
+<div class="note danger">
+            <p><strong>Empirical findings on textCNNs</strong>:</p><ul><li>Dense pretrained word representations are better than 1-of-V encodings, although different representations perform variously on different tasks.</li><li>Filter rigion size and # of feature maps have a large impact on performance.</li><li>Regularization (dropout or $l2$-norm) has relatively little effect on performance.</li></ul>
+          </div>
+<p><strong>Fine-tuning on textCNN suggestions</strong>:</p>
+<ul>
+<li>Use non-static word representations instead of one-hot.</li>
+<li>Line-search over the <strong>single region size</strong> (rather than combined region sizes, e.g. [3,4,5]) to find the best one (e.g. 1~10).</li>
+<li>Alter the <strong># of feature maps</strong> for each filter size (from 100~600), with small dropout rate (0-0.5) and large l2-norm constraint.</li>
+<li>Consider different activation functions if possible (ReLU, tanh)</li>
+</ul>
+<p>Give a detailed figure of a binary classification task<sup id="fnref:5"><a href="#fn:5" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Y., & Wallace, B. (2015). [A sensitivity analysis of (and practitioners' guide to) convolutional neural networks for sentence classification](https://arxiv.org/pdf/1510.03820). arXiv preprint arXiv:1510.03820.
+">[5]</span></a></sup></p>
+<p><img data-src="/notes/images/Textcnn1D-conv.png" alt="upload successful"></p>
+<h2 id="RCNN-AAAI-2015"><a href="#RCNN-AAAI-2015" class="headerlink" title="RCNN (AAAI 2015)"></a>RCNN (AAAI 2015)</h2><h3 id="Background"><a href="#Background" class="headerlink" title="Background"></a><strong>Background</strong></h3><ul>
+<li>Recurrent NNs are better to capture the contextual information without the limitation of window size. But it is a <strong>biased</strong> model since the latter words play more important roles than former contexts.</li>
+<li>ConvNets are unbiased since it can fairly tackle the words in a fixed context with a max-pooling layer. However, it is limited by the pre-defined filter region size. Higher order window size or n-gram could lead to sparse problems.</li>
+</ul>
+<p>Recurrent ConvNets(RCNN) combines both of them.<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lai, S., Xu, L., Liu, K., & Zhao, J. (2015, January). [Recurrent Convolutional Neural Networks for Text Classification](http://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/download/9745/9552). In AAAI (Vol. 333, pp. 2267-2273).
+">[6]</span></a></sup></p>
+<h3 id="Two-steps"><a href="#Two-steps" class="headerlink" title="Two steps"></a><strong>Two steps</strong></h3><h4 id="a-Word-representation-with-recurrent-connection"><a href="#a-Word-representation-with-recurrent-connection" class="headerlink" title="a) Word representation with recurrent connection"></a>a) <strong>Word representation with recurrent connection</strong></h4><p>Combine current word embedding <script type="math/tex">\mathbf{e}(w_i)</script> and its left and right context (i.e. <script type="math/tex">\mathbf{c}_l(w_i), \mathbf{c}_r(w_i)</script>) to represent $i$-th word <script type="math/tex">\mathbf{w}_i</script>: </p>
+<script type="math/tex; mode=display">\mathbf{x}_i = [ \mathbf{c}_l(w_i), \mathbf{e}(w_i), \mathbf{c}_r(w_i) ]</script><p>Here compute the left and right context representation recursively:</p>
+<script type="math/tex; mode=display">\mathbf{c}_l(w_i) = f(W^{(l)} \mathbf{c}_l(w_{i-1}) + W^{sl} \mathbf{e}(w_{i-1}) )</script><script type="math/tex; mode=display">\mathbf{c}_r(w_i) = f(W^{(r)} \mathbf{c}_r(w_{i-1}) + W^{sr} \mathbf{e}(w_{i-1}) )</script><p>where $f$ is a non-linear activation function.</p>
+<p>Afterwards, go through a FC layer with $\tanh$ activation function.</p>
+<script type="math/tex; mode=display">\mathbf{y}_i^{(2)} = \tanh( W^{(2)} \mathbf{x}_i + \mathbf{b}^{(2)})</script><p>where <script type="math/tex">\mathbf{y}_i^{(2)}</script> is a learned word representation, i.e. latent semantic vector.</p>
+<h4 id="b-Text-representation-learning"><a href="#b-Text-representation-learning" class="headerlink" title="b) Text representation learning"></a>b) <strong>Text representation learning</strong></h4><p>CNNs are used for text representation. Previous step can be seen as a recurrent convolution op.</p>
+<p>Then apply a max-pooling layer:</p>
+<script type="math/tex; mode=display">\mathbf{y}^{(3)} = \max_{i=1}^n \mathbf{y}_i^{(2)}</script><p>where $k$-th element of $\mathbf{y}^{(3)}$ is the maximum of the $k$-th elements of $\mathbf{y}_i^{(2)}$.</p>
+<p>Finally, go to a FC-softmax layer.</p>
+<p><img data-src="/notes/images/RCNN.png" alt="upload successful"></p>
+<h2 id="DMN-ICML-2016"><a href="#DMN-ICML-2016" class="headerlink" title="DMN (ICML 2016)"></a>DMN (ICML 2016)</h2><div class="note primary">
+            <p><strong>DMN (Dynamic Memory Network)</strong></p><p><strong>Inituition</strong>: Most NLP tasks can be <strong>cast as question-answering</strong> problems, (e.g. machine translation, sequence modeliing, classification problems) using raw <strong>input-question-answer triplets</strong>: firstly obtain representations for inputs and the question. The question representation will trigger the <em>iterative attention process</em> by searching at inputs and relevant facts. Then the memory module produces a vector representation of all relevant information to answer the module.</p>
+          </div>
+<p><img data-src="/notes/images/DMN.png" alt="upload successful"></p>
+<p><strong>Input module</strong></p>
+<ul>
+<li>Encode <em>raw texts</em> into distributed representations:<script type="math/tex; mode=display">h_t = \text{GRU}(E(w_t), h_{t-1})</script>where $E$ is the embedding lookup table, <script type="math/tex">w_t</script> is the word index of $t$-th word of the input sentence.</li>
+</ul>
+<p><strong>Question module</strong></p>
+<ul>
+<li>Encode <em>question</em> into distributed representations with GRU. Unlike input module, output the last hiddden states $q$.</li>
+</ul>
+<p><strong>Episodic memory module</strong></p>
+<ul>
+<li>During each iteration, the attention mechanism attends over all the fact representation $c$ with gated function, whilst taking into account the question representation $q$ and the previous memory $m^{i-1}$ to produce the episode $e^i$.</li>
+<li><p>Use <strong>gating function</strong> as the attention for each pass $i$: $G_i^t = G(c_t, m^{i-1}, q)$.<br>The scoring function $G$ takes (candidate fact $c$, previous memory $m$, question $q$)  as the input feature and output a scala score: </p>
+<script type="math/tex; mode=display">z = [c,m,q, c \circ q, c \circ m, |c-q|, |c-m|, c^TW^{(b)}q, c^TW^{(b)}m]</script><p>where $\circ$ is an element-wise product.<br>The scoring function is a two-layer FC layer:</p>
+<script type="math/tex; mode=display">G(c,m,q) = \sigma(W^{(2)} \tanh (W^{(1)} z(c,m,q) + b^{(1)}) + b^{(2)})</script></li>
+<li><p>Memory update: for pass $i$, given a sentence of <script type="math/tex">{c_1, ...,c_{T_c}}</script>, the hidden states at time $t$ and episode $e^i$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+h_i^t &= g_t^i \text{GRU} (c_t, h_{t-1}^i) + (1-g_t^i) h_{t-1}^i \\
+e^i &= h^i_{T_C}
+\end{align}</script></li>
+</ul>
+<p><strong>Answer module</strong></p>
+<ul>
+<li>Employ another GRU whose initial state is last memory: <script type="math/tex">a_0 = m^{T_M}</script>. At each time, considering the question $q$, last hidden state <script type="math/tex">a_{t-1}</script>, as well as previous predicted output <script type="math/tex">y_{t-1}</script>.<script type="math/tex; mode=display">y_t = \text{softmax} (W^{(a)}a_t)</script><script type="math/tex; mode=display">a_t = \text{GRU} ([y_{t-1},q],a_{t-1})</script>where concat last generated output and question vector <script type="math/tex">[y_{t-1},q]</script>.</li>
+</ul>
+<h2 id="BERT-Google-2018"><a href="#BERT-Google-2018" class="headerlink" title="BERT (Google 2018)"></a>BERT (Google 2018)</h2><p><strong>B</strong>i-directional <strong>E</strong>ncoder <strong>R</strong>epresentations from <strong>T</strong>ransformers</p>
+<ul>
+<li>Model: bi-transformer</li>
+<li>Pretraining: <ol>
+<li>Masked Language Models</li>
+<li>Next Sentence Prediction</li>
+</ol>
+</li>
+<li>Fine-tuning</li>
+</ul>
+<p>My solution: <a target="_blank" rel="noopener" href="https://github.com/cyk1337/BERT-classification">github</a></p>
+<p><img data-src="/notes/images/BERT-classification.png" alt="upload successful"></p>
+<h1 id="Document-classification"><a href="#Document-classification" class="headerlink" title="Document classification"></a>Document classification</h1><h2 id="HAN-NAACL-2016"><a href="#HAN-NAACL-2016" class="headerlink" title="HAN (NAACL 2016)"></a>HAN (NAACL 2016)</h2><p>HAN(Hierarchical Attention Net) models the attention mechanism in two levels: <strong>word and sentence-level</strong>. <sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang, Z., Yang, D., Dyer, C., He, X., Smola, A., & Hovy, E. (2016). [Hierarchical attention networks for document classification](http://www.aclweb.org/anthology/N16-1174). In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 1480-1489).
+">[4]</span></a></sup></p>
+<div class="note danger">
+            <ul><li><strong>Intuition</strong>: <strong>incorporating knowledge of document structure</strong> in the model architecture.<br>Because <strong>not all parts of documents are equally relevant</strong>, and determing the relevant parts includes <strong>modeling the interaction of the words</strong>, not just their presence in isolation.</li><li><strong>Hierarchical structure</strong>: words form sentences, sentences form a document.</li><li>Different words and sentences in a document are <strong>differently informative</strong>. The importance of the informative words and sentences are <strong>highly context-dependent</strong>.</li><li>Attention mechanism could provide insight into which words and sentences contribute more or less to the decision<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang, Z., Yang, D., Dyer, C., He, X., Smola, A., & Hovy, E. (2016). [Hierarchical attention networks for document classification](http://www.aclweb.org/anthology/N16-1174). In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 1480-1489).">[4]</span></a></sup> (by plotting hotmap I think;) )</li></ul>
+          </div>
+<h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><p>Overall: </p>
+<ol>
+<li><strong>Word-level</strong>: a word encoder + word-level attention layer;</li>
+<li><strong>Sentence-level</strong>: a sentence encoder + sentence-level attention layer.</li>
+</ol>
+<p><strong>Sequence encoder</strong>: GRU</p>
+<h4 id="Hierarchical-attention"><a href="#Hierarchical-attention" class="headerlink" title="Hierarchical attention"></a><strong>Hierarchical attention</strong></h4><h5 id="Word-Encoder"><a href="#Word-Encoder" class="headerlink" title="Word Encoder"></a><strong>Word Encoder</strong></h5><p>Get word representations from characters using bi-GRU.</p>
+<p>Given a sentence with words $w_{it}, t \in [1,T]$, firstly map the words to vectors through an embedding matrix <script type="math/tex">W_e</script>: </p>
+<script type="math/tex; mode=display">x_{ij} = W_e w_{ij}</script><p>Then concat the bi-GRU representation:</p>
+<script type="math/tex; mode=display">\overrightarrow{h}_{it} =  \overrightarrow{GRU}(x_{it})</script><script type="math/tex; mode=display">\overleftarrow{h}_{it} =  \overleftarrow{GRU}(x_{it})</script><script type="math/tex; mode=display">h_{it} = [\overrightarrow{h}_{it}, \overleftarrow{h}_{it}]</script><p>HAN<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang, Z., Yang, D., Dyer, C., He, X., Smola, A., & Hovy, E. (2016). [Hierarchical attention networks for document classification](http://www.aclweb.org/anthology/N16-1174). In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 1480-1489).
+">[4]</span></a></sup> directly applied word embeddings for simplification.</p>
+<h5 id="Word-Attention"><a href="#Word-Attention" class="headerlink" title="Word Attention"></a><strong>Word Attention</strong></h5><p><strong>Intuition</strong>: not all words contribute equally to the sentence representation. Hence employ attention to extract the important words that are most informative and aggregate all the words according to their informativeness (attention vector distribution) to obtain the sentence vector <script type="math/tex">s_i</script>.</p>
+<script type="math/tex; mode=display">u_{it}= \tanh (W_wh_{it}+b_w)</script><script type="math/tex; mode=display">\alpha_{it}=\frac{\exp(u_{it}^T u_w)}{ \sum_t \exp( u_{it}^T u_w ) }</script><script type="math/tex; mode=display">s_i = \sum_t \alpha_{it} h_{it}</script><p><strong>Interpretation</strong>:  firstly feed the word representation into a FC layer to get a hidden representation of <script type="math/tex">u_{it}</script>. Then measure the (cosine) similarity between the current representation <script type="math/tex">u_{it}</script> and randomly initialized context <script type="math/tex">u_w</script>, followed by a softmax to obtain the normalized attention weights <script type="math/tex">\alpha{it}</script>. Finally, aggregate all the word representations <script type="math/tex">h_{it}</script> according to the weight vector.<br><div class="note primary">
+            <p>Here, the word context vector <script type="math/tex">u_w</script> is <strong>randomly initialized</strong> and <strong>joint learned</strong> during the training process<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yang, Z., Yang, D., Dyer, C., He, X., Smola, A., & Hovy, E. (2016). [Hierarchical attention networks for document classification](http://www.aclweb.org/anthology/N16-1174). In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 1480-1489).">[4]</span></a></sup>. “The context vector <script type="math/tex">u_w</script> can be seen as a high level representation of a fixed query “what is the informative word” over the words like that used in memory networks.”</p>
+          </div></p>
+<h5 id="Sentence-Encoder"><a href="#Sentence-Encoder" class="headerlink" title="Sentence Encoder"></a>Sentence Encoder</h5><p>Given sentene vector <script type="math/tex">s_i</script>, we get the document vector <script type="math/tex">h_i</script> with bi-GRU (same as word encoder):</p>
+<script type="math/tex; mode=display">\overrightarrow{h}_{i} =  \overrightarrow{\text{GRU}}(s_{i})</script><script type="math/tex; mode=display">\overleftarrow{h}_{i} =  \overleftarrow{\text{GRU}}(s_{i})</script><script type="math/tex; mode=display">h_{i} = [\overrightarrow{h}_{i}, \overleftarrow{h}_{i}]</script><h5 id="Sentence-Attention"><a href="#Sentence-Attention" class="headerlink" title="Sentence Attention"></a>Sentence Attention</h5><p>Same as word attention. Obtain the document vector $v$:</p>
+<script type="math/tex; mode=display">u_{i}=\tanh(W_s h_{i}+b_s)</script><script type="math/tex; mode=display">\alpha_{i}=\frac{\exp(u_{i}^T u_s)}{\sum_t \exp(u_{t}^T u_s) }</script><script type="math/tex; mode=display">v = \sum_t \alpha_{i} h_{i}</script><p>where <script type="math/tex">u_s</script> is sentence-level randomly-initialized sentence context vector, and is joinly learned during training.</p>
+<h5 id="Document-classification-1"><a href="#Document-classification-1" class="headerlink" title="Document classification"></a>Document classification</h5><p>Feed high-level document representation $v$ into a FC-softmax layer.</p>
+<script type="math/tex; mode=display">p=\text{softmax}(W_c v + b_c)</script><p>The loss function is NLL(negative log likelihood):</p>
+<script type="math/tex; mode=display">L = -\sum_d log p_{dj}</script><p>where $j$ is the label of the document $d$.</p>
+<p><img data-src="/notes/images/HAN.png" alt="upload successful"></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Joulin, A., Grave, E., Bojanowski, P., &amp; Mikolov, T. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1607.01759">Bag of tricks for efficient text classification</a>. arXiv preprint arXiv:1607.01759.<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Devlin, J., Chang, M. W., Lee, K., &amp; Toutanova, K. (2018). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1810.04805.pdf?fbclid=IwAR3FQiWQzP7stmPWZ4kzrGmiUaN81UpiNeq4GWthrxmwgX0B9f1CvuXJC2E">Bert: Pre-training of deep bidirectional transformers for language understanding</a>. arXiv preprint arXiv:1810.04805.<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kim, Y. (2014). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1408.5882">Convolutional neural networks for sentence classification</a>. arXiv preprint arXiv:1408.5882.<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yang, Z., Yang, D., Dyer, C., He, X., Smola, A., &amp; Hovy, E. (2016). <a target="_blank" rel="noopener" href="http://www.aclweb.org/anthology/N16-1174">Hierarchical attention networks for document classification</a>. In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 1480-1489).<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, Y., &amp; Wallace, B. (2015). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1510.03820">A sensitivity analysis of (and practitioners' guide to) convolutional neural networks for sentence classification</a>. arXiv preprint arXiv:1510.03820.<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lai, S., Xu, L., Liu, K., &amp; Zhao, J. (2015, January). <a target="_blank" rel="noopener" href="http://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/download/9745/9552">Recurrent Convolutional Neural Networks for Text Classification</a>. In AAAI (Vol. 333, pp. 2267-2273).<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kumar, A., Irsoy, O., Su, J., Bradbury, J., English, R., Pierce, B., Ondruska, P., Gulrajani, I., &amp; Socher, R. (2016). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1506.07285.pdf">Ask Me Anything: Dynamic Memory Networks for Natural Language Processing</a>. ICML.<a href="#fnref:7" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+              <a href="/notes/tags/Survey/" rel="tag"># Survey</a>
+              <a href="/notes/tags/Text-classification/" rel="tag"># Text classification</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/01/06/NLP/Embedding-pretrained-linguistic-prior-in-a-nutshell/" rel="prev" title="Embedding Pretrained Linguistic Prior in a Nutshell">
+      <i class="fa fa-chevron-left"></i> Embedding Pretrained Linguistic Prior in a Nutshell
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/01/20/Programming/Shell-command-zoo-in-data-processing/" rel="next" title="Shell Command Zoo in Data Processing">
+      Shell Command Zoo in Data Processing <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Sentence-classfication"><span class="nav-number">1.</span> <span class="nav-text">Sentence classfication</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Fasttext-Facebook-2016"><span class="nav-number">1.1.</span> <span class="nav-text">Fasttext (Facebook 2016)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TextCNN-Kim-2014"><span class="nav-number">1.2.</span> <span class="nav-text">TextCNN (Kim 2014)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RCNN-AAAI-2015"><span class="nav-number">1.3.</span> <span class="nav-text">RCNN (AAAI 2015)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Background"><span class="nav-number">1.3.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Two-steps"><span class="nav-number">1.3.2.</span> <span class="nav-text">Two steps</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-Word-representation-with-recurrent-connection"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">a) Word representation with recurrent connection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-Text-representation-learning"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">b) Text representation learning</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DMN-ICML-2016"><span class="nav-number">1.4.</span> <span class="nav-text">DMN (ICML 2016)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BERT-Google-2018"><span class="nav-number">1.5.</span> <span class="nav-text">BERT (Google 2018)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Document-classification"><span class="nav-number">2.</span> <span class="nav-text">Document classification</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HAN-NAACL-2016"><span class="nav-number">2.1.</span> <span class="nav-text">HAN (NAACL 2016)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Architecture"><span class="nav-number">2.1.1.</span> <span class="nav-text">Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Hierarchical-attention"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">Hierarchical attention</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Word-Encoder"><span class="nav-number">2.1.1.1.1.</span> <span class="nav-text">Word Encoder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Word-Attention"><span class="nav-number">2.1.1.1.2.</span> <span class="nav-text">Word Attention</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sentence-Encoder"><span class="nav-number">2.1.1.1.3.</span> <span class="nav-text">Sentence Encoder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sentence-Attention"><span class="nav-number">2.1.1.1.4.</span> <span class="nav-text">Sentence Attention</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Document-classification-1"><span class="nav-number">2.1.1.1.5.</span> <span class="nav-text">Document classification</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/01/18/NLP/Text-classification-overview/";
+    this.page.identifier = "2019/01/18/NLP/Text-classification-overview/";
+    this.page.title = "Text Classification: An Overview";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

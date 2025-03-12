@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Background: Conventional maximum likelihood approaches for sequence generation with teacher forcing algorithms are inherently prone to exposure bias at the inference stage due to the training-testing">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sequence GANs in a Nutshell">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="Background: Conventional maximum likelihood approaches for sequence generation with teacher forcing algorithms are inherently prone to exposure bias at the inference stage due to the training-testing">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SeqGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/TextGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MaliGAN-Algorithm.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MaliGAN-Mix-Algorithm.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RankGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/LeakGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/FM-GAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/MaskGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SentiGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RelGAN-Generator.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/RelGAN-Discriminator.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/CatGAN.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/SALGAN.png">
+<meta property="article:published_time" content="2020-08-30T09:27:00.000Z">
+<meta property="article:modified_time" content="2021-01-01T04:00:00.000Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="NLP">
+<meta property="article:tag" content="NLG">
+<meta property="article:tag" content="GAN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/SeqGAN.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Sequence GANs in a Nutshell | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Sequence GANs in a Nutshell
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-30 17:27:00" itemprop="dateCreated datePublished" datetime="2020-08-30T17:27:00+08:00">2020-08-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/NLG/" itemprop="url" rel="index"><span itemprop="name">NLG</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/NLP/NLG/GAN/" itemprop="url" rel="index"><span itemprop="name">GAN</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><!--A summary of Generative Adversarial Networks (GANs) for generating discrete sequences, such as language modeling, music generation, *etc*.-->
+<p><strong>Background</strong>: Conventional maximum likelihood approaches for sequence generation with teacher forcing algorithms are inherently prone to <em>exposure bias</em> at the inference stage due to the training-testing discrepancy—the generator produces a sequence iteratively conditioned on its previously predicted ones that may be never observed during training—leading to accumulative mismatch with the increment of generated sequences. In other words, the model is only trained on demonstrated behaviors (real data samples) but not free-running mode.<br>Generative Adversarial Networks (GANs) hold the promise of mitigating such issues for generating discrete sequences, such as language modeling, speech/music generation, <em>etc</em>.<br><span id="more"></span></p>
+<p>GANs have demonstrated the compelling performance in generating real-valued data such as pixel-based images but have fallen short of discrete data generation primarily resulting from the incapability of gradient propagation passing from the discriminator (denoted as $\mathcal{D}$) to the generator (denoted as $\mathcal{G}$) in the original (image) GAN framework, which is incurred by the non-differential sampling/argmax operation in between.</p>
+<p>Existing solutions to discrete sequence generation using GANs could be mainly sorted into different groups by resorting to:</p>
+<ol>
+<li><strong>Reinforcement Learning</strong> (RL): modeling the sequence generation procedure as a sequential decision-making process <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Lantao, et al. "[Seqgan: Sequence generative adversarial nets with policy gradient.](https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/download/14344/14489)" Thirty-first AAAI conference on artificial intelligence. (2017).
+">[1]</span></a></sup><sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Jiaxian, et al. "[Long text generation via adversarial training with leaked information.](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/16360/16061)" Thirty-Second AAAI Conference on Artificial Intelligence (2018).
+">[6]</span></a></sup><sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Che, Tong, et al. "[Maximum-likelihood augmented discrete generative adversarial networks.](https://arxiv.org/pdf/1702.07983.pdf)" arXiv preprint arXiv:1702.07983 (2017).
+">[7]</span></a></sup><sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lin, Kevin, et al. "[Adversarial ranking for language generation.](http://papers.nips.cc/paper/6908-adversarial-ranking-for-language-generation.pdf)" Advances in Neural Information Processing Systems (2017).
+">[8]</span></a></sup>; typically yielding high-variance but unbiased gradient estimates.</li>
+<li>RL-free: utilizing soft-argmax operator<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Yizhe, et al. "[Adversarial feature matching for text generation.](https://arxiv.org/pdf/1706.03850)" arXiv preprint arXiv:1706.03850 (2017).
+">[2]</span></a></sup>, Gumbel-softmax trick<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kusner, Matt J., and José Miguel Hernández-Lobato. "[Gans for sequences of discrete elements with the gumbel-softmax distribution.](https://arxiv.org/pdf/1611.04051.pdf)" arXiv preprint arXiv:1611.04051 (2016).
+">[9]</span></a></sup>, or continuous relaxation<sup id="fnref:16"><a href="#fn:16" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Gulrajani, Ishaan, et al. "[Improved training of wasserstein gans.](https://papers.nips.cc/paper/7159-improved-training-of-wasserstein-gans.pdf)" Advances in Sneural information processing systems (2017).
+">[16]</span></a></sup> to provide the continuous approximation of the discrete distribution on the sequences; yielding low variance but biased estimation.</li>
+</ol>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">Policy Gradient</th>
+<th style="text-align:center">Gumbel-softmax</th>
+<th style="text-align:center">Soft-argmax</th>
+<th style="text-align:center">Dense Reward</th>
+<th style="text-align:center">Internal Feature</th>
+<th style="text-align:center">Pretraining</th>
+<th style="text-align:center">$\mathcal{G}$</th>
+<th style="text-align:center">$\mathcal{D}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">SeqGAN  (AAAI’17)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">TextGAN  (ICML’17)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">MaliGAN  (MILA)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">RankGAN  (NIPS’17)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">LeakGAN  (AAAI’18)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">GSGAN</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">LSTM</td>
+</tr>
+<tr>
+<td style="text-align:center">FMGAN  (NeurIPS’18)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">SentiGAN  (IJCAI’18)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">MaskGAN  (ICLR’18)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM (seq2seq)</td>
+<td style="text-align:center">LSTM (seq2seq)</td>
+</tr>
+<tr>
+<td style="text-align:center">RelGAN  (ICLR’19)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">SAN</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">ScratchGAN  (NeurIPS’19)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">LSTM</td>
+</tr>
+<tr>
+<td style="text-align:center">JSDGAN  (AISTATS’19)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔ / ✘</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">✘</td>
+</tr>
+<tr>
+<td style="text-align:center">CatGAN  (AAAI’20)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">SAN</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">SALGAN  (ICLR’20)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">LSTM</td>
+<td style="text-align:center">CNN</td>
+</tr>
+<tr>
+<td style="text-align:center">ColdGAN (NeurIPS’20)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">T5 / BART</td>
+<td style="text-align:center">N/A</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="SeqGAN-AAAI’17"><a href="#SeqGAN-AAAI’17" class="headerlink" title="SeqGAN (AAAI’17)"></a>SeqGAN (AAAI’17)</h1><h2 id="Problems"><a href="#Problems" class="headerlink" title="Problems"></a>Problems</h2><p>There exist limitations in discrete sequence generation using GANs, such as:</p>
+<ol>
+<li>The discrete output of the generator $\mathcal{G}$;</li>
+<li>$\mathcal{D}$ can only assess the complete sequence, while it is non-trivial to balance the current score and future one for partially generated sequence once the entire sequence has been generated.</li>
+</ol>
+<h2 id="Approach"><a href="#Approach" class="headerlink" title="Approach"></a>Approach</h2><p>SeqGAN<sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Lantao, et al. "[Seqgan: Sequence generative adversarial nets with policy gradient.](https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/download/14344/14489)" Thirty-first AAAI conference on artificial intelligence. (2017).
+">[1]</span></a></sup> bypasses the generator differentiation problem by directly performing a policy gradient update, which adopts the judgments of $\mathcal{D}$ on the complete generated sequences as reward signals using Monte Carlo (MC) search.</p>
+<p>SeqGAN considers the sequence generation as a sequential decision-making process with a stochastic parameterized policy, in which the generator $\mathcal{G}$ is treated as the actor/agent of RL, the state is previously generated tokens so far and the action is the next token to be generated.</p>
+<p><img data-src="/notes/images/SeqGAN.png" width="80%"/></p>
+<center> Image source: <sup id="fnref:1"><a href="#fn:1" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Yu, Lantao, et al. "[Seqgan: Sequence generative adversarial nets with policy gradient.](https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/download/14344/14489)" Thirty-first AAAI conference on artificial intelligence. (2017).
+">[1]</span></a></sup> </center>
+
+<h3 id="Definition"><a href="#Definition" class="headerlink" title="Definition"></a>Definition</h3><p>Given a dataset of real-word structured sequences, train a $\theta$-parameterized generative model <script type="math/tex">G_\theta</script> to produce a sequence <script type="math/tex">Y_{1:T} = (y_1, \cdots, y_t, \cdots, y_T), y_t \in \mathcal{Y}</script>, where $\mathcal{Y}$ is the vocabulary of candidate tokens. The policy <script type="math/tex">G_\theta(y_t \vert Y_{1: t-1})</script> is stochastic: at the $t$-th timestep, the state $s$ is the current partially predicted sequences <script type="math/tex">(y_1, \cdots, y_{t-1})</script>, and the action $a$ is the next token $y_t$ to be selected. </p>
+<p>The discriminator <script type="math/tex">D_\phi</script> parameterized by $\phi$ predicts how likely the sampled sequence <script type="math/tex">Y_{1:T}</script> is from real data, providing the guidance (reward) to update the policy <script type="math/tex">G_\theta</script>.</p>
+<h3 id="Policy-Gradient-with-MC-Search"><a href="#Policy-Gradient-with-MC-Search" class="headerlink" title="Policy Gradient with MC Search"></a>Policy Gradient with MC Search</h3><p>Let <script type="math/tex">Q_{D_\phi}^{G_\theta} (s, a)</script> be the action-value function of a sequence, <em>i.e.</em>, the expected accumulative reward starting from the state $s$ taking action $a$ with policy <script type="math/tex">G_\theta</script>; <script type="math/tex">R_T</script> be the reward for a complete sequence. The objective of <script type="math/tex">G_\theta(y_t \vert Y_{1:t-1})</script> is to generate a sequence from the start state <script type="math/tex">s_0</script> to maxmize its expected reward at the end of the episode:</p>
+<script type="math/tex; mode=display">
+J(\theta) = \mathbb{E} [R_T \vert s_0, \theta] = \sum_{y_1 \in \mathcal{Y}} G_\theta (y_1 \vert s_0) \cdot Q_{D_\phi}^{G_\theta} (s_0, y_1).</script><p>SeqGAN adopts the estimated probability of being real by <script type="math/tex">D_\phi (Y_{1:T}^n)</script> as the reward, but $D$ can only provides the reward for a finished sequence. Thus, in order to evaluate the action-value for an intermediate state, Monte Carlo (MC) search with a roll-out policy <script type="math/tex">G_\beta</script> is applied to sample the unknown last $T-t$ tokens. Let an $N$-time Monte Carlo search be <script type="math/tex">\{ Y_{1:T}, \cdots, Y_{1:T}^N \} = \textrm{MC}^{G_\beta}(Y_{1:T}; N)</script>, where <script type="math/tex">Y_{1:t}^n = (y_1, \dots, y_t)</script> and <script type="math/tex">Y_{t+1:T}^n</script> is sampled based on the roll-out policy <script type="math/tex">G_\beta</script> and the current state.</p>
+<p>It runs the roll-out policy starting from current state till the end of the  sequence for $N$ times to get a batch of output samples. Thus,</p>
+<script type="math/tex; mode=display">
+\begin{align} \label{eq1}\tag{1} 
+Q_{D_\phi}^{G_\theta} (s=Y_{1:t-1}, a=y_t) = \left\{
+\begin{array}{ll}
+\frac{1}{N}\sum_{n=1}^N D_\phi(Y_{1:T}^n) & \textrm{for }t<T \\
+D_\phi (Y_{1:t}) & \textrm{for }t=T 
+\end{array}
+\right\},
+\end{align}</script><p>where <script type="math/tex">\quad Y_{1:T}^n \in \textrm{MC}^{G_\beta} (Y_{1:t}; N)</script>. The intermediate reward is iteratively defined as the next-state value starting from the state <script type="math/tex">s^\prime = Y_{1:t}</script> and rolling out to the end.</p>
+<p>The <script type="math/tex">D_\phi</script> is trained as follows:</p>
+<script type="math/tex; mode=display">
+\begin{align} \label{eq2} \tag{2}
+\min_\phi - \mathbb{E}_{Y \sim p_\textrm{data}} [\log D_\phi (Y)] - \mathbb{E}_{Y \sim G_\theta} [\log (1-D_\phi (Y))]].
+\end{align}</script><p>The gradient of objective function $J(\theta)$ w.r.t. policy’s parameter $\theta$ is:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_\theta J(\theta) &{}= \sum_{t=1}^T \mathbb{E}_{Y_{1:t-1} \sim G_\theta} \big[\sum_{y_t \in \mathcal{Y}} \nabla_\theta G_\theta (y_t \vert Y_{1:t-1}) \cdot Q_{D_\phi}^{G_\theta} (Y_{1:t-1}, y_t) \big] \\
+&{}\simeq \sum_{t=1}^T \sum_{y_t \in \mathcal{Y}} \nabla_\theta G_\theta (y_t \vert Y_{1:t-1}) \cdot Q_{D_\phi}^{G_\theta} (Y_{1:t-1}, y_t) \\
+&{}= \sum_{t=1}^T \sum_{y_t \in \mathcal{Y}} G_\theta (y_t \vert Y_{1:t-1}) \nabla_\theta \log G_\theta (y_t \vert Y_{1:t-1}) \cdot Q_{D_\phi}^{G_\theta} (Y_{1:t-1}, y_t) \\
+&{}= \sum_{t=1}^T \mathbb{E}_{y_t \sim G_\theta (y_t \vert Y_{1:t-1})} \big[ \nabla_\theta \log G_\theta (y_t \vert Y_{1:t-1}) \cdot Q_{D_\phi}^{G_\theta} (Y_{1:t-1}, y_t) \big],
+\end{align}</script><p>where <script type="math/tex">Y_{1:t-1}</script> is the obvserved intermediate state sampled from <script type="math/tex">G_\theta</script>.</p>
+<h3 id="Training-Algorithm"><a href="#Training-Algorithm" class="headerlink" title="Training Algorithm"></a>Training Algorithm</h3><p><strong>Require</strong>: generator policy <script type="math/tex">G_\theta</script>; roll-out policy <script type="math/tex">G_\beta</script>; discriminator <script type="math/tex">D_\phi</script>; a sequence dataset <script type="math/tex">\mathcal{S}=\{ X_{1:T} \}</script>; learning rate $\alpha$</p>
+<ol>
+<li>Initialize <script type="math/tex">G_\theta</script>, <script type="math/tex">D_\phi</script> with random weights $\theta$, $\phi$</li>
+<li>Pretrain <script type="math/tex">G_\theta</script> using MLE on $\mathcal{S}$</li>
+<li>$\beta \leftarrow \theta$</li>
+<li>Generate negative samples using <script type="math/tex">G_\theta</script> for training <script type="math/tex">D_\phi</script></li>
+<li>Pretrain <script type="math/tex">D_\phi</script> via minimizing the cross entropy</li>
+<li><strong>repeat</strong><ul>
+<li><strong>for</strong> g-steps <strong>do</strong><ol>
+<li>Generate a sequence <script type="math/tex">Y_{1:T} = (y_1, \cdots, y_T) \in G_\theta</script><ol>
+<li><strong>for</strong> $t$ in $1:T$ <strong>do</strong><ul>
+<li>compute <script type="math/tex">Q(a=y_t; s=Y_{1:t-1})</script> using Eq.(\ref{eq1})</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>Update generator parameters with policy gradient: <script type="math/tex">\theta \leftarrow \theta + \alpha \nabla_\theta J(\theta)</script></li>
+</ol>
+</li>
+<li><strong>for</strong> d-steps <strong>do</strong><ul>
+<li>Use current <script type="math/tex">G_\theta</script> to generate negative (synthetic) examples and combine with sampled positive (real) examples $\mathcal{S}$</li>
+<li>Train discriminator <script type="math/tex">D_\phi</script> for $k$ epochs using Eq.(\ref{eq2})</li>
+</ul>
+</li>
+<li>$\beta \leftarrow \theta$</li>
+</ul>
+</li>
+<li><strong>until</strong> SeqGAN converges</li>
+</ol>
+<h3 id="Model-Architecture"><a href="#Model-Architecture" class="headerlink" title="Model Architecture"></a>Model Architecture</h3><h4 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h4><p>$G_\theta$: LSTM actor.</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{h}_t &{}= \textrm{LSTM}(\mathbf{h}_{t-1}, \mathbf{x}_t), \\
+p(y_t \vert x_1, \cdots, x_t) &{}= \textrm{softmax} (\mathbf{c} + \mathbf{Vh}_t),
+\end{align}</script><p>where <script type="math/tex">\mathbf{h}_{t-1}</script> represents the $t$-th hidden state of LSTMs, $\mathbf{x}_t$ denotes the input embedding at the time step $t$.</p>
+<h4 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h4><p>$D_\phi$: CNN critic.<br>The input word embeddings are:</p>
+<script type="math/tex; mode=display">\varepsilon = \mathbf{x}_1 \oplus \mathbf{x}_2 \oplus \cdots \oplus \mathbf{x}_T,</script><p>where <script type="math/tex">\mathbf{x}_t \in \mathbb{R}^k</script> represents the $k$ dimensional embedding, $\oplus$ is the vertical concatenation operator to build the matrix $\varepsilon_{1:T} \in \mathbb{R}^{T \times k}$. Then a kernel $\mathbf{w} \in \mathbb{R}^{n \times k}$ applies a convolutional operation to extract $n$-gram features:</p>
+<script type="math/tex; mode=display">c_i = \rho (\mathbf{w} \otimes \varepsilon_{i:i+n-1} + b),</script><p>where $\otimes$ operator is the summation of elementwise product, $b$ is a bias term, $\rho$ is a non-linear function. Then concatenate the output of multi-channel convolutions with various kernel sizes followed by a max-over-time-pooling:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{c} &{}= [c_1, \cdots, c_{T-l+1}], \\
+\tilde{c} &{}= \max \{ \mathbf{c} \}.
+\end{align}</script><p>Then apply a highway architecture before the final dense layer:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathbf{\tau} &{}= \sigma (\mathbf{W}_T \cdot \tilde{\mathbf{c}} + \mathbf{b}_T), \\
+\tilde{\mathbf{C}} &{}= \pmb{\tau} \cdot H(\tilde{\mathbf{c}}, \mathbf{W}_H) + (1-\pmb{\tau}) \cdot \tilde{\mathbf{c}},
+\end{align}</script><p>where <script type="math/tex">\mathbf{W}_T</script>, <script type="math/tex">\mathbf{b}_T</script>, <script type="math/tex">\mathbf{W}_H</script> are highway layer weights, $H$ denotes an affine transform with non-linearity, $\pmb{\tau}$ represents the transform gate.</p>
+<p>Finally, apply a sigmoid function to get the probability of being real given the input sequences:</p>
+<script type="math/tex; mode=display">
+\hat{y} = \sigma (\mathbf{W}_o \cdot \tilde{\mathbf{C}} + \mathbf{b}_o),</script><p>where <script type="math/tex">\mathbf{W}_o</script> and <script type="math/tex">\mathbf{b}_o</script> are the weight and bias respectively.</p>
+<h1 id="TextGAN-ICML’17"><a href="#TextGAN-ICML’17" class="headerlink" title="TextGAN (ICML’17)"></a>TextGAN (ICML’17)</h1><h2 id="Problems-1"><a href="#Problems-1" class="headerlink" title="Problems"></a>Problems</h2><p>Two fundamental problems of the GAN framework limit their usage in practice:</p>
+<ol>
+<li><strong>Mode collapse</strong>: $G$ tends to produce a single observation for multiple latent representations.<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Metz, Luke, et al. "[Unrolled generative adversarial networks.](https://arxiv.org/pdf/1611.02163.pdf)" arXiv preprint arXiv:1611.02163 (2016).
+">[3]</span></a></sup></li>
+<li><p><strong>Vanishing gradient</strong>: $G$’s contribution to the <em>learning signal</em> is insubstantial when $D$ is close to its local optimum.<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Arjovsky, Martin, and Léon Bottou. "[Towards principled methods for training generative adversarial networks.](https://arxiv.org/pdf/1701.04862.pdf)" arXiv preprint arXiv:1701.04862 (2017).
+">[4]</span></a></sup></p>
+<p> When $D$ is <em>optimal</em>, using standard GAN’s miminax objective is equivalent to minimizing the Jenson-Shannon Divergence (JSD)<sup id="fnref:4"><a href="#fn:4" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Arjovsky, Martin, and Léon Bottou. "[Towards principled methods for training generative adversarial networks.](https://arxiv.org/pdf/1701.04862.pdf)" arXiv preprint arXiv:1701.04862 (2017).
+">[4]</span></a></sup> between the real data distribution <script type="math/tex">p_x(\cdot)</script> and the synthetic data distribution <script type="math/tex">p_{\tilde{x}}(\cdot) \triangleq p\big( (G(z) )\big)</script>, where <script type="math/tex">z \sim p_z(\cdot)</script>. However, the saddile-point solution of the object is intractable. Thus iteratively updating $D$ and $G$ is required.</p>
+<p> However, standard GAN’s objective suffers from unstable weak learning signal when $D$ gets close to its local minimum resulting from the vanishing gradient problem, which comes from that JSD implied by the original GAN objective approaches to a constant when <script type="math/tex">p_x(\cdot)</script> and <script type="math/tex">p_{\tilde{x}}(\cdot)</script> share no support, thus minimizing JSD yields no learning signal. This problem also exists in the distance metric of Total Variance Distance (TVD) of energy-based GAN (EBGAN).</p>
+</li>
+</ol>
+<h2 id="Approach-1"><a href="#Approach-1" class="headerlink" title="Approach"></a>Approach</h2><p>TextGAN<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Yizhe, et al. "[Adversarial feature matching for text generation.](https://arxiv.org/pdf/1706.03850)" arXiv preprint arXiv:1706.03850 (2017).
+">[2]</span></a></sup> leverages the kernel-based moment-matching scheme over a Reproducing Kernel Hilbert Space (RKHS) to force the empirical distributions of real and synthetic sentences to have matched moments in latent-feature space, which consequentially ameliorates the mode collapsing issues associated with standard GAN training.</p>
+<h3 id="Objective-Function"><a href="#Objective-Function" class="headerlink" title="Objective Function"></a>Objective Function</h3><p>Given a sentence corpus $\mathcal{S}$, TextGAN proposes the objective:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_D &{}= \mathcal{L}_\textrm{GAN} - \lambda_r \mathcal{L}_\textrm{recon} + \lambda_m \mathcal{L}_{\textrm{MMD}^2}, \tag{3}\label{eq3}\\
+\mathcal{L}_G &{}= \mathcal{L}_{\textrm{MMD}^2}, \tag{4}\label{eq4}\\
+\mathcal{L}_\textrm{GAN} &{}= \mathbb{E}_{s \sim \mathcal{S}}\log D(s) + \mathbb{E}_{z \sim p_z} \log [1- D(G(z))],\\
+\mathcal{L}_\textrm{recon} &{}= \Vert \hat{z} - z \Vert^2,
+\end{align}</script><p>where <script type="math/tex">\mathcal{L}_\textrm{recon}</script> is the Euclidean distance between the reconstructed latent code $\hat{z}$ and the original code $z$ drawn from prior distribution <script type="math/tex">p_z(\cdot)</script>; <script type="math/tex">\mathcal{L}_{\textrm{MMD}^2}</script> represents the Maximum Mean Discrepany (MMD) between the emprical distribution of sentence embeddings <script type="math/tex">\tilde{\mathbf{f}}</script> and <script type="math/tex">\mathbf{f}</script> for synthetic and real data respectively.</p>
+<p><img data-src="/notes/images/TextGAN.png" width="55%"/></p>
+<p>$\mathcal{L}(G)$ attempts to adjust to force the synthetic sentences’ features <script type="math/tex">\tilde{\mathbf{f}}</script> to match the real sentence features <script type="math/tex">\mathbf{f}</script> encoded by $D(\cdot)$, by matching the empirical distributions of <script type="math/tex">\tilde{\mathbf{f}}</script> and <script type="math/tex">\mathbf{f}</script> with a kernel discrepancy metric, MMD.</p>
+<h4 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h4><p>In Eq.(\ref{eq3}), the reconstruction and MMD loss in $D$ serve as the regularizer to the binary classification loss in that $D$ features tend to be more spread out in the feature space.</p>
+<p>Thus, $D(\cdot)$ attempts to select informative sentence features, whereas $G(\cdot)$ aims to match these features. Hyperparameters <script type="math/tex">\lambda_r</script> and <script type="math/tex">\lambda_m</script> act as the trade-off.</p>
+<p>The original GAN objective is prone to mode collapsing especially when applying $\log D$ alternative for the generator loss, <em>i.e.</em>, replacing the second term of Eq.(\ref{eq3}) with <script type="math/tex">-\mathbb{E}_{z\sim p_z} \log[D(G(z))]</script>. If so, fake samples are more severely penalized than less diverse samples, thus grossly underestimating the variance of latent features<sup id="fnref:3"><a href="#fn:3" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Metz, Luke, et al. "[Unrolled generative adversarial networks.](https://arxiv.org/pdf/1611.02163.pdf)" arXiv preprint arXiv:1611.02163 (2016).
+">[3]</span></a></sup>.</p>
+<p>The $G$’s loss in Eq.(\ref{eq4}) forces $G$ to produce highly diverse sentences to match the variations of real data by latent moment matching, thus alleviating the mode-collapsing problem.</p>
+<h4 id="Feature-Matching-via-MMD"><a href="#Feature-Matching-via-MMD" class="headerlink" title="Feature Matching via MMD"></a>Feature Matching via MMD</h4><p>MMD measures the mean squared difference between two sets of samples $\mathcal{X}$ andq $\mathcal{Y}$ over a RKHD $\mathcal{H}$ with  kernel function $k(\cdot): \mathbb{R}^d \times \mathbb{R}^d \mapsto \mathbb{R}$, where <script type="math/tex">\mathcal{X}= \{ x_i \}_{i=1:N_x}, x_i \in \mathbb{R}^d</script>, <script type="math/tex">\mathcal{Y}= \{ y_i \}_{i=1:N_y}, y_i \in \mathbb{R}^d</script>. The kernel can be written as an inner product over $\mathcal{H}$: <script type="math/tex">k(x, x^\prime) = \langle k(x, \cdot), k(x^\prime, \cdot) \rangle_\mathcal{H}</script>, and  <script type="math/tex">\phi(x) \triangleq k(x, \cdot) \in \mathcal{H}</script> denotes the feature mapping. Fomally the MMD between $\mathcal{X}$ and $\mathcal{Y}$ is given by:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_{\text{MMD}^2} &{}= \| \mathbb{E}_{x \sim \mathcal{X}} \phi (x) - \mathbb{E}_{y \sim \mathcal{Y}} \phi(y) \|_\mathcal{H}^2 \\
+&{}= \mathbb{E}_{x \sim \mathcal{X}} \mathbb{E}_{x^\prime \sim \mathcal{X}} [k(x, x^\prime)] + \mathbb{E}_{y \sim \mathcal{Y}} \mathbb{E}_{y^\prime \sim \mathcal{Y}}[k(y, y^\prime)] - 2 \mathbb{E}_{x \sim \mathcal{X}}\mathbb{E}_{y \sim \mathcal{Y}} [k(x,y)]
+\end{align}</script><p>Here TextGANs adopt a gaussian (rbf) kernel $k(x,y)=\exp\big( - \frac{|x-y|^2}{2 \sigma} \big)$ with brandwidth $\sigma$.</p>
+<h3 id="Model-Architecture-1"><a href="#Model-Architecture-1" class="headerlink" title="Model Architecture"></a>Model Architecture</h3><ul>
+<li>$G$: LSTM generator.</li>
+<li>$D$: CNN discriminator.</li>
+</ul>
+<h1 id="MaliGAN-MILA"><a href="#MaliGAN-MILA" class="headerlink" title="MaliGAN (MILA)"></a>MaliGAN (MILA)</h1><h2 id="Problems-2"><a href="#Problems-2" class="headerlink" title="Problems"></a>Problems</h2><p>Instability of GAN training: When optimizing $G$ USING $D$’s output as a reward via RL, the policy $G$ has difficulties to get positive and stable reward signals from $D$ even with careful pretraining.</p>
+<p>When applying the GAN framework to discrete data, the discontinuity prohibits the update of the generator parameters via standard back-propagation. One way is to employ an RL strategy that directly uses the generator’s output, $D(\cdot)$, or $\log D(\cdot)$ as a reward.</p>
+<p>Thus the objective for $G$ is to optimize:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_\textrm{GAN} (\theta) &{}= - \mathbb{E}_{\mathbf{x} \sim p_\theta} [\log D(\mathbf{x})] \\
+&{}\approx -\frac{1}{n} \sum_{i=1}^n \log D(\mathbf{x}_i), \quad \mathbf{x}_i \sim p_\theta.
+\end{align}</script><p>Define the normalized probability distribution <script type="math/tex">q^\prime (\mathbf{x}) = \frac{1}{Z(D)}D(\mathbf{x})^{1/\tau}</script> in some bounded region to guarantee the integrability ($D$ is an approxmation to <script type="math/tex">\frac{p_d}{p+p_d}</script> if well trained) and also put a maximum-entropy regularizer <script type="math/tex">\mathbb{H}(p_\theta)</script> to encourage diversity, yielding the regularized loss:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathcal{L}_\textrm{GAN} (\theta) &{}= - \mathbb{E}_{\mathbf{x} \sim p_\theta} [\log D(\mathbf{x})] - \tau \mathbb{H}(p_\theta)\\
+&{}= \tau \mathbb{KL}(p_\theta \| q^\prime) + c(D),
+\end{align}</script><p>where $c(D)$ is a constant only depending on $D$. Hence, optimizing the original GAN is equivalent to minimizing the KL-divergence <script type="math/tex">\mathbb{KL}(p_\theta \| q^\prime)</script>. However, since initially $p$ generates sentences with bad quality, it has little chance of generating good sequences to get a positive reward. Though with dedicated pre-training and variance reduction mechanisms, RL based on the moving reward signals still shows the unstable training and does not work on large scale datasets.</p>
+<h2 id="Approach-2"><a href="#Approach-2" class="headerlink" title="Approach"></a>Approach</h2><p><strong>Ma</strong>ximum-<strong>Li</strong>kelihood Augmented Discrete GAN (MaliGAN)<sup id="fnref:7"><a href="#fn:7" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Che, Tong, et al. "[Maximum-likelihood augmented discrete generative adversarial networks.](https://arxiv.org/pdf/1702.07983.pdf)" arXiv preprint arXiv:1702.07983 (2017).
+">[7]</span></a></sup> utilizes the information of $D$ as an additional source of training signals on top of the maximum-likelihood objective, significantly reducing the variance during training.</p>
+<h3 id="Basic-MaliGAN"><a href="#Basic-MaliGAN" class="headerlink" title="Basic MaliGAN"></a>Basic MaliGAN</h3><p>MaliGAN keeps a delayed copy $p^\prime(\mathbf{x})$ of $G$ who is less often optimized. We know that the optimal $D$ is: <script type="math/tex">D(\mathbf{x})=\frac{p_d}{p_d + p^\prime}</script>; so we have <script type="math/tex">p_d=\frac{D}{1-D}p^\prime</script>. Thus MaliGAN sets the target distribution $q$ for maximum likelihood training to be $\frac{D}{1-D}p^\prime$.</p>
+<p>Let <script type="math/tex">r_D(\mathbf{x}) = \frac{D(\mathbf{x})}{1-D(\mathbf{x})}</script>, we define the augmented target distribution as:</p>
+<script type="math/tex; mode=display">
+q(\mathbf{x}) = \frac{1}{Z(\theta^\prime)} \frac{D(\mathbf{x})}{1-D(\mathbf{x})} p^\prime (\mathbf{x}) = \frac{1}{Z(\theta^\prime)} r_D(\mathbf{x}) p^\prime (\mathbf{x}).</script><p>Regarding $q$ as a fixed probablity distribution, the target is to optimize:</p>
+<script type="math/tex; mode=display">
+\mathcal{L}_G(\theta) = \mathbb{KL} (q(\mathbf{x}) \| p_\theta (\mathbf{x})).</script><p>This objective has an attractive prob=perty that $q$ is a “fixed” distribution during training, <em>i.e.</em>, if $D$ is sufficiently trained, then $q$ is always approximately the data generating distribution <script type="math/tex">q_d</script>.<br>Defining the gradient as <script type="math/tex">\nabla \mathcal{L}_G = \mathbb{E}_q [\nabla_\theta \log p_\theta (\mathbf{x})]</script>, we have:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla \mathcal{L}_G &{}= \mathbb{E}_{p^\prime} [\frac{q(\mathbf{x})}{p^\prime(\mathbf{x})} \nabla_\theta (\mathbf{x})] \\
+&{}= \frac{1}{Z} \mathbb{E}_{p_\theta} [r_D (\mathbf{x})\nabla_\theta \log p_\theta (\mathbf{x})] ,
+\end{align}</script><p>where we assume that <script type="math/tex">p^\prime = p_\theta</script> and the delayed generator is only one step behind the current update in the experiments.</p>
+<p>Then $G$ is optimized as:</p>
+<script type="math/tex; mode=display">
+\nabla \mathcal{L}_G (\theta) \approx \sum_{i=1}^m (\frac{r_D(\mathbf{x}_i)}{\sum_i r_D(\mathbf{x}_i)} - b) \nabla \log p_\theta (\mathbf{x}_i),</script><p>where $b$ is the baseline to reduce variance. In practice, $b$ increases very slowly from 0 to 1 (as $D$).</p>
+<h4 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h4><p><img data-src="/notes/images/MaliGAN-Algorithm.png" width="50%"/></p>
+<h3 id="MaliGAN-with-Variance-Reduction"><a href="#MaliGAN-with-Variance-Reduction" class="headerlink" title="MaliGAN with Variance Reduction"></a>MaliGAN with Variance Reduction</h3><h4 id="Mixed-MLE-Mali-Training"><a href="#Mixed-MLE-Mali-Training" class="headerlink" title="Mixed MLE-Mali Training"></a>Mixed MLE-Mali Training</h4><p>To alleviate the accumulated variance for long sequence generation, MaliGAN clamps the input using the training data for $N$ time steps&lt; and switch to the free-running mode for the remaining $T-N$ time steps. During training, $N$ slowly moves from $T$ towards 0.</p>
+<p>Thus,</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla \mathcal{L}_G &{}= \mathbb{E}_q [\nabla \log p_\theta (\mathbf{x})]\\
+&{}= \mathbb{E}_{p_d} [\nabla \log p_\theta (\mathbf{x}_{\leq N})] + \mathbb{E}_q [\nabla \log p_\theta (\mathbf{x}_{>N} \vert \mathbf{x}_{\leq N})] \\
+&{}= \mathbb{E}_{p_d} [\nabla \log p_\theta (x_0, x_1, \cdots, x_T)] + \frac{1}{Z} \mathbb{E}_{p_\theta} [\sum_{t=N+1}^L r_D (\mathbf{x} \nabla \log p_\theta (a_t \vert \mathbf{s}_t))] 
+\end{align}</script><p>For each sample <script type="math/tex">\mathbf{x}_i</script> from the real data batch, if it has length larger than $N$, we fix the first $N$ words of <script type="math/tex">\mathbf{x}_i</script>, then sample $n$ times from $G$ till the end of the sequence and get $n$ samples <script type="math/tex">\{ \mathbf{x}_{i,j} \}_{j=1}^n</script>. Then for each mini-batch with $0 \leq N \leq T$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla \mathcal{L}_G^N \approx \sum_{i=1,j=1}^{m,n} \big(\frac{r_D(\mathbf{x}_{i,j})}{\sum_j r_D (\mathbf{x}_{i,j})} -b \big) \nabla \log p_\theta (\mathbf{x}_{>N} \vert \mathbf{x}_{\leq N}) + \frac{1}{m} \sum_{i=1}^m \sum_{t=0}^N p_\theta (a_t^i \vert \mathbf{s}_t^i)
+\end{align}</script><h4 id="Training-1"><a href="#Training-1" class="headerlink" title="Training"></a>Training</h4><p><img data-src="/notes/images/MaliGAN-Mix-Algorithm.png" width="60%"/></p>
+<h1 id="GSGAN-2016"><a href="#GSGAN-2016" class="headerlink" title="GSGAN (2016)"></a>GSGAN (2016)</h1><h2 id="Problems-3"><a href="#Problems-3" class="headerlink" title="Problems"></a>Problems</h2><p>In the standard GAN framework, samples from a distribution on discrete objects such as multinomial are not differentiable w.r.t. the distribution parameters.</p>
+<h2 id="Gumbel-softmax-Distribution"><a href="#Gumbel-softmax-Distribution" class="headerlink" title="Gumbel-softmax Distribution"></a>Gumbel-softmax Distribution</h2><p>GSGAN<sup id="fnref:9"><a href="#fn:9" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Kusner, Matt J., and José Miguel Hernández-Lobato. "[Gans for sequences of discrete elements with the gumbel-softmax distribution.](https://arxiv.org/pdf/1611.04051.pdf)" arXiv preprint arXiv:1611.04051 (2016).
+">[9]</span></a></sup> uses the Gumbel-softmax distribution parameterized in terms of the softmax function to avoid the non-differential problem in GAN.</p>
+<p>The softmax function can be used to parameterize a multinomial distribution on a one-hot-encoding $d$-dimensional vector $\mathbf{y}$ in terms of a continuous $d$-dimensional vector $\mathbf{h}$. Let $\mathbf{p}$ be a $d$-dimensional vector of probabilities specifying the multinomial distribution on $\mathbf{y}$ with <script type="math/tex">p_i = p(y_i=1), i=1,\cdots,d</script>.</p>
+<p>Then </p>
+<script type="math/tex; mode=display">\mathbf{p} = \textrm{softmax}(\mathbf{h}),</script><p>where <script type="math/tex">[\textrm{softmax}(\mathbf{h})]_i = \frac{\exp(\mathbf{h}_i)}{\sum_{j=1}^K \exp (\mathbf{h}_j)}, \textrm{for }i=1,\cdots,d</script></p>
+<p>Sampling $\mathbf{y}$ accoridng to the previous multinomial distribution with probability vector is the same as sampling $\mathbf{y}$ according to</p>
+<script type="math/tex; mode=display">\mathbf{y}= \textrm{one_hot}(\arg\max_i (h_i + g_i)),</script><p>where <script type="math/tex">g_i</script> are independent and follow a Gumbel distribution with zero lcoation and unit scale. The sampled result has gradient zero w.r.t. $\mathbf{h}$ because the $\textrm{one_hot}(\arg\max(\cdot))$ is not differentiable. Thus, GSGAN propose to approximate with a differentiable function based on the soft-max transformtion:</p>
+<script type="math/tex; mode=display">
+\mathbf{y} = \textrm{softmax}(\frac{1}{\tau} (\mathbf{h}+\mathbf{g})),</script><p>where $\tau$ is an inverse temperature parameter. When $\tau \rightarrow 0$, the samples have the same output as argmax versionl when $\tau \rightarrow \infty$, the samples are always the uniform probability vector. GAN on discrete data can be trained with this, starting with soem relatively large $\tau$ and then annealing it to zero during training.</p>
+<h1 id="RankGAN-NIPS’17"><a href="#RankGAN-NIPS’17" class="headerlink" title="RankGAN (NIPS’17)"></a>RankGAN (NIPS’17)</h1><h2 id="Problems-4"><a href="#Problems-4" class="headerlink" title="Problems"></a>Problems</h2><p>GANs assume the output of $D$ to be a binary predicate indicating whether the given sequence is from real or fake data, which is too restrictive since the diversity and richness of the sentences are constrained by the degenerated distribution due to binary classification.</p>
+<h2 id="Approach-3"><a href="#Approach-3" class="headerlink" title="Approach"></a>Approach</h2><p>RankGAN<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lin, Kevin, et al. "[Adversarial ranking for language generation.](http://papers.nips.cc/paper/6908-adversarial-ranking-for-language-generation.pdf)" Advances in Neural Information Processing Systems (2017).
+">[8]</span></a></sup> replaces the original binary classifier discriminator with a ranking model by taking a softmax over the expected cosine distances from the generated sequences to the real data. It relaxes the training of binary discriminator to a learning-to-rank optimization problem, consisting of a generator <script type="math/tex">G_\theta</script> and a ranker <script type="math/tex">R_\phi</script>. Instead of performing binary classification, the ranker is trained to rank the machine-generated sequences lower than the human-generated sequences. </p>
+<p><img data-src="/notes/images/RankGAN.png" width="70%"/></p>
+<p>$G$ is to confuse the ranker $R$ so that synthetic samples are ranked higher than real samples, while $R$ is to rank the synthetic sample (denoted “G” in the figure) lower than human-written setences (denoted “H” in the figure). Thus, $G$ and $R$ play a minimax game:</p>
+<script type="math/tex; mode=display">
+\min_\theta \max_\phi \mathcal{L}(G_\theta, R_\phi) = \mathbb{E}_{s \sim \mathcal{P}_h} [\log R_\phi (s \vert U, C^-)] + \mathbb{E}_{s \sim G_\theta} [\log (1-R_\phi (s \vert U, C^+))],</script><p>where <script type="math/tex">\mathcal{P}_h</script> denotes the read data from human-written sentences, $C^+， C^-$ are comparison set w.r.t. different input $s$: when $s$ is the real data, $C^-$ generated data pre-sampled from <script type="math/tex">G_\theta</script>; If $s$ is the synthetic data, $C^+$ is the human written data.</p>
+<h3 id="Rank-Score"><a href="#Rank-Score" class="headerlink" title="Rank Score"></a>Rank Score</h3><p>The relevance score of the input sequence $s$ given a reference $u$ is:</p>
+<script type="math/tex; mode=display">
+\alpha (s \vert u) = \cos (y_s, y_u) = \frac{y_s \cdot y_u}{\Vert y_s \Vert \Vert y_u \Vert},</script><p>where <script type="math/tex">y_u</script> and <script type="math/tex">y_s</script> are embedded feature vectors of the reference and input sequence, respectively.</p>
+<p>Then the ranking score for a sequence $s$ is computed given a comparison set $\mathcal{S}$:</p>
+<script type="math/tex; mode=display">
+P(s \vert u, \mathcal{C}) = \frac{\exp (\gamma \alpha(s\vert u))}{\sum_{s^\prime \in \mathcal{C}^\prime} \exp (\gamma \alpha(s^\prime \vert u)) },</script><p>which is similar to Boltzmann exploration in RL. Lower $\gamma$ results in all setenecs to be nearly equiprobable (uniform), while higher $\gamma$ increases the biases towards the sentence with higher score. <script type="math/tex">\mathcal{C}^\prime = \mathcal{C} \cup \{ s \}</script> denotes the set of input sentences to be ranked.</p>
+<h3 id="Training-2"><a href="#Training-2" class="headerlink" title="Training"></a>Training</h3><p>Like SeqGAN, RankGAN employs Monte Carlo rollout methods to simulate the intermediate rewards when a sequence is incomplete. The expected future reward $V$ for partial sequences is computed by:</p>
+<script type="math/tex; mode=display">
+V_{\theta, \phi} (s_{1:t-1}, U) = \mathbb{E}_{s_r \sim G_\theta} [R_\phi (s_r \vert U, \mathcal{C}^+, s_{1:t-1})],</script><p>where <script type="math/tex">s_r</script> represents the complete setence sampled by rollout methods with given partial sequence <script type="math/tex">s_{1:t-1}</script>. Specifically, the beginning tokens <script type="math/tex">(w_0, w_1, \cdots, w_{t-1})</script> are fixed and the rest tokens are consecutively sampled by <script type="math/tex">G_\theta</script> unitl the last token <script type="math/tex">w_T</script> is generated. It samples $n$ times and take the average ranking score to approximate the expected reward.</p>
+<p>The gradient of $G$’s objective is:</p>
+<script type="math/tex; mode=display">
+\nabla_\theta \mathcal{L} (s_0) = \mathbb{E}_{s_{1:T} \sim G_\theta} \big[ \sum_{t=1}^T \sum_{w_t \in V} \nabla_\theta \pi_\theta (w_t \vert s_{1:t-1}) V_{\theta, \phi}(s_{1:t}, U) \big].</script><p>In practice, minimizing $\log R(\cdot)$ instead of maximizing $\log (1-R(\cdot))$ performs better to train the ranker $R$. Thus, maximize the ranking objective:</p>
+<script type="math/tex; mode=display">
+\max_\phi \mathcal{L}(G_\theta, R_\phi) = \mathbb{E}_{s \sim \mathcal{P}_h} [\log R_\phi (s \vert U, C^-)] - \mathbb{E}_{s \sim G_\theta} [\log R_\phi (s \vert U, C^+)],</script><div class="note info">
+            <p>In a sense, replacing binary predicates with (multi-sentence) ranking scores can relieve the gradient vanishing problem.<sup id="fnref:8"><a href="#fn:8" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Lin, Kevin, et al. "[Adversarial ranking for language generation.](http://papers.nips.cc/paper/6908-adversarial-ranking-for-language-generation.pdf)" Advances in Neural Information Processing Systems (2017).">[8]</span></a></sup></p>
+          </div>
+<h1 id="LeakGAN-AAAI’18"><a href="#LeakGAN-AAAI’18" class="headerlink" title="LeakGAN (AAAI’18)"></a>LeakGAN (AAAI’18)</h1><h2 id="Problems-5"><a href="#Problems-5" class="headerlink" title="Problems"></a>Problems</h2><ol>
+<li>Sparsity: GANs with policy gradient can only get a scalar guiding signal after generating the entire texts and lack intermediate information about text structure during the generation process, which grossly hinders the generation of long texts (&gt;20 words). </li>
+<li>Non-informativeness: the scalar guiding signal for a whole text is non-informative as it does not necessarily preserve the picture about the intermediate syntactic and semantics of the text that is being generated for $G$ to sufficiently learn. </li>
+</ol>
+<h2 id="Approach-4"><a href="#Approach-4" class="headerlink" title="Approach"></a>Approach</h2><p>Inspired by Hierarchical Reinforcement Learning (HRL), LeakGAN<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Jiaxian, et al. "[Long text generation via adversarial training with leaked information.](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/16360/16061)" Thirty-Second AAAI Conference on Artificial Intelligence (2018).
+">[6]</span></a></sup> designs a hierarchical generator $G$, consisting of a high-level “MANAGER” module and a low-level “WORKER” module. In each step, “MANAGER” receives $D$’s high-level feature representation to form the guiding goal for the “WORKER” module, which is a leakage of information from $D$. Then the “WORKER” module firstly encodes the currently generated tokens and combines with the goal embedding to take the final action at the current state. As such, the guiding signals from $D$ is available not only at the end but during the generation process.</p>
+<div class="note info">
+            <p>LeakGAN can implicitly learn sentence structures, such as punctuation, clause structure, and long suffix without any supervision<sup id="fnref:6"><a href="#fn:6" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Guo, Jiaxian, et al. "[Long text generation via adversarial training with leaked information.](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/16360/16061)" Thirty-Second AAAI Conference on Artificial Intelligence (2018).">[6]</span></a></sup>.</p>
+          </div>
+<p><img data-src="/notes/images/LeakGAN.png" width="60%"/></p>
+<h3 id="Feature-Leakage-from-D"><a href="#Feature-Leakage-from-D" class="headerlink" title="Feature Leakage from $D$"></a>Feature Leakage from $D$</h3><p>LeakGAN allows <script type="math/tex">D_\phi</script> to provide additional information, <em>i.e.</em>, feature <script type="math/tex">f_t</script> of the current sequence <script type="math/tex">s_T</script> to generate <script type="math/tex">G_\theta</script>.</p>
+<p>Typically, <script type="math/tex">D_\phi</script> can be decomposed into a feature extractor <script type="math/tex">\mathcal{F}(\cdot ;\phi_f)</script> and a final sigmoid classification layer with weight <script type="math/tex">\phi_l</script>. Mathematically, given the input $s$, we have:</p>
+<script type="math/tex; mode=display">
+D_\phi (s) = \sigma (\phi_l^\top \mathcal{F}(s;\phi_f)) = \sigma (\phi_l^\top f),</script><p>where $f$ is the exxtracted features of CNN after max-over-time pooling.</p>
+<p>In each time step $t$, “MANAGER” is an LSTM that takes the extracted feature vector <script type="math/tex">f_t</script> and generates a goal vector <script type="math/tex">g_t</script>, which is then fed into the “WORKER” module to guide the next word’s generation.</p>
+<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>The “MANAGER” and “WORKER” of LSTMs are all zero-initialized. At each step, the “MANAGER” receives the leaked feature vector <script type="math/tex">f_t</script> from the $D$ to produce the goal vector <script type="math/tex">g_t</script> as:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\hat{g}, h_t^M &{}= \mathcal{M} (f_t, h_{t-1}^M; \theta_m), \\
+g_t &{}= \frac{\hat{g_t}}{\Vert g_t \Vert},
+\end{align}</script><p>where <script type="math/tex">\mathcal{M}(\cdot; \theta_m)</script> denotes the LSTM of “MANAGER” with parameters <script type="math/tex">\theta_m</script> and hidden vector <script type="math/tex">h_t^M</script>.</p>
+<p>The goal is a linear transformation $\psi$ with weight matrix <script type="math/tex">W_\psi</script> with a summation over recent $c$ goals to produce a $k$-dimensional goal embedding <script type="math/tex">w_t</script> as:</p>
+<script type="math/tex; mode=display">
+w_t = \psi \big( \sum_{i=1}^c g_{t-i} \big) = W_\psi \big( \sum_{i=1}^c g_{t-i} \big).</script><p>Then the “WORKER” takes the current word <script type="math/tex">x_t</script> and combines the output with the goal embedding <script type="math/tex">w_t</script> with a dot product before softmax:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+O_t, h_t^W &{}= \mathcal{W} (x_t, h_{t-1}^W; \theta_w), \\
+G_\theta (\cdot \vert s_t) &{}= \textrm{softmax} (O_t \cdot w_t / \alpha), 
+\end{align}</script><p>where <script type="math/tex">\mathcal{W}(\cdot; \theta_w)</script> denotes the LSTM of “WORKER”, $\alpha$ is the temperature to control the generation entropy.</p>
+<h4 id="Training-of-G"><a href="#Training-of-G" class="headerlink" title="Training of $G$"></a>Training of $G$</h4><p>“MANAGER” is trained to predict advantageous directions in the discriminative feature space and the “WORKER” is intrinsically rewarded to follow such directions. The gradient of manager is defined as:</p>
+<script type="math/tex; mode=display">
+\nabla_{\theta_m}^\textrm{adv} g_t = -Q_\mathcal{F} (s_t, g_t) \nabla_{\theta_m} \cos \big( f_{t+c}-f_t, g_t\big)</script><p>where <script type="math/tex">Q_\mathcal{F} (s_t, g_t)= Q (s_t, g_t) = \mathbb{E} [r_t]</script> is the expected reward under the current policy. $\cos(\cdot)$ measures the cosine similarity between the change of feature representation after $c$ step transitions, <em>i.e.</em>, <script type="math/tex">f_{t+c}-f_t</script>, and the goal vector <script type="math/tex">g_t</script>. This loss functin is intuitively force the goal vector to match the transition inArrow the feature space while achieving high reward.</p>
+<p>Meanwhile, the “WORKER” is trined to maximize the reaward using the REINFORCE algorithm:</p>
+<script type="math/tex; mode=display">
+\nabla_{\theta_w} \mathbb{E}_{s_{t-1}\sim G} [\sum_{x_t} r_t^I \mathcal{W} (x_t \vert s_{t-1}; \theta_w)] = \mathbb{E}_{s_{t-1} \sim G, x_t \sim \mathcal{W}(x_t \vert s_{t-1})} [r_t^I \nabla_{\theta_w} \log \mathcal{W}(x_t \vert s_{t-1}; \theta_w)]</script><p>where the intrinsit reward for “WORKER” <script type="math/tex">r_t^I</script> is defined as:</p>
+<script type="math/tex; mode=display">
+r_t^I = \frac{1}{c} \sum_{i=1}^c \cos \big( f_t - f_{t-i}, g_{t-i} \big).</script><p>To be consistent, in pretraining stage, the gradient of “MANAGER” is:</p>
+<script type="math/tex; mode=display">
+\nabla_{\theta_m}^\textrm{pre} g_t = - \nabla_{\theta_m} \cos(\hat{f}_{t+c} - \hat{f}_t, g_t)</script><div class="note info">
+            <p><strong>Interleaved training of MLE and GAN</strong> instead of full GAN training after pretraining. Blending these two training would help GAN get rid of some local minimum and alleviate mode collapse. Inserting MLE performs an implicit regularization on GAN to prevent it from going too far away from the MLE solution.</p>
+          </div>
+<h1 id="FM-GAN-NeurIPS’18"><a href="#FM-GAN-NeurIPS’18" class="headerlink" title="FM-GAN (NeurIPS’18)"></a>FM-GAN (NeurIPS’18)</h1><h2 id="Problems-6"><a href="#Problems-6" class="headerlink" title="Problems"></a>Problems</h2><p>TextGAN<sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhang, Yizhe, et al. "[Adversarial feature matching for text generation.](https://arxiv.org/pdf/1706.03850)" arXiv preprint arXiv:1706.03850 (2017).
+">[2]</span></a></sup> applied feature matching with MMD in the objective, which is difficult to train:</p>
+<ol>
+<li>Choices of the bandwidth of the RBF kernel;</li>
+<li>Kernel methods often suffer from poor scaling;</li>
+<li>Empirically, TextGAN tends to generate short sentences.</li>
+</ol>
+<h2 id="Approach-5"><a href="#Approach-5" class="headerlink" title="Approach"></a>Approach</h2><p>Feature Mover GAN (FM-GAN)<sup><a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/7717-adversarial-text-generation-via-feature-movers-distance.pdf">[11]</a></sup> leverages earth-mover’s distance (EMD) in optimal transport (OT), which considers the problem of optimally transporting one set of data points to another. FM-GAN proposes feature-mover’s distance, a variant of EMD between the feature distribution of real and synthetic sentences. In this adversarial setting, $D$ aims to maximize the dissimilarity of the feature distributions based on the FMD, while the generator is trained to minimize the FMD by synthesizing more-realistic data.</p>
+<p><img data-src="/notes/images/FM-GAN.png" width="70%"/><br>See <sup><a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/7717-adversarial-text-generation-via-feature-movers-distance.pdf">[11]</a></sup> for detailed formula of FMD.</p>
+<h1 id="MaskGAN-ICLR’18"><a href="#MaskGAN-ICLR’18" class="headerlink" title="MaskGAN (ICLR’18)"></a>MaskGAN (ICLR’18)</h1><h2 id="Problems-7"><a href="#Problems-7" class="headerlink" title="Problems"></a>Problems</h2><p>Training instability and mode dropping.</p>
+<h2 id="Approach-6"><a href="#Approach-6" class="headerlink" title="Approach"></a>Approach</h2><p>MaskGAN<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Fedus, William, Ian Goodfellow, and Andrew M. Dai. "[MaskGAN: Better text generation via filling in the \_.](https://arxiv.org/pdf/1801.07736.pdf)" ICLR (2018).
+">[10]</span></a></sup> introduces an actor-critic conditional GAN that provides rewards at every time step. It fills in missing text conditioned on the surrounding context including text fill-in-the-blank or in-filling tasks, in which portions of the body of text are deleted or redacted. The goal of the model is to infill the missing portions of the text so that it is indistinguishable from the original data.</p>
+<ul>
+<li>In-filling text: autoregressively output tokens that have thus far filled in as in standard language modeling while conditioned on the true known context.</li>
+<li>If the entire body of the text is redacted, then this reduces to language modeling.</li>
+</ul>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p>Let <script type="math/tex">(x_t, y_t)</script> denote pairs of input and target tokens; <script type="math/tex">\hat{x}_t</script> is the filled-in token. Either real or fake <script type="math/tex">\hat{x}_t</script> will be passed to $D$ during training.</p>
+<p>MaskGAN uses seq2seq encoder-decoder architecture. For a discrete sequence <script type="math/tex">\mathbf{x}= (x_1, \cdots, x_T)</script>, a binary mask is generated of the same length <script type="math/tex">\mathbf{m}=(m_1, \cdots, m_T)</script> where <script type="math/tex">m_t \in \{ 0,1 \}</script> determining whether to retain or mask.</p>
+<p>The masked sequence <script type="math/tex">\mathbf{m}(\mathbf{x})</script> is fed to the encoder (as below figure), and the decoder fills in missing tokens auto-regressively conditioned on both the masked input and what has filled-in upfront. The generator decomposes the distribution over the sequence into an ordered conditional sequence:</p>
+<script type="math/tex; mode=display">
+G(x_t) \equiv P(\hat{x}_1, \cdots, \hat{x}_T \vert \mathbf{m(x)}) = \prod_{t=1}^T P(\hat{x}_t \vert \hat{x}_1, \cdots, \hat{x}_{t-1}, \mathbf{m(x)}).</script><p><img data-src="/notes/images/MaskGAN.png" width="100%"/></p>
+<center> Generator architecture<sup id="fnref:10"><a href="#fn:10" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Fedus, William, Ian Goodfellow, and Andrew M. Dai. "[MaskGAN: Better text generation via filling in the \_.](https://arxiv.org/pdf/1801.07736.pdf)" ICLR (2018).
+">[10]</span></a></sup> </center>
+
+
+<p>The discriminator $D$ has the identical architecture to $G$ except the scalar output at each time step, computing the probability of each token $\tilde{x}_t$ being real given the true context of masked sequences $\mathbf{m(x)}$:</p>
+<script type="math/tex; mode=display">
+D_\phi (\tilde{x}_t \vert \tilde{x}_{0:T}, \mathbf{m(x)}) = P(\tilde{x}_t = x_t^\textrm{real} \vert \tilde{x}_{0:T}, \mathbf{m(x)}).</script><p>The logrithm of the $D$’s estimates are regarded as the reward:</p>
+<script type="math/tex; mode=display">r_t \equiv \log D_\phi (\tilde{x}_t \vert \tilde{x}_{0:T}, \mathbf{m(x)}).</script><p>The critic net is an additional head off the discriminator, estimating the value function in RL.</p>
+<h2 id="Training-3"><a href="#Training-3" class="headerlink" title="Training"></a>Training</h2><p>MaskGAN employs policy gradient estimation for generator $G$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\nabla_\theta \mathbb{E}_G [R_t] &{}= (R_t - b_t) \nabla_\theta G_\theta (\hat{x}_t) \\
+&{}= \mathbb{E}_{\hat{x}_t \sim G} \big[ \sum_{t=1}^T (R_t -b) \nabla_\theta \log G_\theta(\hat{x}_t) \big] \\
+&{}= \mathbb{E}_{\hat{x}_t \sim G} \big[ \sum_{t=1}^T (\gamma^s r_s - b_t) \nabla_\theta \log G_\theta (\hat{x}_t) \big],
+\end{align}</script><p>where $gamma$ is the discount vector, $b_t$ is the critic.</p>
+<p>Finally, $D$ is updated with:</p>
+<script type="math/tex; mode=display">
+\nabla_\phi \frac{1}{m} \sum_{i=1}^m \big[ \log D(x^{(i)}) + \log (1-D(G(z^{(i)}))) \big]</script><p><strong>Pretraining</strong>:</p>
+<ol>
+<li>Trin LM using MLE for encoder/decoder.</li>
+<li>Then pretrain the seq2seq model on the in-filling task using MLE. Select with holdout set.</li>
+<li>Not include critic.</li>
+</ol>
+<h1 id="SentiGAN-IJCAI’18"><a href="#SentiGAN-IJCAI’18" class="headerlink" title="SentiGAN (IJCAI’18)"></a>SentiGAN (IJCAI’18)</h1><p>SentiGAN<sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Ke, and Xiaojun Wan. "[SentiGAN: Generating Sentimental Texts via Mixture Adversarial Networks.](https://www.tensorinfinity.com/upload/files/20181227/1545889246130589.pdf)" IJCAI (2018).
+">[12]</span></a></sup> employs $k$ generators with $k$ sentiment labels and one multi-class ($k+1$) discriminator.</p>
+<p>Let <script type="math/tex">S_t</script> represent the partially generated sequence <script type="math/tex">S_t = \{ X_1, \cdots, X_t \}</script>, where <script type="math/tex">X_t</script> is a token generated at time $t$. It defines the penalty based loss function at step $t$ for $G$:</p>
+<script type="math/tex; mode=display">
+\mathcal{L}(X) = G_i (X_{t+1} \vert S_t) \cdot V_D^G (S_t, X_{t+1}),</script><p>where <script type="math/tex">V_D^G (S_t, X_{t+1})</script> is generated by $D$.</p>
+<p>The objective of $G$ is defined with MC search:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+J_G &= \mathbb{E}_{X \sim P_g} [\mathcal{L}(X)] \\
+&= \sum_{t=0}^{t= \vert X \vert -1} G (X_{t+1} \vert S_t) \cdot V_D^G (S_t, X_{t+1})
+\end{align}</script><p><img data-src="/notes/images/SentiGAN.png" width="70%"/></p>
+<p>$D$ is a CNN-based multi-class discriminator, producing a ${k+1}$-dimensional probability vector. The score at $i$-th ($i \in {1,\cdots,k}$) index represents the probablity of being the $i$-th sentiment, the $(k+1)$-th index denote the probability to be synthetic.</p>
+<p>Refer to <sup id="fnref:12"><a href="#fn:12" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Wang, Ke, and Xiaojun Wan. "[SentiGAN: Generating Sentimental Texts via Mixture Adversarial Networks.](https://www.tensorinfinity.com/upload/files/20181227/1545889246130589.pdf)" IJCAI (2018).
+">[12]</span></a></sup> for details.</p>
+<h1 id="RelGAN-ICLR’19"><a href="#RelGAN-ICLR’19" class="headerlink" title="RelGAN (ICLR’19)"></a>RelGAN (ICLR’19)</h1><h2 id="Problems-8"><a href="#Problems-8" class="headerlink" title="Problems"></a>Problems</h2><p>GANs suffer from mode collapse issue due to either a lack of expressive power in $G$ (not considering many more complex modes in the data distribution), or by a less informative guiding signal in $D$ (constrain the $G$’s update to within certain modes). </p>
+<p>The LSTM-based generator might be the bottleneck of GANs with such experimental observations:</p>
+<ol>
+<li>$D$’s loss value very quickly goes t near minimum after few iterations, which means $D$ may be more powerful than $G$  and can easily distinguish between real/fake samples;</li>
+<li>Mode collapse may partly indicate the incapacity of $G$, as it may not be expressive enough to fit all modes of data distribution;</li>
+<li>Existing GANs perform poorly at long sentence generation, and LSTM encodes all previous sequences into a fixed hidden vector, potentially limiting its ability to modeling long-distance dependency.</li>
+</ol>
+<h2 id="Approach-7"><a href="#Approach-7" class="headerlink" title="Approach"></a>Approach</h2><p>RelGAN<sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Nie, Weili, Nina Narodytska, and Ankit Patel. "[Relgan: Relational generative adversarial networks for text generation.](https://openreview.net/pdf?id=rJedV3R5tm)" International conference on learning representations (2019).
+">[13]</span></a></sup> employs a relational memory based generator; Gumbel-softmax trick; and multi-representations in $D$.</p>
+<h3 id="Relational-Memory-based-G"><a href="#Relational-Memory-based-G" class="headerlink" title="Relational Memory based $G$"></a>Relational Memory based $G$</h3><p>As below figure, let each row of the memory <script type="math/tex">M_t</script> denote a memory slot. Given input <script type="math/tex">x_t</script> at time $t$ and $H$ heads, the memory is updated with self-attention mechanisms.<br><img data-src="/notes/images/RelGAN-Generator.png" width="70%"/></p>
+<p>For each head, we have query <script type="math/tex">Q_t = M_t W_q</script>, key <script type="math/tex">K_t = [M_t; x_t] W_k</script>, and value <script type="math/tex">V_t = [M_t;x_t]W_v</script>, where $[;]$ denotes row-wise concatenation. Thus, the updated memory <script type="math/tex">\tilde{M}_{t+1}</script>:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\tilde{M}_{t+1} &{}= [\tilde{M}_{t+1}^{(1)}L\cdots :\tilde{M}_{t+1}^{(H)}],\\
+\tilde{M}_{t+1}^{(h)} &{}= \textrm{softmax}\big( d_k^{-1/2} M_t W_q ([M_t;x_t] W_k)^\top \big) [M_t;x_t] W_v,
+\end{align}</script><p>where <script type="math/tex">d_k</script> is the column dimension of <script type="math/tex">K_t</script>, $[:]$ denotes column-wise concatenation.</p>
+<p>Then the next memory <script type="math/tex">M_{t+1}</script> is computed with skip-connections/MLP/gated operations.</p>
+<h3 id="Gumbel-Softmax-Relaxation"><a href="#Gumbel-Softmax-Relaxation" class="headerlink" title="Gumbel-Softmax Relaxation"></a>Gumbel-Softmax Relaxation</h3><p>The multinomial softmax can be parameterized as:</p>
+<script type="math/tex; mode=display">
+y_{t+1} = \textrm{one_hot} (\arg\max_{1\leq i \leq V} (o_t^{(i)} + g_t^{(i)})),</script><p>where <script type="math/tex">o_t^{(i)}</script> denotes the $i$-th entry of <script type="math/tex">o_t</script> and <script type="math/tex">g_t^{(i)}</script> is from the $i.i.d.$ Gumbel distribution <script type="math/tex">g_t^{(i)} = -\log \big( -\log U_t^{(i)} \big)</script> with <script type="math/tex">U_t^{(i)} \sim \textrm{uniform}(0,1)</script>.</p>
+<p>Further, the one-hot with argmax op can be approximated as:</p>
+<script type="math/tex; mode=display">
+\hat{y}_{t+1} = \textrm{sofmtax} \big( \beta (o_t + g_t) \big),</script><p>where the incerse temperature $\beta \in \mathbb{R}+$ is a tunable parameter. Large $\beta$ encourages exploration for better sample diversity while smaller one does more explitation for bettter sample quality. </p>
+<p>Thus it has an exponential policy: <script type="math/tex">\beta_n = \beta_\max^{n/N}</script>, where <script type="math/tex">\beta_\max</script> denotes the maximum inverse temperature, $N$ is the maximum # of training iteration, $n$ denotes current iteration. The increase rate of inverse temperature is from exploitation phrase to exploration phrase.</p>
+<h3 id="Multiple-Representaions-in-D"><a href="#Multiple-Representaions-in-D" class="headerlink" title="Multiple Representaions in $D$"></a>Multiple Representaions in $D$</h3><p>RelGAN applies multiple embedded representations for each input with each independently passed through CNN-based classifiers to get the score. Finally, take the average of different representations as the final guiding signal to update $G$. This resembles the use of multiple discriminators in image GANs but keeps a weight-sharing CNN-based classifier to curtail the computational cost.</p>
+<p><img data-src="/notes/images/RelGAN-Discriminator.png" width="70%"/></p>
+<h3 id="Training-4"><a href="#Training-4" class="headerlink" title="Training"></a>Training</h3><h4 id="Loss-function"><a href="#Loss-function" class="headerlink" title="Loss function"></a>Loss function</h4><p>RelGAN use the loss of Relativistic GAN (RSGAN), <em>i.e.</em>, <script type="math/tex">f(a,b) = \log \sigma (a-b)</script> for $a,b \in \mathbb{R}$.<br>Thus,</p>
+<script type="math/tex; mode=display">\mathcal{L}_D = \frac{1}{S} \sum_{s=1}^S \mathbb{E}_{r_{1:T}\sim P_R; \hat{y}_{1:T}\sim P_\theta} \log \sigma \big( D(\tilde{X}_r^{(s)}) - D(\tilde{X}_y^{(s)}) \big).</script><p>Intuitively, this loss is to directly estimate the average probability that real sentences are more realistic than generated sentences in terms of different embedded representations.</p>
+<h1 id="ScratchGAN-NeurIPS’19"><a href="#ScratchGAN-NeurIPS’19" class="headerlink" title="ScratchGAN (NeurIPS’19)"></a>ScratchGAN (NeurIPS’19)</h1><h2 id="Problems-9"><a href="#Problems-9" class="headerlink" title="Problems"></a>Problems</h2><p>Having suffered from challenges with gradient estimation, optimization instability, and mode collapse, existing language GANs resorted to MLE pretraining followed by adversarial fine-tuning with restrictive fine-tuning epochs and a small learning rate.<br>This suggests that “the best-performing GANs tend to stay close to the solution given by MLE training”. Even with pre-training, it shows that discrete GANs do not improve over MLE training.</p>
+<h2 id="Learning-Signals"><a href="#Learning-Signals" class="headerlink" title="Learning Signals"></a>Learning Signals</h2><div class="note info">
+            <p>The REINFORCE gradient estimator for $G$:</p><script type="math/tex; mode=display">\nabla_\theta \mathbb{E}_{p_\theta (\mathbf{x})} [R(\mathbf{x})] = \mathbb{E}_{p_\theta (\mathbf{x})}[R(\mathbf{x}) \nabla_\theta \log p_\theta (\mathbf{x}) ],</script><p>where $R(\mathbf{x})$ is provided by $D(\cdot)$. When setting <script type="math/tex">R(\mathbf{x})=\frac{p^*(\mathbf{x})}{p_\theta(\mathbf{x})}</script>, it recovers the MLE estimator:</p><script type="math/tex; mode=display">\mathbb{E}_{p_\theta (\mathbf{x})}[\frac{p^*(\mathbf{x})}{p_\theta(\mathbf{x})} \nabla_\theta \log p_\theta (\mathbf{x}) ] = \mathbb{E}_{p^*(\mathbf{x})}[\nabla_\theta \log p_\theta (\mathbf{x})] = \nabla_\theta\mathbb{E}_{p^*(\mathbf{x})}\log p_\theta (\mathbf{x}).</script><p>The gradient updates of MLE can be seen as a special case of the REINFORCE updates in discrete GAN training, whereas the language GANs’ rewards are learned.</p><p>We postulate the learned rewards provide a smoother signal to $G$ than classical MLE loss: $D$ can learn to generalize and provide a meaningful signal over parts of the distribution uncovered by the training data. As the training progresses and the signal from $D$ improves, $G$ also explores other parts of the data space, providing a natural curriculum, whereas MLE training is only exposed to the expert demonstration (real data).</p>
+          </div>
+<h2 id="Approach-8"><a href="#Approach-8" class="headerlink" title="Approach"></a>Approach</h2><p>ScratchGAN<sup id="fnref:14"><a href="#fn:14" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="de Masson d'Autume, Cyprien, et al. "[Training language gans from scratch.](http://papers.nips.cc/paper/8682-training-language-gans-from-scratch.pdf)" Advances in Neural Information Processing Systems (2019).
+">[14]</span></a></sup> combines existing techniques such as large batch sizes, dense rewards, and discriminator regularization to stabilize and improve the discrete GANs.</p>
+<h3 id="Dense-Rewards"><a href="#Dense-Rewards" class="headerlink" title="Dense Rewards"></a>Dense Rewards</h3><p>ScratchGAN emplolys a recurrent discriminator to provide rewards for each generated token. The discriminator learns to distinguish between sentence prefixees coming from real data and sampled sentence prefixes:</p>
+<script type="math/tex; mode=display">
+\max_\phi \sum_{i=1}^T \mathbb{E}_{p^*(x_t \vert x_1, \cdots, x_{t-1})} [\log D_\phi (x_t \vert x_1, \cdots, x_{t-1})] + \sum_{t=1}^T \mathbb{E}_{p_\theta(x_t \vert x_1, \cdots, x_{t-1})} [1-\log D_\phi (x_t \vert x_1, \cdots, x_{t-1})].</script><p>The recurrent $D$ is much cheaper than Monte Carlo Tree Search (MCTS) to score partial sentences.</p>
+<p>FOr the geerated token <script type="math/tex">\hat{x}_t \sim p_\theta (x_t \vert x_1, \cdots, x_{t-1})</script>, the reward at time step $t$ is scaled linearly with $D$’s output:</p>
+<script type="math/tex; mode=display">
+r_t = 2 D_\phi (\hat{x}_t \vert x_1, \cdots, x_{t-1}) -1.</script><p>The goal of $G$ at timestep $t$ is to maximize the sum of discounted future rewards using a discount factor $\gamma$: </p>
+<script type="math/tex; mode=display">R_t = \sum_{s=t}^T \gamma^{s-t} r_s.</script><h3 id="Large-Batch-Size-for-Variance-Reduction"><a href="#Large-Batch-Size-for-Variance-Reduction" class="headerlink" title="Large Batch Size for Variance Reduction"></a>Large Batch Size for Variance Reduction</h3><p>$G$ is updated using MC estimates of policy gradients, where $N$ is the batch size:</p>
+<script type="math/tex; mode=display">
+\nabla_\theta = \sum_{n=1}^N \sum_{t=1}^T (R_t^n - b_t) \nabla_\theta \log p_\theta (\hat{x}_t^n \vert \hat{x}_1^n , \cdots, \hat{x}_{t-1}^n ), \quad \hat{x}_t^n  \sim  p_\theta (\hat{x}_t^n \vert \hat{x}_1^n , \cdots ,\hat{x}_{t-1}^n )</script><p>ScratchGAN uses a global moving-average of rewards as a baseline <script type="math/tex">b_t</script>.</p>
+<h3 id="Training-5"><a href="#Training-5" class="headerlink" title="Training"></a>Training</h3><ul>
+<li>$D$ and $G$ both use an embedding layer followed by one or more LSTM layers.</li>
+<li>Discriminator regularization: layer normalization, dropout, L<sub>2</sub> weight decay.</li>
+<li>Concatenating the fixed sinusoidal position matrices and word embeddings in $D$. </li>
+</ul>
+<h1 id="JSDGAN-AISTATS’19"><a href="#JSDGAN-AISTATS’19" class="headerlink" title="JSDGAN (AISTATS’19)"></a>JSDGAN (AISTATS’19)</h1><h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>MLE is equivalent to minimizing the KL divergence between the empirical data distribution and the model distribution, which tends to favor approximations of model distribtuion that overgeneralize the data distribtuion. Instead the reverse KL divergence favors under-generalization. JSD combines KL and reverse KL, which is symmetric.</p>
+<p>GAN is regarded as a two-play minimax game with distinguishability game value function $V(G,D)$:</p>
+<script type="math/tex; mode=display">
+\min_G \max_D V(G,D) = \mathbb{E}_{x \sim \tilde{p}_\textrm{data}(x)} \log D(x) + \mathbb{E}_{x \sim p_G (x)} \log (1-D(x)),</script><p>where <script type="math/tex">\tilde{p}_\textrm{data}(x)</script> denotes the empirical data distribution over training data <script type="math/tex">\mathcal{C}=\{ x_1, \cdots, x_N \}</script>, and</p>
+<script type="math/tex; mode=display">
+\tilde{p}_\textrm{data}(x) = \left\{
+                \begin{array}{ll}
+                  \frac{1}{N} & \textrm{if } x \in \mathcal{C} \\
+                  0 & \textrm{otherwise}
+                \end{array}
+    \right.</script><h2 id="GAN-without-Explicit-D"><a href="#GAN-without-Explicit-D" class="headerlink" title="GAN without Explicit $D$"></a>GAN without Explicit $D$</h2><p><sup id="fnref:15"><a href="#fn:15" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Li, Zhongliang, et al. "[Adversarial discrete sequence generation without explicit neuralnetworks as discriminators.](http://proceedings.mlr.press/v89/li19g/li19g.pdf)" The 22nd International Conference on Artificial Intelligence and Statistics (2019).
+">[15]</span></a></sup> claimed that optimal $D$ has a closed form solution, and approximation on $D$ with neural networks is unnecessary.<br>It directly optimizes the JSD divergence between the distribution between $G$ and real data without sampling from $G$, which implies an alternative minimax optimizatin procedure.</p>
+<p>The optimal discriminator <script type="math/tex">D^*_G (x)</script> is:</p>
+<script type="math/tex; mode=display">
+D^*_G (x) = \left\{
+\begin{array}{ll}
+\frac{\tilde{p}_\textrm{data}(x)}{\tilde{p}_\textrm{data}(x) + p_g(x)} & \textrm{if } x \in \mathcal{C} \\
+0 & \textrm{otherwise}
+\end{array}
+\right.</script><p>The value function with optimal <script type="math/tex">D^*_G(x)</script> becomes:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+V(G, D^*_G (x)) &= 2 \textrm{JSD} (\tilde{p}_\textrm{data}(x) \Vert p_G (x)) - \log 4 \\
+&= \sum_{x \in \mathcal{C}} \tilde{p}_\textrm{data} \log [ \frac{\tilde{p}_\textrm{data}(x)}{\tilde{p}_\textrm{data}(x) + p_g(x)} ] + \sum_{x \in \mathcal{C}} p_G (x) [\log \frac{p_g(x)}{\tilde{p}_\textrm{data}(x) + p_g(x)} ]
+\end{align}</script><div class="note danger">
+            <p>This approach is only applicable when <script type="math/tex">p_G(x)</script> has explicit representations.</p>
+          </div>
+<h1 id="CatGAN-AAAI’20"><a href="#CatGAN-AAAI’20" class="headerlink" title="CatGAN (AAAI’20)"></a>CatGAN (AAAI’20)</h1><p>Category-aware GAN (CatGAN)<sup id="fnref:18"><a href="#fn:18" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Liu, Zhiyue, Jiahai Wang, and Zhiwei Liang. "[CatGAN: Category-Aware Generative Adversarial Networks with Hierarchical Evolutionary Learning for Category Text Generation.](https://www.aaai.org/Papers/AAAI/2020GB/AAAI-LiuZ.5249.pdf)" AAAI. 2020.
+">[18]</span></a></sup> employs such methods to generate sentences of different categories:</p>
+<ul>
+<li>Gumbel-softmax relaxation (as <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Nie, Weili, Nina Narodytska, and Ankit Patel. "[Relgan: Relational generative adversarial networks for text generation.](https://openreview.net/pdf?id=rJedV3R5tm)" International conference on learning representations (2019).
+">[13]</span></a></sup>)</li>
+<li>SAN-based relational memory (as <sup id="fnref:13"><a href="#fn:13" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Nie, Weili, Nina Narodytska, and Ankit Patel. "[Relgan: Relational generative adversarial networks for text generation.](https://openreview.net/pdf?id=rJedV3R5tm)" International conference on learning representations (2019).
+">[13]</span></a></sup>)</li>
+<li>Category-wise relativistic objective.</li>
+<li>Hierarchical evolutionary learning.</li>
+</ul>
+<p><img data-src="/notes/images/CatGAN.png" width="70%"/></p>
+<h1 id="SALGAN-ICLR’20"><a href="#SALGAN-ICLR’20" class="headerlink" title="SALGAN (ICLR’20)"></a>SALGAN (ICLR’20)</h1><h2 id="Problems-10"><a href="#Problems-10" class="headerlink" title="Problems"></a>Problems</h2><ul>
+<li>Reward spasity</li>
+<li>Mode collapse</li>
+</ul>
+<h2 id="Comparative-discriminaor"><a href="#Comparative-discriminaor" class="headerlink" title="Comparative discriminaor"></a>Comparative discriminaor</h2><p>SALGAN<sup id="fnref:17"><a href="#fn:17" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Zhou, Wangchunshu, et al. "[Self-Adversarial Learning with Comparative Discrimination for Text Generation.](https://arxiv.org/pdf/2001.11691)" arXiv preprint arXiv:2001.11691 (2020).
+">[17]</span></a></sup> employs a comparative discriminaor to pairwisely compare the text quality between a pair of samples: better($&gt;$), worse ($&lt;$), or  indistinguishable ($\approx$). Given a training set with $n$ real samples and $n$ generated samples, the comparative discimination can construct $\binom{2n}{2}$ pairwise training examples.<br><img data-src="/notes/images/SALGAN.png" width="70%"/></p>
+<h1 id="ColdGAN"><a href="#ColdGAN" class="headerlink" title="ColdGAN"></a>ColdGAN</h1><p>ColdGAN<sup id="fnref:19"><a href="#fn:19" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="Scialom, Thomas, et al. "[ColdGANs: Taming Language GANs with Cautious Sampling Strategies.](https://arxiv.org/pdf/2006.04643)" arXiv preprint arXiv:2006.04643 (2020).">[19]</span></a></sup> adopts such methods on T5 (small) and BART:</p>
+<ul>
+<li>Importance sampling</li>
+<li>PPO Clip</li>
+<li>Nucleus sampling</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Yu, Lantao, et al. &quot;<a target="_blank" rel="noopener" href="https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/download/14344/14489">Seqgan: Sequence generative adversarial nets with policy gradient.</a>&quot; Thirty-first AAAI conference on artificial intelligence. (2017).<a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhang, Yizhe, et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1706.03850">Adversarial feature matching for text generation.</a>&quot; arXiv preprint arXiv:1706.03850 (2017).<a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Metz, Luke, et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1611.02163.pdf">Unrolled generative adversarial networks.</a>&quot; arXiv preprint arXiv:1611.02163 (2016).<a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Arjovsky, Martin, and Léon Bottou. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1701.04862.pdf">Towards principled methods for training generative adversarial networks.</a>&quot; arXiv preprint arXiv:1701.04862 (2017).<a href="#fnref:4" rev="footnote"> ↩</a></span></li><li id="fn:5"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">5.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Goodfellow, Ian, et al. &quot;<a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/5423-generative-adversarial-nets.pdf">Generative adversarial nets.</a>&quot; Advances in neural information processing systems (2014).<a href="#fnref:5" rev="footnote"> ↩</a></span></li><li id="fn:6"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">6.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Guo, Jiaxian, et al. &quot;<a target="_blank" rel="noopener" href="https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPDFInterstitial/16360/16061">Long text generation via adversarial training with leaked information.</a>&quot; Thirty-Second AAAI Conference on Artificial Intelligence (2018).<a href="#fnref:6" rev="footnote"> ↩</a></span></li><li id="fn:7"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">7.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Che, Tong, et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1702.07983.pdf">Maximum-likelihood augmented discrete generative adversarial networks.</a>&quot; arXiv preprint arXiv:1702.07983 (2017).<a href="#fnref:7" rev="footnote"> ↩</a></span></li><li id="fn:8"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">8.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Lin, Kevin, et al. &quot;<a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/6908-adversarial-ranking-for-language-generation.pdf">Adversarial ranking for language generation.</a>&quot; Advances in Neural Information Processing Systems (2017).<a href="#fnref:8" rev="footnote"> ↩</a></span></li><li id="fn:9"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">9.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Kusner, Matt J., and José Miguel Hernández-Lobato. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1611.04051.pdf">Gans for sequences of discrete elements with the gumbel-softmax distribution.</a>&quot; arXiv preprint arXiv:1611.04051 (2016).<a href="#fnref:9" rev="footnote"> ↩</a></span></li><li id="fn:10"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">10.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Fedus, William, Ian Goodfellow, and Andrew M. Dai. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1801.07736.pdf">MaskGAN: Better text generation via filling in the _.</a>&quot; ICLR (2018).<a href="#fnref:10" rev="footnote"> ↩</a></span></li><li id="fn:11"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">11.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Chen, Liqun, et al. &quot;<a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/7717-adversarial-text-generation-via-feature-movers-distance.pdf">Adversarial text generation via feature-mover's distance.</a>&quot; Advances in Neural Information Processing Systems (2018).<a href="#fnref:11" rev="footnote"> ↩</a></span></li><li id="fn:12"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">12.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Wang, Ke, and Xiaojun Wan. &quot;<a target="_blank" rel="noopener" href="https://www.tensorinfinity.com/upload/files/20181227/1545889246130589.pdf">SentiGAN: Generating Sentimental Texts via Mixture Adversarial Networks.</a>&quot; IJCAI (2018).<a href="#fnref:12" rev="footnote"> ↩</a></span></li><li id="fn:13"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">13.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Nie, Weili, Nina Narodytska, and Ankit Patel. &quot;<a target="_blank" rel="noopener" href="https://openreview.net/pdf?id=rJedV3R5tm">Relgan: Relational generative adversarial networks for text generation.</a>&quot; International conference on learning representations (2019).<a href="#fnref:13" rev="footnote"> ↩</a></span></li><li id="fn:14"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">14.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">de Masson d'Autume, Cyprien, et al. &quot;<a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/8682-training-language-gans-from-scratch.pdf">Training language gans from scratch.</a>&quot; Advances in Neural Information Processing Systems (2019).<a href="#fnref:14" rev="footnote"> ↩</a></span></li><li id="fn:15"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">15.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Li, Zhongliang, et al. &quot;<a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v89/li19g/li19g.pdf">Adversarial discrete sequence generation without explicit neuralnetworks as discriminators.</a>&quot; The 22nd International Conference on Artificial Intelligence and Statistics (2019).<a href="#fnref:15" rev="footnote"> ↩</a></span></li><li id="fn:16"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">16.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Gulrajani, Ishaan, et al. &quot;<a target="_blank" rel="noopener" href="https://papers.nips.cc/paper/7159-improved-training-of-wasserstein-gans.pdf">Improved training of wasserstein gans.</a>&quot; Advances in Sneural information processing systems (2017).<a href="#fnref:16" rev="footnote"> ↩</a></span></li><li id="fn:17"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">17.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Zhou, Wangchunshu, et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2001.11691">Self-Adversarial Learning with Comparative Discrimination for Text Generation.</a>&quot; arXiv preprint arXiv:2001.11691 (2020).<a href="#fnref:17" rev="footnote"> ↩</a></span></li><li id="fn:18"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">18.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Liu, Zhiyue, Jiahai Wang, and Zhiwei Liang. &quot;<a target="_blank" rel="noopener" href="https://www.aaai.org/Papers/AAAI/2020GB/AAAI-LiuZ.5249.pdf">CatGAN: Category-Aware Generative Adversarial Networks with Hierarchical Evolutionary Learning for Category Text Generation.</a>&quot; AAAI. 2020.<a href="#fnref:18" rev="footnote"> ↩</a></span></li><li id="fn:19"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">19.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;">Scialom, Thomas, et al. &quot;<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2006.04643">ColdGANs: Taming Language GANs with Cautious Sampling Strategies.</a>&quot; arXiv preprint arXiv:2006.04643 (2020).<a href="#fnref:19" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/NLP/" rel="tag"># NLP</a>
+              <a href="/notes/tags/NLG/" rel="tag"># NLG</a>
+              <a href="/notes/tags/GAN/" rel="tag"># GAN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2020/06/05/NLG/Automatic-Evaluation-Metrics-for-Language-Generation/" rel="prev" title="Automatic Evaluation Metrics for Language Generation">
+      <i class="fa fa-chevron-left"></i> Automatic Evaluation Metrics for Language Generation
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2021/02/07/Backpropagation-step-by-step/" rel="next" title="Review: Backpropagation step by step">
+      Review: Backpropagation step by step <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">1.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SeqGAN-AAAI%E2%80%9917"><span class="nav-number">2.</span> <span class="nav-text">SeqGAN (AAAI’17)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems"><span class="nav-number">2.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach"><span class="nav-number">2.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Definition"><span class="nav-number">2.2.1.</span> <span class="nav-text">Definition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Policy-Gradient-with-MC-Search"><span class="nav-number">2.2.2.</span> <span class="nav-text">Policy Gradient with MC Search</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-Algorithm"><span class="nav-number">2.2.3.</span> <span class="nav-text">Training Algorithm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-Architecture"><span class="nav-number">2.2.4.</span> <span class="nav-text">Model Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Generator"><span class="nav-number">2.2.4.1.</span> <span class="nav-text">Generator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Discriminator"><span class="nav-number">2.2.4.2.</span> <span class="nav-text">Discriminator</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TextGAN-ICML%E2%80%9917"><span class="nav-number">3.</span> <span class="nav-text">TextGAN (ICML’17)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-1"><span class="nav-number">3.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-1"><span class="nav-number">3.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Objective-Function"><span class="nav-number">3.2.1.</span> <span class="nav-text">Objective Function</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Analysis"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">Analysis</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Feature-Matching-via-MMD"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">Feature Matching via MMD</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-Architecture-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">Model Architecture</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MaliGAN-MILA"><span class="nav-number">4.</span> <span class="nav-text">MaliGAN (MILA)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-2"><span class="nav-number">4.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-2"><span class="nav-number">4.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Basic-MaliGAN"><span class="nav-number">4.2.1.</span> <span class="nav-text">Basic MaliGAN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Training"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MaliGAN-with-Variance-Reduction"><span class="nav-number">4.2.2.</span> <span class="nav-text">MaliGAN with Variance Reduction</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Mixed-MLE-Mali-Training"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Mixed MLE-Mali Training</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training-1"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GSGAN-2016"><span class="nav-number">5.</span> <span class="nav-text">GSGAN (2016)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-3"><span class="nav-number">5.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gumbel-softmax-Distribution"><span class="nav-number">5.2.</span> <span class="nav-text">Gumbel-softmax Distribution</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RankGAN-NIPS%E2%80%9917"><span class="nav-number">6.</span> <span class="nav-text">RankGAN (NIPS’17)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-4"><span class="nav-number">6.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-3"><span class="nav-number">6.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Rank-Score"><span class="nav-number">6.2.1.</span> <span class="nav-text">Rank Score</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-2"><span class="nav-number">6.2.2.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LeakGAN-AAAI%E2%80%9918"><span class="nav-number">7.</span> <span class="nav-text">LeakGAN (AAAI’18)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-5"><span class="nav-number">7.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-4"><span class="nav-number">7.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Feature-Leakage-from-D"><span class="nav-number">7.2.1.</span> <span class="nav-text">Feature Leakage from $D$</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Generation"><span class="nav-number">7.2.1.1.</span> <span class="nav-text">Generation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training-of-G"><span class="nav-number">7.2.1.2.</span> <span class="nav-text">Training of $G$</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FM-GAN-NeurIPS%E2%80%9918"><span class="nav-number">8.</span> <span class="nav-text">FM-GAN (NeurIPS’18)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-6"><span class="nav-number">8.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-5"><span class="nav-number">8.2.</span> <span class="nav-text">Approach</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MaskGAN-ICLR%E2%80%9918"><span class="nav-number">9.</span> <span class="nav-text">MaskGAN (ICLR’18)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-7"><span class="nav-number">9.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-6"><span class="nav-number">9.2.</span> <span class="nav-text">Approach</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Architecture"><span class="nav-number">9.3.</span> <span class="nav-text">Architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training-3"><span class="nav-number">9.4.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SentiGAN-IJCAI%E2%80%9918"><span class="nav-number">10.</span> <span class="nav-text">SentiGAN (IJCAI’18)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RelGAN-ICLR%E2%80%9919"><span class="nav-number">11.</span> <span class="nav-text">RelGAN (ICLR’19)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-8"><span class="nav-number">11.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-7"><span class="nav-number">11.2.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Relational-Memory-based-G"><span class="nav-number">11.2.1.</span> <span class="nav-text">Relational Memory based $G$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gumbel-Softmax-Relaxation"><span class="nav-number">11.2.2.</span> <span class="nav-text">Gumbel-Softmax Relaxation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiple-Representaions-in-D"><span class="nav-number">11.2.3.</span> <span class="nav-text">Multiple Representaions in $D$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-4"><span class="nav-number">11.2.4.</span> <span class="nav-text">Training</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Loss-function"><span class="nav-number">11.2.4.1.</span> <span class="nav-text">Loss function</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ScratchGAN-NeurIPS%E2%80%9919"><span class="nav-number">12.</span> <span class="nav-text">ScratchGAN (NeurIPS’19)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-9"><span class="nav-number">12.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Signals"><span class="nav-number">12.2.</span> <span class="nav-text">Learning Signals</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Approach-8"><span class="nav-number">12.3.</span> <span class="nav-text">Approach</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dense-Rewards"><span class="nav-number">12.3.1.</span> <span class="nav-text">Dense Rewards</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Large-Batch-Size-for-Variance-Reduction"><span class="nav-number">12.3.2.</span> <span class="nav-text">Large Batch Size for Variance Reduction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Training-5"><span class="nav-number">12.3.3.</span> <span class="nav-text">Training</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JSDGAN-AISTATS%E2%80%9919"><span class="nav-number">13.</span> <span class="nav-text">JSDGAN (AISTATS’19)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">13.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GAN-without-Explicit-D"><span class="nav-number">13.2.</span> <span class="nav-text">GAN without Explicit $D$</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CatGAN-AAAI%E2%80%9920"><span class="nav-number">14.</span> <span class="nav-text">CatGAN (AAAI’20)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SALGAN-ICLR%E2%80%9920"><span class="nav-number">15.</span> <span class="nav-text">SALGAN (ICLR’20)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problems-10"><span class="nav-number">15.1.</span> <span class="nav-text">Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Comparative-discriminaor"><span class="nav-number">15.2.</span> <span class="nav-text">Comparative discriminaor</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ColdGAN"><span class="nav-number">16.</span> <span class="nav-text">ColdGAN</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">17.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/";
+    this.page.identifier = "2020/08/30/NLG/Sequence-GANs-in-a-Nutshell/";
+    this.page.title = "Sequence GANs in a Nutshell";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

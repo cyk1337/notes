@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Useful usage of python.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tricks of Python">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/03/03/Programming/Tricks-of-Python/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:description" content="Useful usage of python.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/shallow-copy.png">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/python-pathlib.png">
+<meta property="article:published_time" content="2019-03-03T05:58:00.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.849Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/shallow-copy.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/03/03/Programming/Tricks-of-Python/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Tricks of Python | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/03/03/Programming/Tricks-of-Python/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tricks of Python
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-03 13:58:00" itemprop="dateCreated datePublished" datetime="2019-03-03T13:58:00+08:00">2019-03-03</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/03/03/Programming/Tricks-of-Python/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/03/Programming/Tricks-of-Python/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p>Useful usage of python.<br><span id="more"></span></p>
+<h1 id="Advanced-Trick"><a href="#Advanced-Trick" class="headerlink" title="Advanced Trick"></a>Advanced Trick</h1><h2 id="Implement-Trie-Prefix-Tree"><a href="#Implement-Trie-Prefix-Tree" class="headerlink" title="Implement Trie (Prefix Tree)"></a>Implement Trie (Prefix Tree)</h2><ul>
+<li>defaultdict</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line">TrieNode = <span class="keyword">lambda</span>: defaultdict(TrieNode)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Trie</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        self.trie = TrieNode()</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">insert</span>(<span class="params">self, word</span>):</span></span><br><span class="line">        reduce(<span class="built_in">dict</span>.__getitem__, word, self.trie)[<span class="string">&#x27;end&#x27;</span>] = <span class="literal">True</span></span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span>(<span class="params">self, word</span>):</span></span><br><span class="line">        <span class="keyword">return</span> reduce(<span class="keyword">lambda</span> d,k: d[k] <span class="keyword">if</span> k <span class="keyword">in</span> d <span class="keyword">else</span> TrieNode(), word, self.trie).get(<span class="string">&#x27;end&#x27;</span>, <span class="literal">False</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">startsWith</span>(<span class="params">self, word</span>):</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">bool</span>(reduce(<span class="keyword">lambda</span> d,k: d[k] <span class="keyword">if</span> k <span class="keyword">in</span> d <span class="keyword">else</span> TrieNode(), word, self.trie).keys())</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>dict</code></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrieNode</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Initialize your data structure here.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        self.data = &#123;&#125;</span><br><span class="line">        self.is_word = <span class="literal">False</span></span><br><span class="line">  </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Trie</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        self.root = TrieNode()</span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">insert</span>(<span class="params">self, word</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Inserts a word into the trie.</span></span><br><span class="line"><span class="string">        :type word: str</span></span><br><span class="line"><span class="string">        :rtype: void</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        node = self.root</span><br><span class="line">        <span class="keyword">for</span> letter <span class="keyword">in</span> word:</span><br><span class="line">            child = node.data.get(letter)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> child:</span><br><span class="line">                node.data[letter] = TrieNode()</span><br><span class="line">            node = node.data[letter]</span><br><span class="line">        node.is_word = <span class="literal">True</span></span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span>(<span class="params">self, word</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns if the word is in the trie.</span></span><br><span class="line"><span class="string">        :type word: str</span></span><br><span class="line"><span class="string">        :rtype: bool</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        node = self.root</span><br><span class="line">        <span class="keyword">for</span> letter <span class="keyword">in</span> word:</span><br><span class="line">            node = node.data.get(letter)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> node:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span> node.is_word </span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">starts_with</span>(<span class="params">self, prefix</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns if there is any word in the trie</span></span><br><span class="line"><span class="string">        that starts with the given prefix.</span></span><br><span class="line"><span class="string">        :type prefix: str</span></span><br><span class="line"><span class="string">        :rtype: bool</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        node = self.root</span><br><span class="line">        <span class="keyword">for</span> letter <span class="keyword">in</span> prefix:</span><br><span class="line">            node = node.data.get(letter)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> node:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">  </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_start</span>(<span class="params">self, prefix</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns words started with prefix</span></span><br><span class="line"><span class="string">        :param prefix:</span></span><br><span class="line"><span class="string">        :return: words (list)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">_get_key</span>(<span class="params">pre, pre_node</span>):</span></span><br><span class="line">            words_list = []</span><br><span class="line">            <span class="keyword">if</span> pre_node.is_word:</span><br><span class="line">                words_list.append(pre)</span><br><span class="line">            <span class="keyword">for</span> x <span class="keyword">in</span> pre_node.data.keys():</span><br><span class="line">                words_list.extend(_get_key(pre + <span class="built_in">str</span>(x), pre_node.data.get(x)))</span><br><span class="line">            <span class="keyword">return</span> words_list</span><br><span class="line">  </span><br><span class="line">        words = []</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.starts_with(prefix):</span><br><span class="line">            <span class="keyword">return</span> words</span><br><span class="line">        <span class="keyword">if</span> self.search(prefix):</span><br><span class="line">            words.append(prefix)</span><br><span class="line">            <span class="keyword">return</span> words</span><br><span class="line">        node = self.root</span><br><span class="line">        <span class="keyword">for</span> letter <span class="keyword">in</span> prefix:</span><br><span class="line">            node = node.data.get(letter)</span><br><span class="line">        <span class="keyword">return</span> _get_key(prefix, node)</span><br></pre></td></tr></table></figure>
+<h2 id="2D-list-to-1D"><a href="#2D-list-to-1D" class="headerlink" title="2D list to 1D"></a>2D list to 1D</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">matrix = [[<span class="number">1</span>,<span class="number">5</span>,<span class="number">9</span>],[<span class="number">10</span>,<span class="number">11</span>,<span class="number">13</span>],[<span class="number">12</span>,<span class="number">13</span>,<span class="number">15</span>]]</span><br><span class="line"><span class="built_in">sum</span>(matrix, [])</span><br><span class="line"><span class="comment"># [1, 5, 9, 10, 11, 13, 12, 13, 15]</span></span><br></pre></td></tr></table></figure>
+<h1 id="Variable"><a href="#Variable" class="headerlink" title="Variable"></a>Variable</h1><h2 id="Swap-value"><a href="#Swap-value" class="headerlink" title="Swap value"></a>Swap value</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># python way to swap values</span></span><br><span class="line">a, b  = b, a</span><br></pre></td></tr></table></figure>
+<h2 id="chain-comparison-with-ops"><a href="#chain-comparison-with-ops" class="headerlink" title="chain comparison with ops"></a>chain comparison with ops</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">b=<span class="number">6</span></span><br><span class="line"><span class="number">1</span>==b&lt;<span class="number">38</span> <span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+<h1 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h1><h2 id="For-else"><a href="#For-else" class="headerlink" title="For else"></a>For else</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">l = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">5</span>))</span><br><span class="line"><span class="keyword">for</span> e <span class="keyword">in</span> l:</span><br><span class="line">	<span class="keyword">if</span> e == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"><span class="keyword">else</span>: <span class="comment"># called if for loop does not reach break statement</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;did not break out of for loop&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="List"><a href="#List" class="headerlink" title="List"></a>List</h1><h2 id="list-to-str"><a href="#list-to-str" class="headerlink" title="list to str"></a>list to str</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">l = [<span class="string">&quot;Python&quot;</span>, <span class="string">&quot;is&quot;</span>, <span class="string">&quot;awesome&quot;</span>]</span><br><span class="line"><span class="string">&quot; &quot;</span>.join(l)</span><br><span class="line"></span><br><span class="line">l = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">5</span>))</span><br><span class="line"><span class="string">&quot;,&quot;</span>.join(<span class="built_in">map</span>(<span class="built_in">str</span>, l))</span><br></pre></td></tr></table></figure>
+<h2 id="2d-array-transpose"><a href="#2d-array-transpose" class="headerlink" title="2d array transpose"></a>2d array transpose</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arr = [[<span class="string">&#x27;a&#x27;</span>,<span class="string">&#x27;b&#x27;</span>], [<span class="string">&#x27;c&#x27;</span>,<span class="string">&#x27;d&#x27;</span>],[<span class="string">&#x27;e&#x27;</span>,<span class="string">&#x27;f&#x27;</span>]]</span><br><span class="line">transposed = <span class="built_in">list</span>(<span class="built_in">zip</span>(*arr))</span><br></pre></td></tr></table></figure>
+<h2 id="most-frequent-element-in-a-list"><a href="#most-frequent-element-in-a-list" class="headerlink" title="most frequent element in a list"></a>most frequent element in a list</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">1</span>]</span><br><span class="line"><span class="built_in">max</span>(<span class="built_in">set</span>(a), key=a.count)</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot; use Counter from collections&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line">cnt = Counter(a)</span><br><span class="line">cnt.most_common(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="copy-array"><a href="#copy-array" class="headerlink" title="copy array"></a>copy array</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># a fast way of shallow copy of a list</span></span><br><span class="line">b = a[:]</span><br><span class="line"></span><br><span class="line">b = a.copy() <span class="comment"># python3 only</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># copy nested lists using copy.deepcopy</span></span><br><span class="line"><span class="keyword">import</span> copy</span><br><span class="line">l = [[<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>]]</span><br><span class="line">l2 = copy.deepcopy(l)</span><br></pre></td></tr></table></figure>
+<h2 id="Remove-duplicates-in-list"><a href="#Remove-duplicates-in-list" class="headerlink" title="Remove duplicates in list"></a>Remove duplicates in list</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">items = [<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">1</span>]</span><br><span class="line"><span class="built_in">list</span>(<span class="built_in">set</span>(items))</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot; remove dups and keep order &quot;&quot;&quot;</span></span><br><span class="line">items = [<span class="string">&#x27;foo&#x27;</span>, <span class="string">&#x27;bar&#x27;</span>, <span class="string">&#x27;bar&#x27;</span>, <span class="string">&#x27;foo&#x27;</span>]</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> OrderedDict</span><br><span class="line"><span class="built_in">list</span>(OrderedDict.fromkeys(items).keys())</span><br></pre></td></tr></table></figure>
+<h2 id="Find-index-of-Min-Max"><a href="#Find-index-of-Min-Max" class="headerlink" title="Find index of Min/Max"></a>Find index of Min/Max</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">l = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">5</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">minIndex</span>(<span class="params">lst</span>):</span></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">min</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(lst)), key=lst.__getitem__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">maxIndex</span>(<span class="params">lst</span>):</span></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">max</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(lst)), key=lst.__getitem__)</span><br><span class="line"></span><br><span class="line">minIndex(l)</span><br><span class="line">maxIndex(l)</span><br></pre></td></tr></table></figure>
+<h1 id="Str"><a href="#Str" class="headerlink" title="Str"></a>Str</h1><h2 id="check-if-strs-are-permutation"><a href="#check-if-strs-are-permutation" class="headerlink" title="check if strs are permutation"></a>check if strs are permutation</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line">Counter(str1) == Counter(str2)</span><br></pre></td></tr></table></figure>
+<h2 id="Reverse-string"><a href="#Reverse-string" class="headerlink" title="Reverse string"></a>Reverse string</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a =<span class="string">&#x27;abcdefghijklmnopqrstuvwxyz&#x27;</span></span><br><span class="line">a[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;</span>.join([ch <span class="keyword">for</span> ch <span class="keyword">in</span> <span class="built_in">reversed</span>(a)])</span><br></pre></td></tr></table></figure>
+<h2 id="find-index"><a href="#find-index" class="headerlink" title="find index"></a>find index</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check the index of a char, else -1</span></span><br><span class="line">a =<span class="string">&#x27;abcdefghijklmnopqrstuvwxyz&#x27;</span></span><br><span class="line">a.find(a) <span class="comment"># 0</span></span><br></pre></td></tr></table></figure>
+<h1 id="Dict"><a href="#Dict" class="headerlink" title="Dict"></a>Dict</h1><h2 id="Dict-get"><a href="#Dict-get" class="headerlink" title="Dict get"></a>Dict get</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d = &#123;<span class="string">&#x27;a&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;b&#x27;</span>: <span class="number">2</span>&#125;</span><br><span class="line">d.get(<span class="string">&#x27;c&#x27;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="sort-dict"><a href="#sort-dict" class="headerlink" title="sort dict"></a>sort dict</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sorted</span>(d.items(), key=<span class="keyword">lambda</span> x:x[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> operator <span class="keyword">import</span> itemgetter</span><br><span class="line"><span class="built_in">sorted</span>(d.items(), key=itemgetter(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">sorted</span>(d, key=d.get)</span><br></pre></td></tr></table></figure>
+<h2 id="merge-dict"><a href="#merge-dict" class="headerlink" title="merge dict"></a>merge dict</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">d1 = &#123;<span class="string">&#x27;a&#x27;</span>: <span class="number">1</span>&#125;</span><br><span class="line">d2 = &#123;<span class="string">&#x27;b&#x27;</span>: <span class="number">2</span>&#125;</span><br><span class="line"></span><br><span class="line">&#123;**d1, **d2&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">dict</span>(d1.items() | d2.items())</span><br><span class="line"></span><br><span class="line">d1.update(d2)</span><br></pre></td></tr></table></figure>
+<h2 id="kwargs"><a href="#kwargs" class="headerlink" title="**kwargs"></a>**kwargs</h2><p><code>dictionary.pop(keyname, defaultvalue)</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fn</span>(<span class="params">*args, **kwargs</span>):</span></span><br><span class="line">    v1 = kwargs.pop(<span class="string">&quot;k1&quot;</span>, <span class="string">&#x27;default1&#x27;</span>)</span><br><span class="line">    v2 = kwargs.pop(<span class="string">&quot;k2&quot;</span>, <span class="string">&#x27;default2&#x27;</span>)</span><br><span class="line">    v3 = kwargs.pop(<span class="string">&quot;k3&quot;</span>, <span class="string">&#x27;default3&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="Builtin-functions"><a href="#Builtin-functions" class="headerlink" title="Builtin functions"></a>Builtin functions</h1><h2 id="Binary-Octal-Hexadecimal-integers"><a href="#Binary-Octal-Hexadecimal-integers" class="headerlink" title="Binary, Octal, Hexadecimal integers"></a>Binary, Octal, Hexadecimal integers</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># base 10 (decimal)</span></span><br><span class="line">dec = <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">base 2 (binary)</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="comment"># decimal to binary (base 2)</span></span><br><span class="line">bin_dec = <span class="built_in">bin</span>(dec) <span class="comment"># str: &#x27;0b101&#x27;</span></span><br><span class="line"><span class="comment"># binary to decimal</span></span><br><span class="line">dec = <span class="built_in">int</span>(bin_dec, <span class="number">2</span>) <span class="comment"># int: 5</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">base 8 (octal)</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="comment"># decimal to octal (base 8)</span></span><br><span class="line">oct_dec = <span class="built_in">oct</span>(dec) <span class="comment"># str: &#x27;05&#x27;</span></span><br><span class="line"><span class="comment"># octal to decimal</span></span><br><span class="line">dec = <span class="built_in">int</span>(oct_dec, <span class="number">8</span>) <span class="comment"># int: 5</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">base 16 (hexadecimal)</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="comment"># decimal to hexadecimal (base 16)</span></span><br><span class="line">hex_dec = <span class="built_in">hex</span>(dec) <span class="comment"># str: &#x27;0x5&#x27;</span></span><br><span class="line"><span class="comment"># hexadecimal to decimal</span></span><br><span class="line">dec = <span class="built_in">int</span>(hex_dec, <span class="number">16</span>) <span class="comment"># int: 5</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Bit-wise-Op"><a href="#Bit-wise-Op" class="headerlink" title="Bit-wise Op"></a>Bit-wise Op</h2><div class="note info">
+            <ul><li><code>&amp;</code>: binary <code>AND</code>. Op copies a bit to the result if it exists in both operands.</li><li><code>|</code>: binary <code>OR</code>. It copies a bit to the result if it exists in either operand.</li><li><code>^</code>: binary <code>XOR</code>. It copies a bit if it is set in one operand but not both.</li><li><p><code>~</code>: binary Ones Complement. It is unary and has the effect of ‘flipping’ bits.</p></li><li><p><code>&lt;&lt;</code>: binary left shift.</p></li><li><code>&gt;&gt;</code>: binary right shift.</li></ul>
+          </div>
+<h2 id="Array-index"><a href="#Array-index" class="headerlink" title="Array index"></a>Array index</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~i <span class="comment"># -i-1</span></span><br><span class="line">arr[~i] <span class="comment"># is equal to arr[-i-1]</span></span><br></pre></td></tr></table></figure>
+<h2 id="r-application"><a href="#r-application" class="headerlink" title="\r application"></a><code>\r</code> application</h2><ul>
+<li><code>\r</code> puts the location of the cursor at the beginning of the current row.</li>
+<li><code>\b</code> backtracks one bit of the cursor.</li>
+</ul>
+<h3 id="Count-down"><a href="#Count-down" class="headerlink" title="Count down"></a>Count down</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">count_down = <span class="number">10</span>  <span class="comment"># count down total time ( seconds )</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count_down, <span class="number">0</span>, -<span class="number">1</span>):</span><br><span class="line">    msg = <span class="string">u&quot;\r System will exit in &quot;</span> + <span class="built_in">str</span>(i) + <span class="string">&quot;secs&quot;</span></span><br><span class="line">    <span class="built_in">print</span>(msg, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">end_msg = <span class="string">&quot;end&quot;</span> + <span class="string">&quot;  &quot;</span>*(<span class="built_in">len</span>(msg)-<span class="built_in">len</span>(<span class="string">&quot;end&quot;</span>))  <span class="comment"># cover all the console output with whitespace </span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">u&quot;\r&quot;</span>+end_msg)</span><br></pre></td></tr></table></figure>
+<h3 id="Progress-bar"><a href="#Progress-bar" class="headerlink" title="Progress bar"></a>Progress bar</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">count_down = <span class="number">10</span>  </span><br><span class="line">interval = <span class="number">1</span>  </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">int</span>(count_down/interval)+<span class="number">1</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\r&quot;</span>+<span class="string">&quot;▇&quot;</span>*i+<span class="string">&quot; &quot;</span>+<span class="built_in">str</span>(i*<span class="number">10</span>)+<span class="string">&quot;%&quot;</span>, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    time.sleep(interval)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\n Finished&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="Loading"><a href="#Loading" class="headerlink" title="Loading"></a>Loading</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">count_down = <span class="number">10</span> </span><br><span class="line">interval = <span class="number">0.25</span>  </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">int</span>(count_down/interval)):</span><br><span class="line">    ch_list = [<span class="string">&quot;\\&quot;</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;/&quot;</span>, <span class="string">&quot;-&quot;</span>]</span><br><span class="line">    index = i % <span class="number">4</span></span><br><span class="line">    msg = <span class="string">&quot;\r Program is running &quot;</span> + ch_list[index]</span><br><span class="line">    <span class="built_in">print</span>(msg, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    time.sleep(interval)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">u&quot;\r Finished&quot;</span> + <span class="string">&quot;  &quot;</span>*<span class="built_in">len</span>(msg))</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Functional-programming"><a href="#Functional-programming" class="headerlink" title="Functional programming"></a>Functional programming</h1><h2 id="Advanced-function"><a href="#Advanced-function" class="headerlink" title="Advanced function"></a>Advanced function</h2><h3 id="map"><a href="#map" class="headerlink" title="map"></a><code>map</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span>(<span class="params">x</span>):</span></span><br><span class="line">	<span class="keyword">return</span> x*x</span><br><span class="line">    </span><br><span class="line">r = <span class="built_in">map</span>(f, [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]) <span class="comment"># =&gt; Iterator</span></span><br><span class="line"><span class="built_in">list</span>(r) <span class="comment"># [1,4,9,16]</span></span><br></pre></td></tr></table></figure>
+<h3 id="reduce"><a href="#reduce" class="headerlink" title="reduce"></a><code>reduce</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reduce(f, [x1,x2,x3]) &lt;=&gt; f(f(x1, x2), x3) </span><br></pre></td></tr></table></figure>
+<ul>
+<li>Application: <strong>str2int</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line">DIGITS = &#123;<span class="string">&#x27;0&#x27;</span>:<span class="number">0</span>, <span class="string">&#x27;1&#x27;</span>:<span class="number">1</span>, <span class="string">&#x27;2&#x27;</span>:<span class="number">2</span>, <span class="string">&#x27;3&#x27;</span>:<span class="number">3</span>, <span class="string">&#x27;4&#x27;</span>:<span class="number">4</span>, <span class="string">&#x27;5&#x27;</span>:<span class="number">5</span>, <span class="string">&#x27;6&#x27;</span>:<span class="number">6</span>, <span class="string">&#x27;7&#x27;</span>:<span class="number">7</span>, <span class="string">&#x27;8&#x27;</span>:<span class="number">8</span>, <span class="string">&#x27;9&#x27;</span>:<span class="number">9</span>, <span class="string">&#x27;0&#x27;</span>:<span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">char2num</span>(<span class="params">s</span>):</span></span><br><span class="line">	<span class="keyword">return</span> DIGIT[s]</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">str2int</span>(<span class="params">s</span>):</span></span><br><span class="line">	<span class="keyword">return</span> reduce(<span class="keyword">lambda</span> x,y: x*<span class="number">10</span>+y, <span class="built_in">map</span>(char2sum, s))</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="filter"><a href="#filter" class="headerlink" title="filter"></a><code>filter</code></h3><p><code>filter</code> filters out sequence by applying on each element and selecting by return value (True means keep that element)</p>
+<ul>
+<li><p>Filter out even numbers:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">is_odd</span>(<span class="params">n</span>):</span></span><br><span class="line">	<span class="keyword">return</span> n%<span class="number">2</span> == <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">list</span>(<span class="built_in">filter</span>(is_odd, [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]))</span><br><span class="line"><span class="comment"># [1,3,5]</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Get the prime number</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_odd_iter</span>():</span></span><br><span class="line">	n=<span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    	n += <span class="number">2</span></span><br><span class="line">        <span class="keyword">yield</span> n</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_not_divisible</span>(<span class="params">n</span>):</span></span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">lambda</span> x: x%n &gt; <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">primes</span>():</span></span><br><span class="line">	<span class="keyword">yield</span> <span class="number">2</span></span><br><span class="line">    it = _odd_iter()</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    	n = <span class="built_in">next</span>(it)</span><br><span class="line">        <span class="keyword">yield</span> n</span><br><span class="line">        it = <span class="built_in">filter</span>(_not_divisible(n), it)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> n <span class="keyword">in</span> primes():</span><br><span class="line">	<span class="keyword">if</span> n&lt;<span class="number">1000</span>:</span><br><span class="line">    	<span class="built_in">print</span>(n)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">    	<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="sorted"><a href="#sorted" class="headerlink" title="sorted"></a><code>sorted</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sorted</span>([<span class="string">&#x27;bob&#x27;</span>, <span class="string">&#x27;about&#x27;</span>, <span class="string">&#x27;Zoo&#x27;</span>, <span class="string">&#x27;Credit&#x27;</span>], key=<span class="built_in">str</span>.lower, reverse=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># [&#x27;Zoo&#x27;, &#x27;Credit&#x27;, &#x27;bob&#x27;, &#x27;about&#x27;]</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Decorator"><a href="#Decorator" class="headerlink" title="Decorator"></a>Decorator</h2><ul>
+<li>Print the call time of a function<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">time_metric</span>(<span class="params">func</span>):</span></span><br><span class="line">	<span class="comment"># print the call time and call counts</span></span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span>(<span class="params">*args, **kwargs</span>):</span></span><br><span class="line">    	<span class="keyword">nonlocal</span> count</span><br><span class="line">        start_time = time.time()</span><br><span class="line">        data = func(*args, **kwargs)</span><br><span class="line">        time_delta = time.time() - start_time</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Call &#123;&#125; times. It costs &#123;&#125; secs&quot;</span>.<span class="built_in">format</span>(count, time_delta))</span><br><span class="line">        <span class="keyword">return</span> data</span><br><span class="line">    <span class="keyword">return</span> wrapper</span><br><span class="line"></span><br><span class="line"><span class="meta">@time_metric</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span>():</span></span><br><span class="line">    time.sleep(<span class="number">0.5</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h1 id="Deep-copy-and-shallow-copy"><a href="#Deep-copy-and-shallow-copy" class="headerlink" title="Deep copy and shallow copy"></a>Deep copy and shallow copy</h1><ul>
+<li><code>=</code> operator only creates a new variable that shares the <strong>reference</strong> of the original object.</li>
+<li><code>Deep copy</code> is a process in which the copy process occurs <strong>recursively</strong>. It first construct a new collection object and then recursively populating it with copies of the child objects found in the original. Any changes made to a copy of object do not reflect in the original object.<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> copy</span><br><span class="line"></span><br><span class="line">l = [<span class="number">1</span>,<span class="number">2</span>,[<span class="number">3</span>,<span class="number">4</span>],<span class="number">5</span>]</span><br><span class="line">l_deep = copy.deepcopy(l) <span class="comment"># deep copy</span></span><br><span class="line">l[<span class="number">2</span>][<span class="number">0</span>] = <span class="number">6</span> </span><br><span class="line"><span class="built_in">print</span>(l)      <span class="comment"># [1,2,[6,4],5]</span></span><br><span class="line"><span class="built_in">print</span>(l_deep) <span class="comment"># [1,2,[3,4],5]</span></span><br></pre></td></tr></table></figure></li>
+<li><code>Shallow copy</code> constructs a new collection object and then populating it with references to the children objects found in the original. The copying process <strong>does not recurse</strong> and therefore <strong>won’t create copies of the child objects themselves</strong>.</li>
+</ul>
+<p><img data-src="/notes/images/shallow-copy.png" alt="upload successful"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> copy</span><br><span class="line"></span><br><span class="line">l = [<span class="number">1</span>,<span class="number">2</span>,[<span class="number">3</span>,<span class="number">4</span>],<span class="number">5</span>]</span><br><span class="line">l_deep = copy.copy(l) <span class="comment"># shallow copy</span></span><br><span class="line">l[<span class="number">2</span>][<span class="number">0</span>] = <span class="number">6</span> </span><br><span class="line"><span class="built_in">print</span>(l)      <span class="comment"># [1,2,[6,4],5]</span></span><br><span class="line"><span class="built_in">print</span>(l_deep) <span class="comment"># [1,2,[6,4],5]</span></span><br></pre></td></tr></table></figure>
+<h1 id="multiprocess-v-s-threading"><a href="#multiprocess-v-s-threading" class="headerlink" title="multiprocess v.s. threading"></a>multiprocess v.s. threading</h1><div class="note success">
+            <h2 id="multiprocessing"><a href="#multiprocessing" class="headerlink" title="multiprocessing"></a>multiprocessing</h2><p><strong>Pros</strong>:</p><ul><li>Separate memory space</li><li>Takes advantages of multiple CPUs and cores</li><li>Avoids <strong>GIL</strong>(<code>Global Interpreter Lock</code>) limitations for cPython</li><li>Children processes are interruptible</li><li>A must with cPython for <strong>CPU-bound</strong> processing</li></ul><p><strong>Cons</strong>:</p><ul><li>IPC a little more complicated with more overhead</li><li>Larger memory footprint</li></ul>
+          </div>
+<div class="note info">
+            <h2 id="threading"><a href="#threading" class="headerlink" title="threading"></a>threading</h2><p><strong>Pros</strong>:</p><ul><li>Lightweight -&gt; low memory footprint</li><li><strong>Shared memory</strong> -&gt; makes access to state from another context easier</li><li>Allows you to easily make responsive UIs</li><li>cPython C extension modules that properly release the GIL will run in parallel</li><li>Great option for <strong>I/O-bound</strong> applications</li></ul><p><strong>Cons</strong>:</p><ul><li>CPython -&gt; subject to the GIL</li><li>Not interruptible/killable</li></ul>
+          </div>
+<hr>
+<h1 id="Random"><a href="#Random" class="headerlink" title="Random"></a>Random</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># approach 1</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">np.random.choice(items, p)</span><br><span class="line"></span><br><span class="line"><span class="comment"># approach 2</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">random_select</span>(<span class="params">items, p</span>):</span></span><br><span class="line">    x = random.uniform(<span class="number">0</span>,<span class="number">1</span>)</span><br><span class="line">    cum_p = <span class="number">.0</span></span><br><span class="line">    <span class="keyword">for</span> item, prob <span class="keyword">in</span> <span class="built_in">zip</span>(items, p):</span><br><span class="line">        cum_p += prob</span><br><span class="line">        <span class="keyword">if</span> x &lt; cum_p:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">return</span> item</span><br></pre></td></tr></table></figure>
+<h1 id="Pathlib"><a href="#Pathlib" class="headerlink" title="Pathlib"></a>Pathlib</h1><p>The python std library <code>Pathlib</code> module can be used to manipulate windows paths on a Unix machine(or vice versa). It can also be used to manipulate paths without accessing the <code>os</code> module.<br><img data-src="/notes/images/python-pathlib.png" alt="upload successful"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="comment"># listing subdirectories</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p = Path(<span class="string">&#x27;.&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>[x <span class="keyword">for</span> x <span class="keyword">in</span> p.iterdir() <span class="keyword">if</span> x.is_dir()]</span><br><span class="line"></span><br><span class="line"><span class="comment"># listing py src files in the directory tree</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">list</span>(p.glob(<span class="string">&#x27;**/*.py&#x27;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># navigate inside a directory tree</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p = Path(<span class="string">&#x27;/etc&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>q = p / <span class="string">&#x27;init.d&#x27;</span> / <span class="string">&#x27;reboot&#x27;</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>q</span><br><span class="line">PosixPath(<span class="string">&#x27;/etc/init.d/reboot&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># query path properties</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>q.exists()</span><br><span class="line"><span class="literal">True</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>q.is_dir()</span><br><span class="line"><span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># open a file</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">with</span> q.<span class="built_in">open</span>() <span class="keyword">as</span> f: f.readline()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.name <span class="comment"># filename</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.stem <span class="comment"># filename without suffix</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.suffix <span class="comment"># file suffix</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.parent <span class="comment"># the dirname</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create directory</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p=Path(<span class="string">r&#x27;./a/b/c&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.mkdir(exist_ok=<span class="literal">True</span>) <span class="comment"># create if the parent directory exists</span></span><br><span class="line"><span class="comment">## iteratively create the directory</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.mkdir(exist_ok=<span class="literal">True</span>, parents=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># file details</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.stat() <span class="comment"># detail information</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.stat().st_size <span class="comment"># file size</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.stat().st_ctime <span class="comment"># create time</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>p.stat().st_mtime <span class="comment"># modified time</span></span><br></pre></td></tr></table></figure>
+<h1 id="itertools"><a href="#itertools" class="headerlink" title="itertools"></a>itertools</h1><h2 id="itertools-count"><a href="#itertools-count" class="headerlink" title="itertools.count()"></a>itertools.count()</h2><p>Iteration over infinite numbers</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">import</span> itertools</span><br><span class="line">$ results = []</span><br><span class="line">$ <span class="keyword">for</span> x <span class="keyword">in</span> itertools.count(start=<span class="number">0</span>):</span><br><span class="line">$     <span class="keyword">if</span> &lt;condition&gt;:</span><br><span class="line">$        <span class="keyword">break</span></span><br><span class="line">$     results.append(&lt;element&gt;)</span><br></pre></td></tr></table></figure>
+<h2 id="itertools-permutations"><a href="#itertools-permutations" class="headerlink" title="itertools.permutations()"></a>itertools.permutations()</h2><p><code>itertools.permutations(iterable, r=None)</code></p>
+<ul>
+<li>Return successive $r$ length permutations of elements in the iterable. If None, then $r$ defaults to the length of the iterable and alll possible full-length permutations.<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># permutations(&#x27;ABCD&#x27;, 2) --&gt; AB AC AD BA BC BD CA CB CD DA DB DC</span></span><br><span class="line"><span class="comment"># permutations(range(3)) --&gt; 012 021 102 120 201 210</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="itertools-zip-longest"><a href="#itertools-zip-longest" class="headerlink" title="itertools.zip_longest()"></a>itertools.zip_longest()</h2><h2 id=""><a href="#" class="headerlink" title=""></a><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Similar to zip but return the longest length of inputs with filling default values, whereas zip returns the shortest length</span></span><br><span class="line">itertools.zip_longest(*iterables, fillvalue=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure></h2><h1 id="File"><a href="#File" class="headerlink" title="File"></a>File</h1><h2 id="os"><a href="#os" class="headerlink" title="os"></a>os</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">filepath=<span class="string">&#x27;../test/test/test.txt&#x27;</span></span><br><span class="line"><span class="comment"># split filename</span></span><br><span class="line">os.path.splittext(filepath) <span class="comment"># (&#x27;../test/test&#x27;, &#x27;test.txt&#x27;)</span></span><br><span class="line"><span class="comment"># split extention name</span></span><br><span class="line">os.path.splitext(filepath) <span class="comment"># (&#x27;../test/test/test&#x27;, &#x27;.txt&#x27;)</span></span><br></pre></td></tr></table></figure>
+<h2 id="glob"><a href="#glob" class="headerlink" title="glob"></a>glob</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># search for files</span></span><br><span class="line">glob.glob(<span class="string">&#x27;dir/subdir/*.txt&#x27;</span>) <span class="comment"># return *.txt in the directory &#x27;dir/subdir/&#x27;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="My-utils"><a href="#My-utils" class="headerlink" title="My utils"></a>My utils</h1><h2 id="echo-with-colors"><a href="#echo-with-colors" class="headerlink" title="echo with colors"></a>echo with colors</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_format_table</span>():</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    prints table of formatted text format options</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> style <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">        <span class="keyword">for</span> fg <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">30</span>, <span class="number">38</span>):</span><br><span class="line">            s1 = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            <span class="keyword">for</span> bg <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">40</span>, <span class="number">48</span>):</span><br><span class="line">                <span class="built_in">format</span> = <span class="string">&#x27;;&#x27;</span>.join([<span class="built_in">str</span>(style), <span class="built_in">str</span>(fg), <span class="built_in">str</span>(bg)])</span><br><span class="line">                s1 += <span class="string">&#x27;\x1b[%sm %s \x1b[0m&#x27;</span> % (<span class="built_in">format</span>, <span class="built_in">format</span>)</span><br><span class="line">            <span class="built_in">print</span>(s1)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cyk_print</span>(<span class="params">content, font_color=<span class="string">&#x27;green&#x27;</span>, bg_color=<span class="literal">None</span>, display=<span class="string">&#x27;highlight&#x27;</span></span>):</span></span><br><span class="line">    <span class="keyword">assert</span> font_color <span class="keyword">or</span> bg_color <span class="keyword">or</span> display <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span></span><br><span class="line">    display_map = &#123;<span class="string">&#x27;default&#x27;</span>: <span class="number">0</span>, <span class="string">&quot;highlight&quot;</span>: <span class="number">1</span>, <span class="string">&quot;underline&quot;</span>: <span class="number">4</span>, <span class="string">&quot;flicker&quot;</span>: <span class="number">5</span>, <span class="string">&quot;reverse&quot;</span>: <span class="number">7</span>, <span class="string">&quot;invisible&quot;</span>: <span class="number">8</span>&#125;</span><br><span class="line">    font_map = &#123;<span class="string">&#x27;black&#x27;</span>: <span class="number">30</span>, <span class="string">&#x27;red&#x27;</span>: <span class="number">31</span>, <span class="string">&#x27;green&#x27;</span>: <span class="number">32</span>, <span class="string">&#x27;yellow&#x27;</span>: <span class="number">33</span>, <span class="string">&#x27;blue&#x27;</span>: <span class="number">34</span>, <span class="string">&#x27;purple&#x27;</span>: <span class="number">35</span>, <span class="string">&#x27;yank&#x27;</span>: <span class="number">36</span>,</span><br><span class="line">                <span class="string">&#x27;white&#x27;</span>: <span class="number">37</span>&#125;</span><br><span class="line">    bg_map = &#123;<span class="string">&#x27;black&#x27;</span>: <span class="number">40</span>, <span class="string">&#x27;red&#x27;</span>: <span class="number">41</span>, <span class="string">&#x27;green&#x27;</span>: <span class="number">42</span>, <span class="string">&#x27;yellow&#x27;</span>: <span class="number">43</span>, <span class="string">&#x27;blue&#x27;</span>: <span class="number">44</span>, <span class="string">&#x27;purple&#x27;</span>: <span class="number">45</span>, <span class="string">&#x27;yank&#x27;</span>: <span class="number">46</span>,</span><br><span class="line">              <span class="string">&#x27;white&#x27;</span>: <span class="number">47</span>&#125;</span><br><span class="line">    pp = <span class="string">&quot;\033[&#123;&#125;&#123;&#125;&#123;&#125;m&#123;&#125;\033[0m&quot;</span>.<span class="built_in">format</span>(display_map.get(display, <span class="string">&#x27;highlight&#x27;</span>),</span><br><span class="line">                                        <span class="string">&quot;;&#123;&#125;&quot;</span>.<span class="built_in">format</span>(font_map.get(font_color, <span class="number">30</span>)),</span><br><span class="line">                                        <span class="string">&quot;;&#123;&#125;&quot;</span>.<span class="built_in">format</span>(bg_map.get(bg_color, <span class="string">&#x27;&#x27;</span>)), content)</span><br><span class="line">    <span class="built_in">print</span>(pp)</span><br></pre></td></tr></table></figure>
+<h2 id="print-name-and-cost-time-of-a-function"><a href="#print-name-and-cost-time-of-a-function" class="headerlink" title="print name and cost time of a function"></a>print name and cost time of a function</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">printer</span>(<span class="params">f</span>):</span></span><br><span class="line"><span class="meta">    @wraps(<span class="params">f</span>)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapped</span>(<span class="params">*args, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;-&#x27;</span> * <span class="number">60</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Start to run \033[1;36m&#123;&#125;\033[0m ...&quot;</span>.<span class="built_in">format</span>(f.__name__))</span><br><span class="line">        t1 = time.time()</span><br><span class="line">        r = f(*args, **kwargs)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;the result is \033[1;31m&#123;:.4f&#125;\033[0m&#x27;</span>.<span class="built_in">format</span>(r), end=<span class="string">&#x27;, &#x27;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;time cost: &#123;:.5g&#125; \033[1msecs\033[0m&quot;</span>.<span class="built_in">format</span>(time.time() - t1))</span><br><span class="line">        <span class="comment"># return r</span></span><br><span class="line">    <span class="keyword">return</span> wrapped</span><br><span class="line"></span><br><span class="line"><span class="meta">@printer</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">func</span>(<span class="params">...</span>):</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    func()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="Errors"><a href="#Errors" class="headerlink" title="Errors"></a>Errors</h1><h2 id="Default-argument-is-mutable"><a href="#Default-argument-is-mutable" class="headerlink" title="Default argument is mutable"></a>Default argument is mutable</h2><p>When we assign the default argument values, avoid using mutable object, like list(), dict().</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">error_f</span>(<span class="params">item, my_list=[]</span>):</span></span><br><span class="line">	my_list.append(item)</span><br><span class="line">    <span class="built_in">print</span>(my_list)</span><br><span class="line">    </span><br><span class="line">error_f(<span class="string">&#x27;a&#x27;</span>) [<span class="string">&#x27;a&#x27;</span>]</span><br><span class="line"></span><br><span class="line">error_f(<span class="string">&#x27;b&#x27;</span>) <span class="comment"># [&#x27;a&#x27;, &#x27;b&#x27;]</span></span><br><span class="line"></span><br><span class="line">error_f(<span class="string">&#x27;c&#x27;</span>) <span class="comment"># [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]</span></span><br></pre></td></tr></table></figure>
+<div class="note warning">
+            <ul><li>Python’s default arguments are evaluated once when the function is defined, not each time the function is called (like it is in say, Ruby). This means that if you use a mutable default argument and mutate it, you will and have mutated that object for all future calls to the function as well.</li><li><strong>Important warning</strong>: The default value is <strong>evaluated only once</strong>. This makes a difference when the default is a mutable object such as a <em>list</em>, <em>dictionary</em>, or instances of most classes.</li></ul>
+          </div>
+<hr>
+<h1 id="WTF"><a href="#WTF" class="headerlink" title="WTF"></a>WTF</h1><h2 id="Deleting-a-list-item-while-iterating"><a href="#Deleting-a-list-item-while-iterating" class="headerlink" title="Deleting a list item while iterating"></a>Deleting a list item while iterating</h2><div class="note warning">
+            <p><strong> Never change the object you’re iterating over!</strong></p>
+          </div>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">l1 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">l2 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">l3 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">l4 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> idx, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(l1):</span><br><span class="line">	<span class="keyword">del</span> item</span><br><span class="line">   </span><br><span class="line"><span class="keyword">for</span> idx, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(l2):</span><br><span class="line">	l2.remove(item)</span><br><span class="line"></span><br><span class="line"><span class="comment"># the correct way to change the object you iterate over</span></span><br><span class="line"><span class="keyword">for</span> idx, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(l3[:]):</span><br><span class="line">	l3.remove(item)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> idx, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(l4):</span><br><span class="line">	l4.pop(idx)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; l1</span><br><span class="line">[1, 2, 3, 4]</span><br><span class="line">&gt;&gt;&gt; l2</span><br><span class="line">[2, 4]</span><br><span class="line">&gt;&gt;&gt; l3</span><br><span class="line">[]</span><br><span class="line">&gt;&gt;&gt; l4</span><br><span class="line">[2, 4]</span><br></pre></td></tr></table></figure>
+<div class="note info">
+            <p><strong>Difference between <code>del</code>, <code>remove</code> and <code>pop</code></strong>:</p><ul><li><code>del var_name</code> just removes the binding of the <code>var_name</code> form the local/global namespace</li><li><code>remove</code> removes the fist matching value (raise <strong>ValueError</strong> if the value is not found)</li><li><code>pop</code> removes the element at a specific index and returns it (raise <strong>IndexError</strong> if an invalid index)</li></ul>
+          </div>
+<div class="note danger">
+            <p><strong>Why the output is <code>[2,4]</code> ?</strong> <sup id="fnref:2"><a href="#fn:2" rel="footnote"><span class="hint--top hint--error hint--medium hint--rounded hint--bounce" aria-label="[StackOverflow: what-happens-when-you-try-to-delete-a-list-element-while-iterating-over-it](https://stackoverflow.com/questions/45946228/what-happens-when-you-try-to-delete-a-list-element-while-iterating-over-it)">[2]</span></a></sup></p><ul><li>The list iteration is done index by index. When removing <code>1</code> from <code>l1</code> or <code>l4</code>, the contents of lists are <code>[2,3,4]</code>. The remaining elements are shifted down, i.e. <code>2</code> is at index 0, <code>3</code> at index 1. Since the next iteration is going to loo at index 1 (element <code>3</code>), the <code>2</code> is skipped entirely.</li></ul>
+          </div>
+<h1 id="Run"><a href="#Run" class="headerlink" title="Run"></a>Run</h1><p><code>stderr</code> directly outputs to the screen, whilst the <code>stdout</code> is usually saved in the buffer util full.<br><code>python -u</code> can directly print out the <code>stdout</code> without buffers.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># unbuffered</span></span><br><span class="line">python -u &lt;xxx&gt;.py </span><br></pre></td></tr></table></figure></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style: none; padding-left: 0; margin-left: 40px"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">1.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3044580/multiprocessing-vs-threading-python">StackOverflow: Multiprocessing vs threading in python</a><a href="#fnref:1" rev="footnote"> ↩</a></span></li><li id="fn:2"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">2.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/45946228/what-happens-when-you-try-to-delete-a-list-element-while-iterating-over-it">StackOverflow: what-happens-when-you-try-to-delete-a-list-element-while-iterating-over-it</a><a href="#fnref:2" rev="footnote"> ↩</a></span></li><li id="fn:3"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">3.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://docs.python.org/3.6/library/pathlib.html">Pathlib module</a><a href="#fnref:3" rev="footnote"> ↩</a></span></li><li id="fn:4"><span style="display: inline-block; vertical-align: top; padding-right: 10px; margin-left: -40px">4.</span><span style="display: inline-block; vertical-align: top; margin-left: 10px;"><a target="_blank" rel="noopener" href="https://docs.python.org/3.6/library/index.html">Python 3.6 standard library</a><a href="#fnref:4" rev="footnote"> ↩</a></span></li></ol></div></div>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/Python/" rel="tag"># Python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/03/01/Leetcode/Leetcode-practice-random/" rel="prev" title="LeetCode practice: random">
+      <i class="fa fa-chevron-left"></i> LeetCode practice: random
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/03/04/NLP/PoS-tagging-with-HMMs/" rel="next" title="POS Tagging with HMMs">
+      POS Tagging with HMMs <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Advanced-Trick"><span class="nav-number">1.</span> <span class="nav-text">Advanced Trick</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-Trie-Prefix-Tree"><span class="nav-number">1.1.</span> <span class="nav-text">Implement Trie (Prefix Tree)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2D-list-to-1D"><span class="nav-number">1.2.</span> <span class="nav-text">2D list to 1D</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Variable"><span class="nav-number">2.</span> <span class="nav-text">Variable</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swap-value"><span class="nav-number">2.1.</span> <span class="nav-text">Swap value</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chain-comparison-with-ops"><span class="nav-number">2.2.</span> <span class="nav-text">chain comparison with ops</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Statement"><span class="nav-number">3.</span> <span class="nav-text">Statement</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#For-else"><span class="nav-number">3.1.</span> <span class="nav-text">For else</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#List"><span class="nav-number">4.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#list-to-str"><span class="nav-number">4.1.</span> <span class="nav-text">list to str</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2d-array-transpose"><span class="nav-number">4.2.</span> <span class="nav-text">2d array transpose</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#most-frequent-element-in-a-list"><span class="nav-number">4.3.</span> <span class="nav-text">most frequent element in a list</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy-array"><span class="nav-number">4.4.</span> <span class="nav-text">copy array</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-duplicates-in-list"><span class="nav-number">4.5.</span> <span class="nav-text">Remove duplicates in list</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Find-index-of-Min-Max"><span class="nav-number">4.6.</span> <span class="nav-text">Find index of Min&#x2F;Max</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Str"><span class="nav-number">5.</span> <span class="nav-text">Str</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#check-if-strs-are-permutation"><span class="nav-number">5.1.</span> <span class="nav-text">check if strs are permutation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reverse-string"><span class="nav-number">5.2.</span> <span class="nav-text">Reverse string</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#find-index"><span class="nav-number">5.3.</span> <span class="nav-text">find index</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dict"><span class="nav-number">6.</span> <span class="nav-text">Dict</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Dict-get"><span class="nav-number">6.1.</span> <span class="nav-text">Dict get</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sort-dict"><span class="nav-number">6.2.</span> <span class="nav-text">sort dict</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#merge-dict"><span class="nav-number">6.3.</span> <span class="nav-text">merge dict</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kwargs"><span class="nav-number">6.4.</span> <span class="nav-text">**kwargs</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Builtin-functions"><span class="nav-number">7.</span> <span class="nav-text">Builtin functions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Binary-Octal-Hexadecimal-integers"><span class="nav-number">7.1.</span> <span class="nav-text">Binary, Octal, Hexadecimal integers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bit-wise-Op"><span class="nav-number">7.2.</span> <span class="nav-text">Bit-wise Op</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Array-index"><span class="nav-number">7.3.</span> <span class="nav-text">Array index</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#r-application"><span class="nav-number">7.4.</span> <span class="nav-text">\r application</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Count-down"><span class="nav-number">7.4.1.</span> <span class="nav-text">Count down</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Progress-bar"><span class="nav-number">7.4.2.</span> <span class="nav-text">Progress bar</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Loading"><span class="nav-number">7.4.3.</span> <span class="nav-text">Loading</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Functional-programming"><span class="nav-number">8.</span> <span class="nav-text">Functional programming</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Advanced-function"><span class="nav-number">8.1.</span> <span class="nav-text">Advanced function</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#map"><span class="nav-number">8.1.1.</span> <span class="nav-text">map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reduce"><span class="nav-number">8.1.2.</span> <span class="nav-text">reduce</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filter"><span class="nav-number">8.1.3.</span> <span class="nav-text">filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sorted"><span class="nav-number">8.1.4.</span> <span class="nav-text">sorted</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Decorator"><span class="nav-number">8.2.</span> <span class="nav-text">Decorator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deep-copy-and-shallow-copy"><span class="nav-number">9.</span> <span class="nav-text">Deep copy and shallow copy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#multiprocess-v-s-threading"><span class="nav-number">10.</span> <span class="nav-text">multiprocess v.s. threading</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#multiprocessing"><span class="nav-number">10.1.</span> <span class="nav-text">multiprocessing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#threading"><span class="nav-number">10.2.</span> <span class="nav-text">threading</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Random"><span class="nav-number">11.</span> <span class="nav-text">Random</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pathlib"><span class="nav-number">12.</span> <span class="nav-text">Pathlib</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#itertools"><span class="nav-number">13.</span> <span class="nav-text">itertools</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#itertools-count"><span class="nav-number">13.1.</span> <span class="nav-text">itertools.count()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#itertools-permutations"><span class="nav-number">13.2.</span> <span class="nav-text">itertools.permutations()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#itertools-zip-longest"><span class="nav-number">13.3.</span> <span class="nav-text">itertools.zip_longest()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">13.4.</span> <span class="nav-text">1
+2
+# Similar to zip but return the longest length of inputs with filling default values, whereas zip returns the shortest length
+itertools.zip_longest(*iterables, fillvalue&#x3D;None)
+</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#File"><span class="nav-number">14.</span> <span class="nav-text">File</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#os"><span class="nav-number">14.1.</span> <span class="nav-text">os</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#glob"><span class="nav-number">14.2.</span> <span class="nav-text">glob</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#My-utils"><span class="nav-number">15.</span> <span class="nav-text">My utils</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#echo-with-colors"><span class="nav-number">15.1.</span> <span class="nav-text">echo with colors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#print-name-and-cost-time-of-a-function"><span class="nav-number">15.2.</span> <span class="nav-text">print name and cost time of a function</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Errors"><span class="nav-number">16.</span> <span class="nav-text">Errors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Default-argument-is-mutable"><span class="nav-number">16.1.</span> <span class="nav-text">Default argument is mutable</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WTF"><span class="nav-number">17.</span> <span class="nav-text">WTF</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Deleting-a-list-item-while-iterating"><span class="nav-number">17.1.</span> <span class="nav-text">Deleting a list item while iterating</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run"><span class="nav-number">18.</span> <span class="nav-text">Run</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">19.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/03/03/Programming/Tricks-of-Python/";
+    this.page.identifier = "2019/03/03/Programming/Tricks-of-Python/";
+    this.page.title = "Tricks of Python";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

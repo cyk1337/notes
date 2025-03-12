@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/notes/images/dog.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/notes/images/dog.png">
+  <link rel="mask-icon" href="/notes/images/dog.png" color="#222">
+
+<link rel="stylesheet" href="/notes/css/main.css">
+
+
+<link rel="stylesheet" href="/notes/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cyk1337.github.io","root":"/notes/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":{"disqus":{"text":"Load Disqus","order":-1}}},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch Notes">
+<meta property="og:url" content="https://cyk1337.github.io/notes/2019/09/06/Programming/PyTorch-notes/index.html">
+<meta property="og:site_name" content="The Gradient">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cyk1337.github.io/notes/images/pytorch-logo-only.png">
+<meta property="article:published_time" content="2019-09-06T01:25:00.000Z">
+<meta property="article:modified_time" content="2024-07-08T11:47:46.848Z">
+<meta property="article:author" content="cyk1337">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cyk1337.github.io/notes/images/pytorch-logo-only.png">
+
+<link rel="canonical" href="https://cyk1337.github.io/notes/2019/09/06/Programming/PyTorch-notes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>PyTorch Notes | The Gradient</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/notes/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">The Gradient</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Language is not just words.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="https://cyk1337.github.io/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-blog">
+
+    <a href="/notes/" rel="section"><i class="fa fa-rss-square fa-fw"></i>Blog</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/notes/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/notes/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <!-- chaiyekun added -->
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    <!-- 
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+
+    <!-- (github fork span, top right)
+    <a target="_blank" rel="noopener" href="https://github.com/cyk1337"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    -->
+    <!-- (github fork span)
+      <a target="_blank" rel="noopener" href="https://github.com/cyk1337" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; left: 0; transform: scale(-1, 1);" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    -->
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://cyk1337.github.io/notes/2019/09/06/Programming/PyTorch-notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/notes/images/ernie.jpeg">
+      <meta itemprop="name" content="cyk1337">
+      <meta itemprop="description" content="What is now proved was once only imagined.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Gradient">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch Notes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-09-06 09:25:00" itemprop="dateCreated datePublished" datetime="2019-09-06T09:25:00+08:00">2019-09-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/notes/categories/PyTorch/" itemprop="url" rel="index"><span itemprop="name">PyTorch</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/notes/2019/09/06/Programming/PyTorch-notes/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/09/06/Programming/PyTorch-notes/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hint.css/2.6.0/hint.min.css"><p><img data-src='/notes/images/pytorch-logo-only.png' width='30%'/></p>
+<span id="more"></span>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<h1 id="Basic-op"><a href="#Basic-op" class="headerlink" title="Basic op"></a>Basic op</h1><h2 id="numpy-to-from-tensor"><a href="#numpy-to-from-tensor" class="headerlink" title="numpy to/from tensor"></a>numpy to/from tensor</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># numpy -&gt; tensor</span></span><br><span class="line">np_array = np.ones((<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">torch_tensor = torch.from_numpy(np_array)</span><br><span class="line"><span class="comment"># or:</span></span><br><span class="line">torch_tensor = torch.FloatTensor(np_array)</span><br><span class="line"></span><br><span class="line"><span class="comment"># tensor -&gt; numpy</span></span><br><span class="line">np_array = torch_tensor.numpy()</span><br></pre></td></tr></table></figure>
+<h2 id="contiguous"><a href="#contiguous" class="headerlink" title="contiguous"></a>contiguous</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x.transpose(<span class="number">1</span>, <span class="number">2</span>).contiguous().view(...)</span><br></pre></td></tr></table></figure>
+<h2 id="Parameter-v-s-register-buffer"><a href="#Parameter-v-s-register-buffer" class="headerlink" title="Parameter v.s. register_buffer"></a>Parameter v.s. register_buffer</h2><ul>
+<li><p><code>nn.Parameter</code> is considered a module parameter and will appear in <code>parameters()</code> iterator. This would do backprop.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nn.Parameter(data: Tensor, required_grad:<span class="built_in">bool</span> = <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>register_buffer</code> add a persistant buffer to the module. It is used to register a buffer, not a parameter. It cannot do backprop.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.register_buffer(name:<span class="built_in">str</span>, tensor: Tensor)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Multiplication"><a href="#Multiplication" class="headerlink" title="Multiplication"></a>Multiplication</h2><h3 id="torch-einsum"><a href="#torch-einsum" class="headerlink" title="torch.einsum"></a>torch.einsum</h3><p>multi-linear expressions, i.e. sums of products. Use Einstein summation convention</p>
+<p><code>torch.einsum(equation, *operands)</code> → Tensor<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">As = torch.randn(<span class="number">3</span>,<span class="number">2</span>,<span class="number">5</span>)</span><br><span class="line">Bs = torch.randn(<span class="number">3</span>,<span class="number">5</span>,<span class="number">4</span>)</span><br><span class="line">torch.einsum(<span class="string">&#x27;bij,bjk-&gt;bik&#x27;</span>, As, Bs) <span class="comment"># batch matrix multiplication</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="torch-ger"><a href="#torch-ger" class="headerlink" title="torch.ger"></a>torch.ger</h3><p><code>torch.ger(input, vec2, out=None)</code> → Tensor<br>outer product<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">v1 = torch.arange(<span class="number">1.</span>, <span class="number">5.</span>)</span><br><span class="line">v2 = torch.arange(<span class="number">1.</span>, <span class="number">4.</span>)</span><br><span class="line">torch.ger(v1, v2)</span><br><span class="line"><span class="comment"># tensor([[  1.,   2.,   3.],</span></span><br><span class="line">        [  <span class="number">2.</span>,   <span class="number">4.</span>,   <span class="number">6.</span>],</span><br><span class="line">        [  <span class="number">3.</span>,   <span class="number">6.</span>,   <span class="number">9.</span>],</span><br><span class="line">        [  <span class="number">4.</span>,   <span class="number">8.</span>,  <span class="number">12.</span>]])</span><br></pre></td></tr></table></figure></p>
+<h2 id="dimension"><a href="#dimension" class="headerlink" title="dimension"></a>dimension</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">t = torch.randn(<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)</span><br><span class="line"></span><br><span class="line">t.dim() <span class="comment"># 3</span></span><br><span class="line">t.size() <span class="comment"># torch.Size([4, 5, 6])</span></span><br><span class="line">t.shape <span class="comment"># torch.Size([4, 5, 6])</span></span><br><span class="line">t.size(<span class="number">0</span>) <span class="comment"># 4</span></span><br><span class="line">t.size(-<span class="number">1</span>) <span class="comment"># 6</span></span><br></pre></td></tr></table></figure>
+<h2 id="nn-Parameter"><a href="#nn-Parameter" class="headerlink" title="nn.Parameter"></a>nn.Parameter</h2><p><code>torch.nn.Parameter</code>, a subclass of <code>torch.Tensor</code>, could automatically add the data into the list of parameters and could appear in <code>Module.parameters</code> iterator. It can be automatically optimized by the optimizer if in optimized parameter list. Its arguments:</p>
+<ul>
+<li>data (Tensor): parameter tensor.</li>
+<li>requires_grad (bool, optional): if the parameter requires gradient. Default: True.</li>
+</ul>
+<h1 id="Tensor"><a href="#Tensor" class="headerlink" title="Tensor"></a>Tensor</h1><h2 id="byte"><a href="#byte" class="headerlink" title="byte()"></a>byte()</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">t = torch.ones(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">t.byte()</span><br><span class="line"><span class="comment"># equals to</span></span><br><span class="line">t.to(torch.uint8)</span><br></pre></td></tr></table></figure>
+<h2 id="topk"><a href="#topk" class="headerlink" title="topk()"></a>topk()</h2><p><code>torch.topk(input, k, dim=None, largest=True, sorted=True, out=None)</code> -&gt; (Tensor, LongTensor)</p>
+<ul>
+<li>a namedtuple of (values, indices) is returned, where the indices are the indices of the elements in the original input tensor.</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">1.</span>, <span class="number">6.</span>)</span><br><span class="line"><span class="comment"># tensor([ 1.,  2.,  3.,  4.,  5.])</span></span><br><span class="line">torch.topk(x, <span class="number">3</span>)</span><br><span class="line"><span class="comment"># torch.return_types.topk(values=tensor([5., 4., 3.]), indices=tensor([4, 3, 2]))</span></span><br></pre></td></tr></table></figure>
+<h1 id="Loss-functions"><a href="#Loss-functions" class="headerlink" title="Loss functions"></a>Loss functions</h1><h2 id="NLLLoss"><a href="#NLLLoss" class="headerlink" title="NLLLoss"></a>NLLLoss</h2><p><code>torch.nn.NLLLoss(weight=None, size_average=None, ignore_index=-100, reduce=None, reduction=&#39;mean&#39;)</code></p>
+<ul>
+<li>negative log likelihood loss. It is useful to train a classification problem with C classes</li>
+<li><code>size_average</code>, <code>reduce</code> - deprecated</li>
+<li><code>reduction</code>: (‘none’, ‘mean’ (default), ‘sum’)</li>
+<li>It requires adding a <code>LogSoftmax</code> layer as the last layer. Combining <code>LogSoftmax</code> with <code>NLLLoss</code> is the same as using <code>CrossEntropyLoss</code>.</li>
+</ul>
+<h1 id="Optim"><a href="#Optim" class="headerlink" title="Optim"></a>Optim</h1><h2 id="Per-parameter-optim"><a href="#Per-parameter-optim" class="headerlink" title="Per-parameter optim"></a>Per-parameter optim</h2><p>Pass in an iterable of <code>dict</code>s.<br>E.g. specify per-layer learning rates:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">optim.SGD([</span><br><span class="line">            &#123;&#x27;params&#x27;: model.base.parameters()&#125;, # default lr</span><br><span class="line">            &#123;&#x27;params&#x27;: model.classifier.parameters(), &#x27;lr&#x27;: 1e-3&#125;</span><br><span class="line">          ], </span><br><span class="line">          lr=1e-2, # default</span><br><span class="line">          momentum=.9 # for all params</span><br><span class="line">      )</span><br></pre></td></tr></table></figure></p>
+<h2 id="Optim-step"><a href="#Optim-step" class="headerlink" title="Optim step"></a>Optim step</h2><h3 id="Optimizer-step"><a href="#Optimizer-step" class="headerlink" title="Optimizer.step()"></a>Optimizer.step()</h3><p>Step once the gradients are computed <code>loss.backward()</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> <span class="built_in">input</span>, target <span class="keyword">in</span> dataset:</span><br><span class="line">    optimizer.zero_grad() <span class="comment"># zero gradients</span></span><br><span class="line">    output = model(<span class="built_in">input</span>) <span class="comment"># foward pass</span></span><br><span class="line">    loss = loss_fn(output, target) <span class="comment"># calculate loss</span></span><br><span class="line">    loss.backward() <span class="comment"># do backprop, compute gradients</span></span><br><span class="line">    optimizer.step() <span class="comment"># update parameters</span></span><br></pre></td></tr></table></figure>
+<h2 id="Optim-algorithms"><a href="#Optim-algorithms" class="headerlink" title="Optim algorithms"></a>Optim algorithms</h2><p><a href="/notes/2019/05/20/NN/Optimization-methods-introduction">Optimization methods in deep learning</a></p>
+<h3 id="Optimizer-step-closure"><a href="#Optimizer-step-closure" class="headerlink" title="Optimizer.step(closure)"></a>Optimizer.step(closure)</h3><p>Some algorithms like Conjugate Gradient and LBFGS requries re-evaluate multiple times, so pass in a closure to clear the gradients, compute the loss, finally return.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> <span class="built_in">input</span>, target <span class="keyword">in</span> dataset:</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">closure</span>():</span></span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        output = model(<span class="built_in">input</span>)</span><br><span class="line">        loss = loss_fn(output, target)</span><br><span class="line">        loss.backward()</span><br><span class="line">        <span class="keyword">return</span> loss</span><br><span class="line">    optimizer.step(closure) <span class="comment"># pass in a closure</span></span><br></pre></td></tr></table></figure>
+<h3 id="Adjust-learning-rate"><a href="#Adjust-learning-rate" class="headerlink" title="Adjust learning rate"></a>Adjust learning rate</h3><p>use <code>torch.optim.le_scheduler</code><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scheduler = ...</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    train(...)</span><br><span class="line">    evaluate(...)</span><br><span class="line">    scheduler.step()</span><br></pre></td></tr></table></figure></p>
+<h2 id="gradient-clipping"><a href="#gradient-clipping" class="headerlink" title="gradient clipping"></a>gradient clipping</h2><ol>
+<li>clip by value, set threshold</li>
+<li>clip_norm.<script type="math/tex; mode=display">\text{grad_clip_norm(t)}=\left\{
+             \begin{array}{ll}
+               t * \frac{\text{max norm}}{||t||_2} \quad  ||t||_2 \leq \text{max norm} \\
+               t \quad \text{otherwise}\\
+             \end{array}
+ \right.</script></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">clip_grad_norm_</span>(<span class="params">parameters, max_norm, norm_type=<span class="number">2</span></span>):</span></span><br><span class="line">    parameters = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>, parameters))</span><br><span class="line">    max_norm = <span class="built_in">float</span>(max_norm))</span><br><span class="line">    norm_type = <span class="built_in">float</span>(norm_type)</span><br><span class="line">    <span class="keyword">if</span> norm_type = torch._six.inf</span><br><span class="line">    	total_norm = <span class="built_in">max</span>(p.grad.data.<span class="built_in">abs</span>().<span class="built_in">max</span>() <span class="keyword">for</span> p <span class="keyword">in</span> parameters)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">    	total_norm = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> parameters:</span><br><span class="line">            param_norm = p.grad.data.norm(norm_type)</span><br><span class="line">            total_norm += param_norm.item() ** norm_type</span><br><span class="line">        total_norm = total_norm ** (<span class="number">1.</span>/ norm_type)</span><br><span class="line">    clip_coef = max_norm / (total_norm + <span class="number">1e-6</span>)</span><br><span class="line">    <span class="keyword">if</span> clip_coef &lt; <span class="number">1</span>:</span><br><span class="line">    	<span class="keyword">for</span> p <span class="keyword">in</span> parameters:</span><br><span class="line">            p.grad.data.mul_(clip_coef)</span><br><span class="line">    <span class="keyword">return</span> total_norm</span><br></pre></td></tr></table></figure>
+<h1 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h1><h2 id="Define-layers"><a href="#Define-layers" class="headerlink" title="Define layers"></a>Define layers</h2><p>Layers should be directly set as the attribute of a children class of <code>torch.nn.Module</code>, so that <code>model.parameters()</code> can be directly pass to <code>torch.nn.optim</code>. Otherwise, additionally parameters should be passed following model.parameters().</p>
+<ul>
+<li>In other words, if layers are wrapped by a parent data structure like dict(), the model.parameters() cannot get all the layer parameters to be optimized, so that the first augument of optimizer should be manually set. (as below python code)</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Net</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(SharedLayers, self).__init__()</span><br><span class="line">        d = &#123;&#125;</span><br><span class="line">        d[<span class="string">&#x27;f1&#x27;</span>] = nn.Linear(<span class="number">20</span>, <span class="number">10</span>)</span><br><span class="line">        d[<span class="string">&#x27;f2&#x27;</span>] = nn.Linear(<span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">        self.d = d</span><br><span class="line">        self.f3 = nn.Linear(<span class="number">10</span>, <span class="number">1</span>)</span><br><span class="line">        self.loss = nn.MSELoss()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        x = self.d[<span class="string">&#x27;f1&#x27;</span>](x)</span><br><span class="line">        x = self.d[<span class="string">&#x27;f2&#x27;</span>](x)</span><br><span class="line">        x = self.f3(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    net = Net()</span><br><span class="line">    x = torch.rand(<span class="number">1</span>, <span class="number">20</span>)</span><br><span class="line">    y = torch.rand(<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">    optimizer = optim.Adam(net.parameters(), lr=<span class="number">1e-3</span>)</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        y_ = net(x)</span><br><span class="line">        loss = F.mse_loss(y_, y)</span><br><span class="line">        opt.zero_grad()</span><br><span class="line">        loss.backward() <span class="comment"># do backprop</span></span><br><span class="line">        optimizer.step() <span class="comment"># do not optimize layers wrapped in net.d !</span></span><br><span class="line">        <span class="comment"># [p for p in l.d[&#x27;f1&#x27;].parameters()] never change!</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Also, if we need to use gpu to run, often we do: Net().to(device). But if the there are layers encompassed by a dict attribute in the modulde class, we have to do layer.to(device) individually.<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Net</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(SharedLayers, self).__init__()</span><br><span class="line">        d = &#123;&#125;</span><br><span class="line">        d[<span class="string">&#x27;f1&#x27;</span>] = nn.Linear(<span class="number">20</span>, <span class="number">10</span>).to(device)</span><br><span class="line">        d[<span class="string">&#x27;f2&#x27;</span>] = nn.Linear(<span class="number">10</span>, <span class="number">10</span>).to(device)</span><br><span class="line">        self.d = d</span><br><span class="line">        self.f3 = nn.Linear(<span class="number">10</span>, <span class="number">1</span>)</span><br><span class="line">        self.loss = nn.MSELoss()</span><br><span class="line">	</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    net = Net().to(device)</span><br><span class="line">    x = torch.rand(<span class="number">1</span>, <span class="number">20</span>).to(device)</span><br><span class="line">    y = torch.rand(<span class="number">1</span>, <span class="number">1</span>).to(device)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="NaN"><a href="#NaN" class="headerlink" title="NaN"></a>NaN</h2><p>If there exists <code>NaN</code>:</p>
+<ol>
+<li>If within iteration 100, it may be due to the big learning rate. Try to reduce the learning rate 1/2~1/10.</li>
+<li>If use RNNs, may be because of the gradient exploration. Solution: add “gradient clipping”</li>
+<li>Division by 0.</li>
+<li>Take logarithm of 0 or negative number, e.g. calculating entropy or cross entropy.</li>
+<li>In exponential computation, the result is INF/INF, e.g. softmax. Solution: minus the maximum if possible.</li>
+</ol>
+<h2 id="Count-the-parameter-numbers"><a href="#Count-the-parameter-numbers" class="headerlink" title="Count the parameter numbers"></a>Count the parameter numbers</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># approach 1</span></span><br><span class="line">model_parameters = <span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.requires_grad, model.parameters())</span><br><span class="line">tot_params = <span class="built_in">sum</span>([np.prod(p.size()) <span class="keyword">for</span> p <span class="keyword">in</span> model_parameters])</span><br><span class="line"></span><br><span class="line"><span class="comment"># approach 2 (count the trainable params)</span></span><br><span class="line">total_params = <span class="built_in">sum</span>(p.numel() <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> p.requires_grad)</span><br></pre></td></tr></table></figure>
+<h2 id="Configuration-error"><a href="#Configuration-error" class="headerlink" title="Configuration error"></a>Configuration error</h2><h2 id="MacOSX"><a href="#MacOSX" class="headerlink" title="MacOSX"></a>MacOSX</h2><p><code>import torch</code> error</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;/.../lib/python3.6/site-packages/torch/__init__.py&quot;</span>, line 79, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    from torch._C import *</span><br><span class="line">  ...</span><br><span class="line">ImportError: dlopen(/.../lib/python3.6/site-packages/torch/_C.cpython-36m-darwin.so, 9): Library not loaded: /usr/<span class="built_in">local</span>/opt/libomp/lib/libomp.dylib</span><br><span class="line">  Referenced from: /.../lib/python3.6/site-packages/torch/lib/libshm.dylib</span><br><span class="line">  Reason: image not found</span><br><span class="line">  </span><br><span class="line"><span class="comment"># solution </span></span><br><span class="line">$ brew install libomp</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/notes/tags/PyTorch/" rel="tag"># PyTorch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/notes/2019/08/28/NN/go-deeper-in-Convolutions-a-Peek/" rel="prev" title="Go Deeper in Convolutions: a Peek ">
+      <i class="fa fa-chevron-left"></i> Go Deeper in Convolutions: a Peek 
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/notes/2019/09/10/Programming/Implementation-Magic-Misc-in-ML/" rel="next" title="Implementation Practical Misc">
+      Implementation Practical Misc <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Basic-op"><span class="nav-number">1.</span> <span class="nav-text">Basic op</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#numpy-to-from-tensor"><span class="nav-number">1.1.</span> <span class="nav-text">numpy to&#x2F;from tensor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#contiguous"><span class="nav-number">1.2.</span> <span class="nav-text">contiguous</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parameter-v-s-register-buffer"><span class="nav-number">1.3.</span> <span class="nav-text">Parameter v.s. register_buffer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Multiplication"><span class="nav-number">1.4.</span> <span class="nav-text">Multiplication</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#torch-einsum"><span class="nav-number">1.4.1.</span> <span class="nav-text">torch.einsum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#torch-ger"><span class="nav-number">1.4.2.</span> <span class="nav-text">torch.ger</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dimension"><span class="nav-number">1.5.</span> <span class="nav-text">dimension</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nn-Parameter"><span class="nav-number">1.6.</span> <span class="nav-text">nn.Parameter</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tensor"><span class="nav-number">2.</span> <span class="nav-text">Tensor</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#byte"><span class="nav-number">2.1.</span> <span class="nav-text">byte()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#topk"><span class="nav-number">2.2.</span> <span class="nav-text">topk()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Loss-functions"><span class="nav-number">3.</span> <span class="nav-text">Loss functions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NLLLoss"><span class="nav-number">3.1.</span> <span class="nav-text">NLLLoss</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Optim"><span class="nav-number">4.</span> <span class="nav-text">Optim</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Per-parameter-optim"><span class="nav-number">4.1.</span> <span class="nav-text">Per-parameter optim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Optim-step"><span class="nav-number">4.2.</span> <span class="nav-text">Optim step</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimizer-step"><span class="nav-number">4.2.1.</span> <span class="nav-text">Optimizer.step()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Optim-algorithms"><span class="nav-number">4.3.</span> <span class="nav-text">Optim algorithms</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimizer-step-closure"><span class="nav-number">4.3.1.</span> <span class="nav-text">Optimizer.step(closure)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Adjust-learning-rate"><span class="nav-number">4.3.2.</span> <span class="nav-text">Adjust learning rate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gradient-clipping"><span class="nav-number">4.4.</span> <span class="nav-text">gradient clipping</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Misc"><span class="nav-number">5.</span> <span class="nav-text">Misc</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Define-layers"><span class="nav-number">5.1.</span> <span class="nav-text">Define layers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NaN"><span class="nav-number">5.2.</span> <span class="nav-text">NaN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Count-the-parameter-numbers"><span class="nav-number">5.3.</span> <span class="nav-text">Count the parameter numbers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration-error"><span class="nav-number">5.4.</span> <span class="nav-text">Configuration error</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MacOSX"><span class="nav-number">5.5.</span> <span class="nav-text">MacOSX</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="cyk1337"
+      src="/notes/images/ernie.jpeg">
+  <p class="site-author-name" itemprop="name">cyk1337</p>
+  <div class="site-description" itemprop="description">What is now proved was once only imagined.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/notes/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/notes/categories/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/notes/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://cyk1337.github.io" title="Home → https://cyk1337.github.io"><i class="fa fa-home fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/cyk1337" title="GitHub → https://github.com/cyk1337" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:chaiyekun@gmail.com" title="E-Mail → mailto:chaiyekun@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/ychai1224" title="Twitter → https://twitter.com/ychai1224" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/9479335/cyk" title="StackOverflow → https://stackoverflow.com/users/9479335/cyk" rel="noopener" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/notes/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cyk1337</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/notes/lib/anime.min.js"></script>
+  <script src="/notes/lib/pjax/pjax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.14.0/lozad.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.min.js"></script>
+  <script src="/notes/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/notes/js/utils.js"></script>
+
+<script src="/notes/js/motion.js"></script>
+
+
+<script src="/notes/js/schemes/muse.js"></script>
+
+
+<script src="/notes/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/notes/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+  <!-- chaiyekun added  -->
+   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script src="/notes/lib/moment-precise-range.min.js"></script>
+<script>
+  function timer() {
+    var ages = moment.preciseDiff(moment(),moment(20180201,"YYYYMMDD"));
+    ages = ages.replace(/years?/, "years");
+    ages = ages.replace(/months?/, "months");
+    ages = ages.replace(/days?/, "days");
+    ages = ages.replace(/hours?/, "hours");
+    ages = ages.replace(/minutes?/, "mins");
+    ages = ages.replace(/seconds?/, "secs");
+    ages = ages.replace(/\d+/g, '<span style="color:#1890ff">$&</span>');
+    div.innerHTML = `I'm here for ${ages}`;
+  }
+  // create if not exists ==> fix multiple footer bugs ;)
+  if ($('#time').length > 0) {
+    var prev = document.getElementById("time");
+    prev.remove();
+  } 
+  var div = document.createElement("div");
+  div.setAttribute("id", "time");
+  //插入到copyright之后
+  var copyright = document.querySelector(".copyright");
+  document.querySelector(".footer-inner").insertBefore(div, copyright.nextSibling);
+ 
+  timer();
+  setInterval("timer()",1000)
+</script>
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cyk0.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://cyk1337.github.io/notes/2019/09/06/Programming/PyTorch-notes/";
+    this.page.identifier = "2019/09/06/Programming/PyTorch-notes/";
+    this.page.title = "PyTorch Notes";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cyk0.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+<script src="/notes/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/notes/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":96,"height":160,"position":"left","hOffset":0,"vOffset":-20},"mobile":{"show":false,"scale":0.1},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false});</script></body>
+</html>
